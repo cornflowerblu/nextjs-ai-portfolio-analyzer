@@ -108,8 +108,8 @@ export function formatMetricValue(
 /**
  * Format relative time (e.g., "2 minutes ago")
  */
-export function formatRelativeTime(timestamp: number | string): string {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
+export function formatRelativeTime(timestamp: number | string | Date): string {
+  const date = timestamp instanceof Date ? timestamp : (typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp));
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSeconds = Math.floor(diffMs / 1000);

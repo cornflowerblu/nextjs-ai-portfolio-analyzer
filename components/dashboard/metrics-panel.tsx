@@ -22,9 +22,10 @@ const METRIC_LABELS = {
   cls: 'Cumulative Layout Shift',
   inp: 'Interaction to Next Paint',
   ttfb: 'Time to First Byte',
-};
+} as const;
 
-const METRIC_ORDER: (keyof CoreWebVitals)[] = ['fcp', 'lcp', 'cls', 'inp', 'ttfb'];
+type MetricKey = 'fcp' | 'lcp' | 'cls' | 'inp' | 'ttfb';
+const METRIC_ORDER: MetricKey[] = ['fcp', 'lcp', 'cls', 'inp', 'ttfb'];
 
 export function MetricsPanel({ metrics, strategyName }: MetricsPanelProps) {
   return (
@@ -39,7 +40,7 @@ export function MetricsPanel({ metrics, strategyName }: MetricsPanelProps) {
             if (!metric) return null;
 
             const colorClasses = getRatingColorClasses(metric.rating);
-            
+
             return (
               <div key={key} className="flex items-center justify-between">
                 <div className="flex-1">
@@ -50,7 +51,7 @@ export function MetricsPanel({ metrics, strategyName }: MetricsPanelProps) {
                   <span className="text-lg font-semibold tabular-nums">
                     {formatMetricValue(key, metric.value)}
                   </span>
-                  <Badge variant="outline" className={colorClasses}>
+                  <Badge variant="outline" className={`${colorClasses.text} ${colorClasses.border}`}>
                     {metric.rating}
                   </Badge>
                 </div>
