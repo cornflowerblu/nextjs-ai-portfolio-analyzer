@@ -18,7 +18,7 @@ interface StrategyMetrics {
   timestamp: string;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import { fetcher } from '@/lib/fetcher';
 
 export default function MetricsSlot() {
   const { data, error } = useSWR<StrategyMetrics[]>('/api/metrics', fetcher, {
