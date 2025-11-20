@@ -5,7 +5,6 @@
 
 'use client';
 
-import { Badge } from '@/components/ui/badge';
 import { formatRelativeTime } from '@/lib/utils/format';
 import { useEffect, useState } from 'react';
 
@@ -18,11 +17,19 @@ export function RealTimeIndicator({ lastUpdate, isUpdating = false }: RealTimeIn
   const [relativeTime, setRelativeTime] = useState(formatRelativeTime(lastUpdate));
 
   useEffect(() => {
+    // Schedule the state update instead of calling it synchronously
+    const timeoutId = setTimeout(() => {
+      setRelativeTime(formatRelativeTime(lastUpdate));
+    }, 0);
+
     const interval = setInterval(() => {
       setRelativeTime(formatRelativeTime(lastUpdate));
-    }, 1000);
+    }, 10000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
   }, [lastUpdate]);
 
   return (

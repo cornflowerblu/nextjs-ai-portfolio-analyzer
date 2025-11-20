@@ -16,13 +16,23 @@ interface StrategyCardProps {
 
 export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCardProps) {
   const colorClasses = getStrategyColor(strategy.id);
-  
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <Card
+      role="button"
+      tabIndex={0}
       className={`cursor-pointer transition-all hover:shadow-lg ${
         isActive ? 'ring-2 ring-primary' : ''
       }`}
       onClick={onClick}
+      onKeyDown={handleKeyPress}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
