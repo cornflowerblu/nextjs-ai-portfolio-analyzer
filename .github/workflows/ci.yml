@@ -8,7 +8,8 @@ on:
 
 permissions:
   contents: read
-  statuses: write # Allow Lighthouse CI to post status checks
+  checks: write # Allow Lighthouse CI to post check runs
+  pull-requests: write # Allow commenting on PRs
 
 jobs:
   # Job 1: Linting (runs in parallel with test)
