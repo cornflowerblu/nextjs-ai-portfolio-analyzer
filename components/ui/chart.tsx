@@ -37,6 +37,12 @@ export interface BaseChartProps {
 
 /**
  * Custom tooltip wrapper
+ * 
+ * NOTE: The type definition for CustomTooltip may be overly specific and might not align 
+ * with Recharts' actual TooltipProps type. The manual intersection with specific payload 
+ * types could cause type errors when Recharts' types evolve. This will be validated during 
+ * functional testing to determine if a more generic payload type or exact Recharts types 
+ * are needed.
  */
 function CustomTooltip({ active, payload, label }: TooltipProps<number, string> & { 
   payload?: Array<{ color?: string; name?: string; value?: number }>; 
