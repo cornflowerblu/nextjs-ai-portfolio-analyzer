@@ -9,7 +9,7 @@ export default function Home() {
             <span className="text-xl font-semibold">Next.js Rendering Analyzer</span>
           </div>
           <nav className="hidden gap-6 md:flex">
-            <a href="#dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground">Dashboard</a>
+            <a href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground">Dashboard</a>
             <a href="#lab" className="text-sm font-medium text-muted-foreground hover:text-foreground">Lab</a>
             <a href="#analyze" className="text-sm font-medium text-muted-foreground hover:text-foreground">Analyze</a>
             <a href="#trends" className="text-sm font-medium text-muted-foreground hover:text-foreground">Trends</a>
@@ -28,12 +28,12 @@ export default function Home() {
             AI-powered insights, and Lighthouse analysis.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <button className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <a href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               View Dashboard
-            </button>
-            <button className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
+            </a>
+            <a href="#" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
               Try Lab Demos
-            </button>
+            </a>
           </div>
         </div>
       </section>

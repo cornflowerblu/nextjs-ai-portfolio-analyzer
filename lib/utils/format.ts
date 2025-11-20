@@ -9,7 +9,7 @@ import type { CoreWebVitals } from '@/types/performance';
  * Format milliseconds to human-readable time
  */
 export function formatMs(ms: number): string {
-  if (ms < 1000) {
+  if (Math.abs(ms) < 1000) {
     return `${Math.round(ms)}ms`;
   }
   return `${(ms / 1000).toFixed(2)}s`;
@@ -94,8 +94,13 @@ export function formatMetricValue(
   switch (metric) {
     case 'fcp':
     case 'lcp':
+      // FCP and LCP are always displayed in seconds
+      return `${(value / 1000).toFixed(2)}s`;
     case 'inp':
+      // INP is always displayed in milliseconds
+      return `${Math.round(value)}ms`;
     case 'ttfb':
+      // TTFB uses the standard formatMs (ms or s depending on value)
       return formatMs(value);
     case 'cls':
       return value.toFixed(3);
@@ -108,8 +113,8 @@ export function formatMetricValue(
 /**
  * Format relative time (e.g., "2 minutes ago")
  */
-export function formatRelativeTime(timestamp: number | string): string {
-  const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
+export function formatRelativeTime(timestamp: number | string | Date): string {
+  const date = timestamp instanceof Date ? timestamp : (typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp));
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSeconds = Math.floor(diffMs / 1000);

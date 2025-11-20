@@ -72,6 +72,32 @@ function CustomTooltip({ active, payload, label }: TooltipProps<number, string> 
 }
 
 /**
+ * Custom Legend component with fixed order
+ */
+function CustomLegend({ payload }: { payload?: Array<{ value: string; color: string }> }) {
+  if (!payload) return null;
+  
+  // Force order: SSR, SSG, ISR, CACHE
+  const orderedPayload = ['SSR', 'SSG', 'ISR', 'CACHE']
+    .map(key => payload.find(item => item.value === key))
+    .filter((item): item is { value: string; color: string } => item !== undefined);
+
+  return (
+    <div className="flex items-center justify-center gap-4 mt-2">
+      {orderedPayload.map((entry) => (
+        <div key={entry.value} className="flex items-center gap-2">
+          <div
+            className="w-3 h-3 rounded-sm"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-sm text-foreground">{entry.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
  * Bar Chart component
  */
 export interface BarChartProps extends BaseChartProps {
@@ -100,16 +126,21 @@ export function BarChart({
         />
         <YAxis className="text-xs" stroke="hsl(var(--muted-foreground))" />
         {showTooltip && <Tooltip content={<CustomTooltip />} />}
-        {showLegend && <Legend />}
-        {dataKeys.map((config) => (
-          <Bar
-            key={config.key}
-            dataKey={config.key}
-            fill={config.color}
-            name={config.name || config.key}
-            radius={[4, 4, 0, 0]}
-          />
-        ))}
+        {showLegend && <Legend content={<CustomLegend />} />}
+        {/* Render bars in explicit order: SSR, SSG, ISR, CACHE */}
+        {['SSR', 'SSG', 'ISR', 'CACHE'].map((strategyKey) => {
+          const config = dataKeys.find(dk => dk.key === strategyKey);
+          if (!config) return null;
+          return (
+            <Bar
+              key={config.key}
+              dataKey={config.key}
+              fill={config.color}
+              name={config.name || config.key}
+              radius={[4, 4, 0, 0]}
+            />
+          );
+        })}
       </RechartsBarChart>
     </ResponsiveContainer>
   );

@@ -62,20 +62,20 @@
 
 ### Implementation for User Story 1
 
-- [ ] T024 [P] [US1] Create parallel route slot @metrics in app/@metrics/default.tsx for metrics panel
-- [ ] T025 [P] [US1] Create parallel route slot @comparison in app/@comparison/default.tsx for comparison view
-- [ ] T026 [P] [US1] Create parallel route slot @insights in app/@insights/default.tsx for AI insights (placeholder)
-- [ ] T027 [US1] Implement main dashboard page in app/page.tsx with parallel routes layout and sections
-- [ ] T028 [P] [US1] Create StrategyCard component in components/dashboard/strategy-card.tsx displaying strategy name, description, icon
-- [ ] T029 [P] [US1] Create MetricsPanel component in components/dashboard/metrics-panel.tsx displaying all 5 Core Web Vitals
-- [ ] T030 [US1] Build ComparisonChart component in components/dashboard/comparison-chart.tsx with side-by-side bar charts using Recharts
-- [ ] T031 [P] [US1] Create RealTimeIndicator component in components/dashboard/real-time-indicator.tsx showing live update status
-- [ ] T032 [US1] Implement metrics API route in app/api/metrics/route.ts to provide mock/sample performance data for each strategy
-- [ ] T033 [US1] Add client-side metrics fetching in dashboard with SWR or React Query for real-time updates
-- [ ] T034 [US1] Style dashboard layout with Tailwind CSS grid for responsive 4-column strategy comparison
-- [ ] T035 [P] [US1] Add visual indicators (colors, badges) to MetricsPanel to highlight best/worst performing strategies
-- [ ] T036 [US1] Implement real-time update mechanism using polling (1-second interval) to refresh metrics without page reload
-- [ ] T037 [US1] Test dashboard loads in under 3 seconds and displays all strategy cards with metrics
+- [x] T024 [P] [US1] Create parallel route slot @metrics in app/@metrics/default.tsx for metrics panel
+- [x] T025 [P] [US1] Create parallel route slot @comparison in app/@comparison/default.tsx for comparison view
+- [x] T026 [P] [US1] Create parallel route slot @insights in app/@insights/default.tsx for AI insights (placeholder)
+- [x] T027 [US1] Implement main dashboard page in app/dashboard/page.tsx with parallel routes layout and sections (Note: Intentionally changed from app/page.tsx to app/dashboard/page.tsx to separate landing page from dashboard, allowing for better UX and navigation structure)
+- [x] T028 [P] [US1] Create StrategyCard component in components/dashboard/strategy-card.tsx displaying strategy name, description, icon
+- [x] T029 [P] [US1] Create MetricsPanel component in components/dashboard/metrics-panel.tsx displaying all 5 Core Web Vitals
+- [x] T030 [US1] Build ComparisonChart component in components/dashboard/comparison-chart.tsx with side-by-side bar charts using Recharts
+- [x] T031 [P] [US1] Create RealTimeIndicator component in components/dashboard/real-time-indicator.tsx showing live update status
+- [x] T032 [US1] Implement metrics API route in app/api/metrics/route.ts to provide mock/sample performance data for each strategy
+- [x] T033 [US1] Add client-side metrics fetching in dashboard with SWR or React Query for real-time updates
+- [x] T034 [US1] Style dashboard layout with Tailwind CSS grid for responsive 4-column strategy comparison
+- [x] T035 [P] [US1] Add visual indicators (colors, badges) to MetricsPanel to highlight best/worst performing strategies
+- [x] T036 [US1] Implement real-time update mechanism using polling (1-second interval) to refresh metrics without page reload
+- [x] T037 [US1] Test dashboard loads in under 3 seconds and displays all strategy cards with metrics
 
 **Checkpoint**: MVP complete - users can understand rendering strategy differences through dashboard comparison
 

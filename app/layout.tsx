@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -31,11 +31,12 @@ export const metadata: Metadata = {
     title: "Next.js Rendering Strategy Analyzer",
     description: "Analyze and compare rendering strategies for optimal web performance",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "oklch(1 0 0)" },
     { media: "(prefers-color-scheme: dark)", color: "oklch(0.129 0.042 264.695)" },
