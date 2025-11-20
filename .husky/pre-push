@@ -10,6 +10,6 @@ npm test -- --run || exit 1
 
 # Run build
 echo "🔨 Building project..."
-npm run build || exit 1
+NEXT_TURBOPACK_EXPERIMENTAL_USE_SYSTEM_TLS_CERTS=1 npm run build || exit 1
 
 echo "✅ Pre-push checks passed!"
