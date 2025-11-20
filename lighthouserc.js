@@ -15,6 +15,7 @@ module.exports = {
     },
     upload: {
       target: 'temporary-public-storage',
+      githubStatusCheck: false, // Disable status check posting (causes 422 errors)
     },
     assert: {
       preset: 'lighthouse:recommended',
