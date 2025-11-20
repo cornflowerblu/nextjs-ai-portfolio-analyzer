@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 // Mock SWR for component tests
-const useSWR = vi.fn((key, fetcher, options) => ({
+const useSWR = vi.fn(() => ({
   data: undefined,
   error: undefined,
   isLoading: false,

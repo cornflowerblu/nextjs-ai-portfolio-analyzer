@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { GET } from '@/app/api/metrics/route';
+import type { RenderingStrategyType } from '@/types/strategy';
+import type { CoreWebVitals } from '@/types/performance';
+
+interface StrategyMetrics {
+  strategy: RenderingStrategyType;
+  metrics: CoreWebVitals;
+  timestamp: string;
+}
 
 describe('GET /api/metrics', () => {
   describe('All Strategies', () => {
@@ -11,7 +19,7 @@ describe('GET /api/metrics', () => {
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toContain('application/json');
       expect(data).toHaveLength(4);
-      expect(data.map((d: any) => d.strategy)).toEqual(['SSR', 'SSG', 'ISR', 'CACHE']);
+      expect(data.map((d: StrategyMetrics) => d.strategy)).toEqual(['SSR', 'SSG', 'ISR', 'CACHE']);
     });
 
     it('returns unique metrics for each strategy', async () => {
@@ -19,7 +27,7 @@ describe('GET /api/metrics', () => {
       const response = await GET(request);
       const data = await response.json();
 
-      const strategies = data.map((d: any) => d.strategy);
+      const strategies = data.map((d: StrategyMetrics) => d.strategy);
       const uniqueStrategies = new Set(strategies);
       expect(uniqueStrategies.size).toBe(4);
     });
@@ -29,7 +37,7 @@ describe('GET /api/metrics', () => {
       const response = await GET(request);
       const data = await response.json();
 
-      data.forEach((strategyData: any) => {
+      data.forEach((strategyData: StrategyMetrics) => {
         expect(strategyData.metrics).toHaveProperty('fcp');
         expect(strategyData.metrics).toHaveProperty('lcp');
         expect(strategyData.metrics).toHaveProperty('cls');

@@ -1,8 +1,6 @@
-import { vi } from 'vitest';
-
 // Mock Recharts components to avoid canvas rendering issues in jsdom
-export const ResponsiveContainer = ({ children }: any) => <div>{children}</div>;
-export const BarChart = ({ children }: any) => <div data-testid="bar-chart">{children}</div>;
+export const ResponsiveContainer = ({ children }: { children?: React.ReactNode }) => <div>{children}</div>;
+export const BarChart = ({ children }: { children?: React.ReactNode }) => <div data-testid="bar-chart">{children}</div>;
 export const Bar = () => <div data-testid="bar" />;
 export const XAxis = () => <div data-testid="x-axis" />;
 export const YAxis = () => <div data-testid="y-axis" />;

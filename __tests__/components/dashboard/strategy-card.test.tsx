@@ -200,14 +200,17 @@ describe('StrategyCard', () => {
       ];
 
       strategies.forEach((strategy) => {
-        const { container } = render(
+        const { unmount } = render(
           <StrategyCard strategy={strategy} isActive={false} onClick={mockOnClick} />
         );
 
         // Check that all cards have the same basic structure
-        expect(container.querySelector('button')).toBeInTheDocument();
+        expect(screen.getByRole('button')).toBeInTheDocument();
         expect(screen.getByText(strategy.id)).toBeInTheDocument();
         expect(screen.getByText(strategy.displayName)).toBeInTheDocument();
+
+        // Clean up for next iteration
+        unmount();
       });
     });
   });

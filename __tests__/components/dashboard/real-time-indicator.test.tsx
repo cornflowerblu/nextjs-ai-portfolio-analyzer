@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { RealTimeIndicator } from '@/components/dashboard/real-time-indicator';
 
 describe('RealTimeIndicator', () => {
@@ -77,12 +77,13 @@ describe('RealTimeIndicator', () => {
 
       expect(screen.getByText(/Last updated just now/i)).toBeInTheDocument();
 
-      // Advance by 2 seconds
-      vi.advanceTimersByTime(2000);
-
-      await waitFor(() => {
-        expect(screen.getByText(/Last updated 1 minute ago/i)).toBeInTheDocument();
+      // Advance by 10 seconds (to trigger the 10s interval) + 1s to pass the minute threshold
+      act(() => {
+        vi.advanceTimersByTime(11000);
       });
+
+      // Text should now show "1 minute ago"
+      expect(screen.getByText(/Last updated 1 minute ago/i)).toBeInTheDocument();
     });
 
     it('cleans up interval on unmount', () => {
@@ -150,7 +151,14 @@ describe('RealTimeIndicator', () => {
       expect(screen.getByText(/Last updated 1 minute ago/i)).toBeInTheDocument();
 
       const newUpdate = new Date();
-      rerender(<RealTimeIndicator lastUpdate={newUpdate} isUpdating={false} />);
+      act(() => {
+        rerender(<RealTimeIndicator lastUpdate={newUpdate} isUpdating={false} />);
+      });
+
+      // Run only pending timers (setTimeout(0)) without the interval
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
 
       expect(screen.getByText(/Last updated just now/i)).toBeInTheDocument();
     });

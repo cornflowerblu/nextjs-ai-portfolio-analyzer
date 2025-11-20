@@ -62,8 +62,8 @@ describe('MetricsPanel', () => {
     it('displays formatted metric values correctly', () => {
       render(<MetricsPanel metrics={mockGoodMetrics} strategyName="SSR" />);
 
-      expect(screen.getByText('1200ms')).toBeInTheDocument(); // FCP
-      expect(screen.getByText('1800ms')).toBeInTheDocument(); // LCP
+      expect(screen.getByText('1.20s')).toBeInTheDocument(); // FCP
+      expect(screen.getByText('1.80s')).toBeInTheDocument(); // LCP
       expect(screen.getByText('0.050')).toBeInTheDocument(); // CLS
       expect(screen.getByText('150ms')).toBeInTheDocument(); // INP
       expect(screen.getByText('600ms')).toBeInTheDocument(); // TTFB
@@ -72,11 +72,11 @@ describe('MetricsPanel', () => {
     it('handles poor metric values', () => {
       render(<MetricsPanel metrics={mockPoorMetrics} strategyName="SSR" />);
 
-      expect(screen.getByText('4000ms')).toBeInTheDocument(); // FCP
-      expect(screen.getByText('5000ms')).toBeInTheDocument(); // LCP
+      expect(screen.getByText('4.00s')).toBeInTheDocument(); // FCP
+      expect(screen.getByText('5.00s')).toBeInTheDocument(); // LCP
       expect(screen.getByText('0.300')).toBeInTheDocument(); // CLS
       expect(screen.getByText('700ms')).toBeInTheDocument(); // INP
-      expect(screen.getByText('2500ms')).toBeInTheDocument(); // TTFB
+      expect(screen.getByText('2.50s')).toBeInTheDocument(); // TTFB
     });
   });
 
