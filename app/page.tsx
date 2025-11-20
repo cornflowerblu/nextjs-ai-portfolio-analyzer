@@ -1,6 +1,6 @@
 export default function Home() {
   return (
-    <div className="min-h-screen bg-linear-to-b from-background to-muted">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted">
       {/* Header */}
       <header className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
