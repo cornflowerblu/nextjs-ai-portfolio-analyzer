@@ -21,7 +21,18 @@ let client: ReturnType<typeof createClient> | null = null;
  */
 export async function getKVClient() {
   if (client) {
-    return client;
+    if (client.isOpen) {
+      return client;
+    } else {
+      // Attempt to reconnect if client is not open
+      try {
+        await client.connect();
+        return client;
+      } catch (err) {
+        console.error('Failed to reconnect Redis client:', err);
+        client = null;
+      }
+    }
   }
 
   const redisUrl = process.env.REDIS_URL;
