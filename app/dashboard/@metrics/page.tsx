@@ -9,8 +9,6 @@
 import useSWR from 'swr';
 import { MetricsPanel } from '@/components/dashboard/metrics-panel';
 import { RENDERING_STRATEGIES } from '@/types/strategy';
-import type { CoreWebVitals } from '@/types/performance';
-import type { RenderingStrategyType } from '@/types/strategy';
 import type { StrategyMetrics } from '@/types/metrics';
 import { fetcher } from '@/lib/fetcher';
 
