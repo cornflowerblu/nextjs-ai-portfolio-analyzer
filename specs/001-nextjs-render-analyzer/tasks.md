@@ -65,7 +65,7 @@
 - [x] T024 [P] [US1] Create parallel route slot @metrics in app/@metrics/default.tsx for metrics panel
 - [x] T025 [P] [US1] Create parallel route slot @comparison in app/@comparison/default.tsx for comparison view
 - [x] T026 [P] [US1] Create parallel route slot @insights in app/@insights/default.tsx for AI insights (placeholder)
-- [x] T027 [US1] Implement main dashboard page in app/dashboard/page.tsx with parallel routes layout and sections
+- [x] T027 [US1] Implement main dashboard page in app/dashboard/page.tsx with parallel routes layout and sections (Note: Intentionally changed from app/page.tsx to app/dashboard/page.tsx to separate landing page from dashboard, allowing for better UX and navigation structure)
 - [x] T028 [P] [US1] Create StrategyCard component in components/dashboard/strategy-card.tsx displaying strategy name, description, icon
 - [x] T029 [P] [US1] Create MetricsPanel component in components/dashboard/metrics-panel.tsx displaying all 5 Core Web Vitals
 - [x] T030 [US1] Build ComparisonChart component in components/dashboard/comparison-chart.tsx with side-by-side bar charts using Recharts
