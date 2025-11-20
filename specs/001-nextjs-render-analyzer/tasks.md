@@ -90,6 +90,7 @@
 ### Implementation for User Story 2
 
 - [ ] T038 [P] [US2] Create lab overview page in app/lab/page.tsx with navigation to all four demos
+- [ ] T038.1 [US2] Add navigation functionality to dashboard StrategyCard components to link to corresponding lab demo pages (e.g., clicking SSR card navigates to /lab/ssr)
 - [ ] T039 [P] [US2] Implement SSR demo page in app/lab/ssr/page.tsx with server-side rendering configuration
 - [ ] T040 [P] [US2] Implement SSG demo page in app/lab/ssg/page.tsx with static generation using generateStaticParams
 - [ ] T041 [P] [US2] Implement ISR demo page in app/lab/isr/page.tsx with revalidation configuration
