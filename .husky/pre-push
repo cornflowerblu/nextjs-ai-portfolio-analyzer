@@ -1,5 +1,9 @@
 echo "🔍 Running pre-push checks..."
 
+# Run linter
+echo "🧹 Linting code..."
+npm run lint || exit 1
+
 # Run tests
 echo "📝 Running tests..."
 npm test -- --run || exit 1
