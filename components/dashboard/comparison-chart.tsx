@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart } from '@/components/ui/chart';
 import { CoreWebVitals } from '@/types/performance';
 import { RenderingStrategyType } from '@/types/strategy';
+import { getStrategyColor } from '@/lib/utils/colors';
 
 interface ComparisonChartProps {
   data: Array<{
