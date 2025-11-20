@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.45",
@@ -45,6 +46,7 @@
     "@vitest/coverage-v8": "^4.0.10",
     "eslint": "^9",
     "eslint-config-next": "16.0.3",
+    "husky": "^9.1.7",
     "jsdom": "^27.2.0",
     "msw": "^2.12.2",
     "tailwindcss": "^4",

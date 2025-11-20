@@ -227,7 +227,7 @@ describe('GET /api/metrics', () => {
       expect(data.metrics.ttfb.value).toBeGreaterThanOrEqual(0);
     });
 
-    it('generates varied metrics across multiple calls', async () => {
+    it('generates consistent metrics for rapid consecutive calls', async () => {
       const request1 = new Request('http://localhost:3000/api/metrics?strategy=SSR');
       const request2 = new Request('http://localhost:3000/api/metrics?strategy=SSR');
 
@@ -237,13 +237,14 @@ describe('GET /api/metrics', () => {
       const data1 = await response1.json();
       const data2 = await response2.json();
 
-      // Metrics should vary (mock data generation)
-      const hasVariation =
-        data1.metrics.fcp.value !== data2.metrics.fcp.value ||
-        data1.metrics.lcp.value !== data2.metrics.lcp.value ||
-        data1.metrics.cls.value !== data2.metrics.cls.value;
-
-      expect(hasVariation).toBe(true);
+      // Metrics use time-based sine waves with 30-40 second cycles
+      // Consecutive calls within milliseconds should produce identical or nearly identical values
+      // This ensures smooth, realistic variations rather than random jumps
+      expect(data1.metrics.fcp.value).toBe(data2.metrics.fcp.value);
+      expect(data1.metrics.lcp.value).toBe(data2.metrics.lcp.value);
+      expect(data1.metrics.cls.value).toBe(data2.metrics.cls.value);
+      expect(data1.metrics.inp.value).toBe(data2.metrics.inp.value);
+      expect(data1.metrics.ttfb.value).toBe(data2.metrics.ttfb.value);
     });
   });
 

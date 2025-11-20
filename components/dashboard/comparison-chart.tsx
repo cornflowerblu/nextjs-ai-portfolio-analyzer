@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { BarChart } from '@/components/ui/chart';
 import { CoreWebVitals } from '@/types/performance';
 import { RenderingStrategyType } from '@/types/strategy';
+import { getStrategyColor } from '@/lib/utils/colors';
 
 interface ComparisonChartProps {
   data: Array<{
@@ -46,18 +47,10 @@ export function ComparisonChart({
   });
   const chartData = [chartDataObj];
 
-  // Create dataKeys array with each strategy having its own color
-  const colorMap: Record<RenderingStrategyType, string> = {
-    SSR: 'hsl(217, 91%, 60%)', // blue
-    SSG: 'hsl(142, 71%, 45%)', // green
-    ISR: 'hsl(38, 92%, 50%)',  // yellow/orange
-    CACHE: 'hsl(271, 91%, 65%)', // purple
-  };
-  
-  // Use sorted data for consistent order
+  // Use sorted data for consistent order, with centralized color definitions
   const dataKeys = sortedData.map((item) => ({
     key: item.strategy,
-    color: colorMap[item.strategy],
+    color: getStrategyColor(item.strategy),
     name: item.strategy,
   }));
 
