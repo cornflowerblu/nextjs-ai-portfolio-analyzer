@@ -1,6 +1,7 @@
 /**
  * Dashboard Page
- * Displays real-time performance comparisons across rendering strategies
+ * Displays header, real-time indicator, and strategy cards
+ * Metrics, comparison, and insights are handled by parallel routes
  * MVP Feature: US1 - View Rendering Strategy Comparisons
  */
 
@@ -9,13 +10,10 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { StrategyCard } from '@/components/dashboard/strategy-card';
-import { MetricsPanel } from '@/components/dashboard/metrics-panel';
-import { ComparisonChart } from '@/components/dashboard/comparison-chart';
 import { RealTimeIndicator } from '@/components/dashboard/real-time-indicator';
 import { RENDERING_STRATEGIES } from '@/types/strategy';
 import { CoreWebVitals } from '@/types/performance';
 import { RenderingStrategyType } from '@/types/strategy';
-import { CardSkeleton, ChartSkeleton } from '@/components/ui/skeleton';
 
 interface StrategyMetrics {
   strategy: RenderingStrategyType;
@@ -28,7 +26,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function DashboardPage() {
   const [selectedStrategy, setSelectedStrategy] = useState<RenderingStrategyType | null>(null);
   
-  // Fetch all strategy metrics with 1-second polling
+  // Fetch metrics for real-time indicator timestamp
   const { data: metricsData, error, isLoading } = useSWR<StrategyMetrics[]>(
     '/api/metrics',
     fetcher,
@@ -46,9 +44,9 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen p-8 flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-2">Error Loading Metrics</h1>
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Error Loading Dashboard</h1>
           <p className="text-muted-foreground">{error.message}</p>
         </div>
       </div>
@@ -56,7 +54,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 space-y-8">
+    <>
       {/* Header */}
       <header className="space-y-2">
         <div className="flex items-center justify-between">
@@ -88,67 +86,6 @@ export default function DashboardPage() {
           ))}
         </div>
       </section>
-
-      {/* Metrics Panels */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Core Web Vitals</h2>
-        {isLoading && !metricsData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <CardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {metricsData?.map((data) => (
-              <MetricsPanel
-                key={data.strategy}
-                metrics={data.metrics}
-                strategyName={RENDERING_STRATEGIES[data.strategy].displayName}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Comparison Charts */}
-      <section>
-        <h2 className="text-2xl font-semibold mb-4">Performance Comparison</h2>
-        {isLoading && !metricsData ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <ChartSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ComparisonChart
-              data={metricsData || []}
-              metricKey="fcp"
-              title="First Contentful Paint (FCP)"
-              description="Time to first DOM content render"
-            />
-            <ComparisonChart
-              data={metricsData || []}
-              metricKey="lcp"
-              title="Largest Contentful Paint (LCP)"
-              description="Time to largest content element"
-            />
-            <ComparisonChart
-              data={metricsData || []}
-              metricKey="cls"
-              title="Cumulative Layout Shift (CLS)"
-              description="Visual stability score"
-            />
-            <ComparisonChart
-              data={metricsData || []}
-              metricKey="inp"
-              title="Interaction to Next Paint (INP)"
-              description="Responsiveness to user interactions"
-            />
-          </div>
-        )}
-      </section>
-    </div>
+    </>
   );
 }
