@@ -192,8 +192,13 @@ function observeINP() {
         
         // INP is the worst (98th percentile) interaction
         const sortedInteractions = [...interactions].sort((a, b) => b - a);
-        const p98Index = Math.max(0, Math.floor(sortedInteractions.length * 0.02));
-        const value = Math.round(sortedInteractions[p98Index] || 0);
+        let value: number;
+        if (sortedInteractions.length < 50) {
+          value = Math.round(sortedInteractions[0] || 0); // max duration
+        } else {
+          const p98Index = Math.max(0, Math.floor(sortedInteractions.length * 0.02));
+          value = Math.round(sortedInteractions[p98Index] || 0);
+        }
         
         const inp: INP = {
           value,
