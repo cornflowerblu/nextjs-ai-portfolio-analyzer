@@ -5,7 +5,7 @@
 
 import type { RenderingStrategyType } from '@/types/strategy';
 import type { CoreWebVitals } from '@/types/performance';
-import { kvSet, kvGet, kvKeys } from './kv';
+import { kvSet, kvGet, kvKeys, kvMGet } from './kv';
 import { getHistoricalKey, getHistoricalPattern } from './cache-keys';
 
 /**
@@ -95,6 +95,7 @@ export async function getHistoricalData(
 
 /**
  * Query historical data for a time range
+ * Uses batch fetching with MGET for better performance
  */
 export async function queryHistoricalData(
   query: TimeRangeQuery
@@ -108,8 +109,10 @@ export async function queryHistoricalData(
       const pattern = getHistoricalPattern(strategy, projectId);
       const keys = await kvKeys(pattern);
       
-      for (const key of keys) {
-        const data = await kvGet<HistoricalDataPoint>(key);
+      // Use batch fetch instead of individual gets
+      const dataPoints = await kvMGet<HistoricalDataPoint>(keys);
+      
+      for (const data of dataPoints) {
         if (data && isInRange(data.timestamp, startDate, endDate)) {
           results.push(data);
         }
@@ -122,8 +125,10 @@ export async function queryHistoricalData(
         const pattern = getHistoricalPattern(strat, projectId);
         const keys = await kvKeys(pattern);
         
-        for (const key of keys) {
-          const data = await kvGet<HistoricalDataPoint>(key);
+        // Use batch fetch instead of individual gets
+        const dataPoints = await kvMGet<HistoricalDataPoint>(keys);
+        
+        for (const data of dataPoints) {
           if (data && isInRange(data.timestamp, startDate, endDate)) {
             results.push(data);
           }

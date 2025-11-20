@@ -102,6 +102,33 @@ export async function kvGet<T>(key: string): Promise<T | null> {
 }
 
 /**
+ * Get multiple values from KV in a single batch operation
+ * More efficient than calling kvGet multiple times
+ */
+export async function kvMGet<T>(keys: string[]): Promise<Array<T | null>> {
+  try {
+    if (keys.length === 0) return [];
+    
+    const client = await getKVClient();
+    if (!client) return keys.map(() => null);
+
+    const values = await client.mGet(keys);
+    
+    return values.map((value) => {
+      if (!value) return null;
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return null;
+      }
+    });
+  } catch (error) {
+    console.error('KV MGet Error:', error);
+    return keys.map(() => null);
+  }
+}
+
+/**
  * Delete a key from KV
  */
 export async function kvDel(key: string): Promise<boolean> {
