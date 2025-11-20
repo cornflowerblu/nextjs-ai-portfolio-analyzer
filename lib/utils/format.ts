@@ -91,11 +91,7 @@ export function formatMetricValue(
   metric: keyof CoreWebVitals,
   value: number
 ): string {
-  if (metric === 'timestamp') return value.toString();
-  
-  const metricKey = metric as 'fcp' | 'lcp' | 'cls' | 'inp' | 'ttfb';
-  
-  switch (metricKey) {
+  switch (metric) {
     case 'fcp':
     case 'lcp':
     case 'inp':
@@ -103,6 +99,7 @@ export function formatMetricValue(
       return formatMs(value);
     case 'cls':
       return value.toFixed(3);
+    case 'timestamp':
     default:
       return value.toString();
   }
