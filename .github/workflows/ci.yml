@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  statuses: write # Allow Lighthouse CI to post status checks
 
 jobs:
   # Job 1: Linting (runs in parallel with test)
@@ -91,3 +92,5 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
           runs: 3
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
