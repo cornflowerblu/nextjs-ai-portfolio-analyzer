@@ -13,45 +13,70 @@ interface StrategyMetrics {
   timestamp: string;
 }
 
-// Mock data generator for realistic Core Web Vitals
+/**
+ * Generate time-based variation using sine waves
+ * This creates smooth, realistic fluctuations instead of random jumps
+ * @param baseValue - The center value to fluctuate around
+ * @param variationPercent - The percentage of variation (e.g., 0.08 = ±8%)
+ * @param frequencyMs - How quickly values cycle (in milliseconds)
+ * @param phaseOffset - Offset to create different patterns for different metrics
+ */
+function getTimeBasedVariation(
+  baseValue: number,
+  variationPercent: number,
+  frequencyMs: number,
+  phaseOffset: number = 0
+): number {
+  const now = Date.now();
+  // Use sine wave for smooth oscillation
+  const angle = ((now + phaseOffset) / frequencyMs) * Math.PI * 2;
+  const variation = Math.sin(angle) * variationPercent;
+  return baseValue * (1 + variation);
+}
+
+// Mock data generator for realistic Core Web Vitals with smooth variations
 function generateMockMetrics(strategy: RenderingStrategyType): CoreWebVitals {
+  // Base values represent typical performance for each strategy
   const baseMetrics = {
     SSR: {
-      fcp: 1200 + Math.random() * 400,
-      lcp: 1800 + Math.random() * 600,
-      cls: 0.05 + Math.random() * 0.05,
-      inp: 150 + Math.random() * 100,
-      ttfb: 600 + Math.random() * 200,
+      fcp: 1400,
+      lcp: 2100,
+      cls: 0.075,
+      inp: 200,
+      ttfb: 700,
     },
     SSG: {
-      fcp: 600 + Math.random() * 300,
-      lcp: 1000 + Math.random() * 400,
-      cls: 0.02 + Math.random() * 0.03,
-      inp: 80 + Math.random() * 60,
-      ttfb: 200 + Math.random() * 150,
+      fcp: 750,
+      lcp: 1200,
+      cls: 0.035,
+      inp: 110,
+      ttfb: 275,
     },
     ISR: {
-      fcp: 800 + Math.random() * 350,
-      lcp: 1400 + Math.random() * 500,
-      cls: 0.03 + Math.random() * 0.04,
-      inp: 100 + Math.random() * 80,
-      ttfb: 400 + Math.random() * 180,
+      fcp: 975,
+      lcp: 1700,
+      cls: 0.05,
+      inp: 140,
+      ttfb: 490,
     },
     CACHE: {
-      fcp: 500 + Math.random() * 250,
-      lcp: 900 + Math.random() * 350,
-      cls: 0.01 + Math.random() * 0.02,
-      inp: 60 + Math.random() * 50,
-      ttfb: 150 + Math.random() * 100,
+      fcp: 625,
+      lcp: 1075,
+      cls: 0.02,
+      inp: 85,
+      ttfb: 225,
     },
   };
 
   const values = baseMetrics[strategy];
-  const fcpValue = Math.round(values.fcp);
-  const lcpValue = Math.round(values.lcp);
-  const clsValue = Math.round(values.cls * 1000) / 1000;
-  const inpValue = Math.round(values.inp);
-  const ttfbValue = Math.round(values.ttfb);
+  
+  // Apply time-based variations (±8%) with different frequencies and phases
+  // This creates realistic, observable trends rather than random noise
+  const fcpValue = Math.round(getTimeBasedVariation(values.fcp, 0.08, 30000, 0));
+  const lcpValue = Math.round(getTimeBasedVariation(values.lcp, 0.08, 35000, 5000));
+  const clsValue = Math.round(getTimeBasedVariation(values.cls, 0.08, 40000, 10000) * 1000) / 1000;
+  const inpValue = Math.round(getTimeBasedVariation(values.inp, 0.08, 32000, 15000));
+  const ttfbValue = Math.round(getTimeBasedVariation(values.ttfb, 0.08, 38000, 20000));
 
   return {
     fcp: {
