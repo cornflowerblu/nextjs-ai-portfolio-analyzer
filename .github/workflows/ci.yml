@@ -48,14 +48,14 @@ jobs:
         run: npm run test:coverage
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        if: always()
+        uses: codecov/codecov-action@v5
         with:
+          fail_ci_if_error: true # optional (default = false)
+          files: ./coverage1.xml,./coverage2.xml # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+          verbose: true # optional (default = false)
 
   # Job 3: Build (depends on lint + test passing)
   build:
@@ -109,7 +109,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+
+      - name: Verify build artifacts
+        run: ls -la && ls -la .next 2>/dev/null || echo ".next not found in root, checking subdirs" && find . -name ".next" -type d 2>/dev/null || echo "No .next directory found"
 
       - name: Install Lighthouse CI
         run: npm install -g @lhci/cli@0.14.x
