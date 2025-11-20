@@ -1,0 +1,35 @@
+// Check if we're on the main branch
+const isMainBranch = process.env.LHCI_GITHUB_REF === 'refs/heads/main';
+
+// Use 'error' on main, 'warn' on other branches
+const assertLevel = isMainBranch ? 'error' : 'warn';
+
+module.exports = {
+  ci: {
+    collect: {
+      startServerCommand: 'npm run start',
+      startServerReadyPattern: 'Ready',
+      startServerReadyTimeout: 30000,
+      url: ['http://localhost:3000'],
+      numberOfRuns: 3,
+    },
+    upload: {
+      target: 'temporary-public-storage',
+    },
+    assert: {
+      preset: 'lighthouse:recommended',
+      assertions: {
+        'categories:performance': [assertLevel, { minScore: 0.9 }],
+        'categories:accessibility': [assertLevel, { minScore: 0.9 }],
+        'categories:best-practices': [assertLevel, { minScore: 0.9 }],
+        'categories:seo': [assertLevel, { minScore: 0.9 }],
+        // Custom assertions for Next.js best practices
+        'first-contentful-paint': ['warn', { maxNumericValue: 2000 }],
+        'largest-contentful-paint': ['warn', { maxNumericValue: 2500 }],
+        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
+        'total-blocking-time': ['warn', { maxNumericValue: 300 }],
+        'speed-index': ['warn', { maxNumericValue: 3000 }],
+      },
+    },
+  },
+};
