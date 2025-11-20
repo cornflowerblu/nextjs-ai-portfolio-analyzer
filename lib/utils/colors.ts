@@ -183,6 +183,21 @@ export const STRATEGY_CHART_COLORS: string[] = [
 ];
 
 /**
+ * Get strategy color for charting libraries that may not support CSS variables
+ * Returns the CSS variable reference which can be used in most modern chart libraries
+ * 
+ * For libraries that require actual color values at initialization time,
+ * you may need to retrieve the computed style at runtime:
+ * ```typescript
+ * const actualColor = getComputedStyle(document.documentElement)
+ *   .getPropertyValue('--strategy-ssr').trim();
+ * ```
+ */
+export function getStrategyChartColor(strategy: RenderingStrategyType): string {
+  return STRATEGY_COLORS[strategy];
+}
+
+/**
  * Get opacity variant of a color
  */
 export function getColorWithOpacity(color: string, opacity: number): string {
