@@ -20,10 +20,13 @@ interface StrategyMetrics {
 
 import { fetcher } from '@/lib/fetcher';
 
+const METRICS_SWR_CONFIG = {
+  refreshInterval: 1000,
+  revalidateOnFocus: true,
+};
+
 export default function MetricsSlot() {
-  const { data, error } = useSWR<StrategyMetrics[]>('/api/metrics', fetcher, {
-    refreshInterval: 1000,
-  });
+  const { data, error } = useSWR<StrategyMetrics[]>('/api/metrics', fetcher, METRICS_SWR_CONFIG);
 
   if (error) throw error; // Caught by error.tsx
   if (!data) return null; // Show loading.tsx
