@@ -9,21 +9,23 @@
 import useSWR from 'swr';
 import { MetricsPanel } from '@/components/dashboard/metrics-panel';
 import { RENDERING_STRATEGIES } from '@/types/strategy';
-import type { CoreWebVitals } from '@/types/performance';
-import type { RenderingStrategyType } from '@/types/strategy';
 import type { StrategyMetrics } from '@/types/metrics';
 import { fetcher } from '@/lib/fetcher';
-
-const METRICS_SWR_CONFIG = {
-  refreshInterval: 1000,
-  revalidateOnFocus: true,
-};
+import { METRICS_SWR_CONFIG } from '@/lib/swr-config';
+import MetricsLoading from './loading';
 
 export default function MetricsSlot() {
-  const { data, error } = useSWR<StrategyMetrics[]>('/api/metrics', fetcher, METRICS_SWR_CONFIG);
+  const { data, error } = useSWR<StrategyMetrics[]>(
+    '/api/metrics',
+    fetcher,
+    METRICS_SWR_CONFIG
+  );
 
   if (error) throw error; // Caught by error.tsx
-  if (!data) return null; // Show loading.tsx
+  if (!data) {
+    // Render inline loading state for consistent behavior
+    return <MetricsLoading />;
+  }
 
   return (
     <section>

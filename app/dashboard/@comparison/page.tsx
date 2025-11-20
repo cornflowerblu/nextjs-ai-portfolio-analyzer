@@ -8,27 +8,23 @@
 
 import useSWR from 'swr';
 import { ComparisonChart } from '@/components/dashboard/comparison-chart';
-import type { CoreWebVitals } from '@/types/performance';
-import type { RenderingStrategyType } from '@/types/strategy';
-
-interface StrategyMetrics {
-  strategy: RenderingStrategyType;
-  metrics: CoreWebVitals;
-  timestamp: string;
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-const METRICS_SWR_CONFIG = {
-  refreshInterval: 1000,
-  revalidateOnFocus: true,
-};
+import type { StrategyMetrics } from '@/types/metrics';
+import { fetcher } from '@/lib/fetcher';
+import { METRICS_SWR_CONFIG } from '@/lib/swr-config';
+import ComparisonLoading from './loading';
 
 export default function ComparisonSlot() {
-  const { data, error } = useSWR<StrategyMetrics[]>('/api/metrics', fetcher, METRICS_SWR_CONFIG);
+  const { data, error } = useSWR<StrategyMetrics[]>(
+    '/api/metrics',
+    fetcher,
+    METRICS_SWR_CONFIG
+  );
 
   if (error) throw error; // Caught by error.tsx
-  if (!data) return null; // Show loading.tsx
+  if (!data) {
+    // Render inline loading state for consistent behavior
+    return <ComparisonLoading />;
+  }
 
   return (
     <section>
