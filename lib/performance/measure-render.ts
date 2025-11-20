@@ -5,6 +5,8 @@
 
 'use client';
 
+import { useRef } from 'react';
+
 /**
  * Render timing result
  */
@@ -100,21 +102,22 @@ export async function measureRenderAsync<T>(
  * React hook for measuring component render time
  */
 export function useRenderTiming(componentName: string) {
+  // Use useRef to persist values across renders
+  const startMarkNameRef = useRef('');
+  const renderCountRef = useRef(0);
+
   if (typeof window === 'undefined') {
     return { startMeasure: () => {}, endMeasure: () => null };
   }
 
-  let startMarkName = '';
-  let renderCount = 0;
-
   const startMeasure = () => {
-    renderCount++;
-    startMarkName = startRenderMeasure(componentName);
+    renderCountRef.current++;
+    startMarkNameRef.current = startRenderMeasure(componentName);
   };
 
   const endMeasure = (): RenderTiming | null => {
-    const renderType = renderCount === 1 ? 'initial' : 're-render';
-    return endRenderMeasure(componentName, startMarkName, renderType);
+    const renderType = renderCountRef.current === 1 ? 'initial' : 're-render';
+    return endRenderMeasure(componentName, startMarkNameRef.current, renderType);
   };
 
   return { startMeasure, endMeasure };
