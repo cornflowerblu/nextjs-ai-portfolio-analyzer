@@ -87,8 +87,11 @@ jobs:
         with:
           name: next-build
           path: |
-            .next/
-            public/
+            .next/**
+            public/**
+            package.json
+            package-lock.json
+            next.config.ts
           retention-days: 1
 
   # Job 4: Lighthouse CI (depends on build, reuses artifacts)
@@ -115,7 +118,13 @@ jobs:
           name: next-build
 
       - name: Verify build artifacts
-        run: ls -la && ls -la .next 2>/dev/null || echo ".next not found in root, checking subdirs" && find . -name ".next" -type d 2>/dev/null || echo "No .next directory found"
+        run: |
+          echo "Checking for .next directory..."
+          ls -la .next/ || echo ".next not found!"
+          echo "Checking build ID..."
+          cat .next/BUILD_ID || echo "BUILD_ID not found!"
+          echo "Checking package.json..."
+          cat package.json | grep '"start"'
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
@@ -125,3 +134,4 @@ jobs:
           configPath: ./lighthouserc.js
           uploadArtifacts: true
           temporaryPublicStorage: true
+          runs: 3
