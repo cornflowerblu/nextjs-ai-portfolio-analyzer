@@ -1,5 +1,10 @@
-import type { CoreWebVitals } from '@/types/performance';
-import { RenderingStrategyType } from './strategy';
+/**
+ * Metrics Types
+ * Shared type definitions for dashboard metrics
+ */
+
+import type { CoreWebVitals } from './performance';
+import type { RenderingStrategyType } from './strategy';
 
 export interface StrategyMetrics {
   strategy: RenderingStrategyType;

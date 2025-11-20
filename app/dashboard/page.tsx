@@ -7,33 +7,20 @@
 
 'use client';
 
-import { useState } from 'react';
 import useSWR from 'swr';
 import { StrategyCard } from '@/components/dashboard/strategy-card';
 import { RealTimeIndicator } from '@/components/dashboard/real-time-indicator';
 import { RENDERING_STRATEGIES } from '@/types/strategy';
-import { CoreWebVitals } from '@/types/performance';
-import { RenderingStrategyType } from '@/types/strategy';
-
-interface StrategyMetrics {
-  strategy: RenderingStrategyType;
-  metrics: CoreWebVitals;
-  timestamp: string;
-}
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+import type { StrategyMetrics } from '@/types/metrics';
+import { fetcher } from '@/lib/fetcher';
+import { METRICS_SWR_CONFIG } from '@/lib/swr-config';
 
 export default function DashboardPage() {
-  const [selectedStrategy, setSelectedStrategy] = useState<RenderingStrategyType | null>(null);
-  
   // Fetch metrics for lastUpdate timestamp only
   const { data: metricsData, isLoading } = useSWR<StrategyMetrics[]>(
     '/api/metrics',
     fetcher,
-    {
-      refreshInterval: 1000, // Poll every 1 second for real-time updates
-      revalidateOnFocus: true,
-    }
+    METRICS_SWR_CONFIG
   );
 
   const lastUpdate = metricsData?.[0]?.timestamp 
@@ -67,10 +54,8 @@ export default function DashboardPage() {
             <StrategyCard
               key={strategy.id}
               strategy={strategy}
-              isActive={selectedStrategy === strategy.id}
-              onClick={() => setSelectedStrategy(
-                selectedStrategy === strategy.id ? null : strategy.id
-              )}
+              isActive={false}
+              onClick={() => {}}
             />
           ))}
         </div>
