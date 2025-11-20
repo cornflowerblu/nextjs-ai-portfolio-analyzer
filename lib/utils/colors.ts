@@ -17,6 +17,24 @@ export const STRATEGY_COLORS = {
 
 /**
  * Tailwind CSS class names for strategy colors
+ * 
+ * IMPORTANT: These classes use Tailwind v4's arbitrary value syntax with CSS variables.
+ * 
+ * According to Tailwind CSS v4 documentation:
+ * - Arbitrary values with CSS variables (e.g., `bg-[var(--strategy-ssr)]`) ARE supported
+ * - These classes work correctly when statically present in source code
+ * - Tailwind's content scanner detects them as plain text strings
+ * 
+ * References:
+ * - https://tailwindcss.com/docs/background-color (arbitrary values)
+ * - https://tailwindcss.com/docs/theme (CSS variables & theme)
+ * - https://tailwindcss.com/docs/detecting-classes-in-source-files (content scanning)
+ * 
+ * NOTE: Dynamic class generation (e.g., string interpolation like `bg-[var(--strategy-${type})]`)
+ * would require safelisting, but these STATIC class strings are safe and will not be purged.
+ * 
+ * The CSS variables (--strategy-*) are defined in app/globals.css within the :root and .dark
+ * selectors, ensuring they're available at runtime.
  */
 export const STRATEGY_COLOR_CLASSES = {
   SSR: {
