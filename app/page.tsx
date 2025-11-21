@@ -10,7 +10,7 @@ export default function Home() {
           </div>
           <nav className="hidden gap-6 md:flex">
             <a href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground">Dashboard</a>
-            <a href="#lab" className="text-sm font-medium text-muted-foreground hover:text-foreground">Lab</a>
+            <a href="/lab" className="text-sm font-medium text-muted-foreground hover:text-foreground">Lab</a>
             <a href="#analyze" className="text-sm font-medium text-muted-foreground hover:text-foreground">Analyze</a>
             <a href="#trends" className="text-sm font-medium text-muted-foreground hover:text-foreground">Trends</a>
           </nav>
