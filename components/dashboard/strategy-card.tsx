@@ -19,15 +19,8 @@ interface StrategyCardProps {
   onClick?: () => void;
 }
 
-export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCardProps) {
+export function StrategyCard({ strategy, isActive = false }: StrategyCardProps) {
   const colorClasses = getStrategyColor(strategy.id);
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onClick?.();
-    }
-  };
 
   return (
     <Card

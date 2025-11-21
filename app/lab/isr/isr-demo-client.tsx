@@ -37,15 +37,14 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
 
   // Countdown to next revalidation
   useEffect(() => {
-    const ageSeconds = Math.floor((Date.now() - isrData.timestamp) / 1000);
-    const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
-    setTimeUntilRevalidation(remaining);
+    const updateTimer = () => {
+      const ageSeconds = Math.floor((Date.now() - isrData.timestamp) / 1000);
+      const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
+      setTimeUntilRevalidation(remaining);
+    };
 
-    const interval = setInterval(() => {
-      const currentAge = Math.floor((Date.now() - isrData.timestamp) / 1000);
-      const currentRemaining = Math.max(0, isrData.data.revalidateInterval - currentAge);
-      setTimeUntilRevalidation(currentRemaining);
-    }, 1000);
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
   }, [isrData.timestamp, isrData.data.revalidateInterval]);

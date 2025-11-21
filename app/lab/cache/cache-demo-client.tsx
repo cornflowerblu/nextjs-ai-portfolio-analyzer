@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { DemoContainer } from '@/components/lab/demo-container';
 import { useDemo } from '@/lib/lab/use-demo';
 import { Badge } from '@/components/ui/badge';
@@ -34,9 +35,20 @@ export function CacheDemoClient({ cachedData, dynamicData, sourceCode }: CacheDe
     strategy: 'CACHE',
   });
 
-  // Calculate component ages
-  const cachedAge = Date.now() - cachedData.timestamp;
-  const dynamicAge = Date.now() - dynamicData.timestamp;
+  // Calculate component ages (using state to avoid impure function in render)
+  const [cachedAge, setCachedAge] = useState(0);
+  const [dynamicAge, setDynamicAge] = useState(0);
+
+  useEffect(() => {
+    const updateAges = () => {
+      setCachedAge(Date.now() - cachedData.timestamp);
+      setDynamicAge(Date.now() - dynamicData.timestamp);
+    };
+    
+    updateAges();
+    const interval = setInterval(updateAges, 1000);
+    return () => clearInterval(interval);
+  }, [cachedData.timestamp, dynamicData.timestamp]);
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -148,14 +160,14 @@ export function CacheDemoClient({ cachedData, dynamicData, sourceCode }: CacheDe
               <h3 className="font-semibold text-lg">Component-Level Caching</h3>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Next.js 16 introduces the <code className="bg-muted px-1 py-0.5 rounded">'use cache'</code> directive,
+              Next.js 16 introduces the <code className="bg-muted px-1 py-0.5 rounded">&apos;use cache&apos;</code> directive,
               allowing you to cache individual components while keeping others dynamic:
             </p>
             <div className="grid md:grid-cols-2 gap-3 text-sm">
               <div className="bg-white dark:bg-gray-900 rounded p-3">
                 <p className="font-semibold mb-1">Cached Component:</p>
                 <code className="text-xs text-green-600 dark:text-green-400">
-                  'use cache'
+                  &apos;use cache&apos;
                 </code>
                 <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                   <li>• Rendered once, reused</li>

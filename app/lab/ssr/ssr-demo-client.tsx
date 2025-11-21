@@ -117,7 +117,7 @@ export function SSRDemoClient({ serverData, sourceCode }: SSRDemoClientProps) {
               {serverData.data.randomValue}
             </Badge>
             <p className="text-xs text-muted-foreground mt-2">
-              Click "Trigger New Request" to generate a new value
+              Click &quot;Trigger New Request&quot; to generate a new value
             </p>
           </div>
 

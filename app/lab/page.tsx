@@ -37,7 +37,7 @@ export default function LabPage() {
       <Card className="mb-8 border-primary/50 bg-primary/5">
         <CardContent className="pt-6">
           <div className="flex flex-col gap-3">
-            <h3 className="font-semibold text-lg">What you'll learn:</h3>
+            <h3 className="font-semibold text-lg">What you&apos;ll learn:</h3>
             <ul className="grid md:grid-cols-2 gap-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>

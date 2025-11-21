@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { DemoContainer } from '@/components/lab/demo-container';
 import { useDemo } from '@/lib/lab/use-demo';
 import { Badge } from '@/components/ui/badge';
@@ -30,8 +31,19 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
     strategy: 'SSG',
   });
 
-  // Calculate age since build
-  const ageMs = Date.now() - staticData.buildTime;
+  // Calculate age since build (using state to avoid impure function in render)
+  const [ageMs, setAgeMs] = useState(0);
+
+  useEffect(() => {
+    const updateAge = () => {
+      setAgeMs(Date.now() - staticData.buildTime);
+    };
+    
+    updateAge();
+    const interval = setInterval(updateAge, 1000);
+    return () => clearInterval(interval);
+  }, [staticData.buildTime]);
+
   const ageMinutes = Math.floor(ageMs / 60000);
   const ageSeconds = Math.floor((ageMs % 60000) / 1000);
 
@@ -119,7 +131,7 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
               Generated at: {staticData.data.generatedAt}
             </p>
             <p className="text-xs text-muted-foreground">
-              "Simulate Rebuild" will create a new version
+              &quot;Simulate Rebuild&quot; will create a new version
             </p>
           </div>
 

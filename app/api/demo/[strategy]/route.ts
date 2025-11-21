@@ -43,7 +43,6 @@ export async function GET(
 
   // Get query parameters for cache busting and request tracking
   const searchParams = request.nextUrl.searchParams;
-  const cacheBust = searchParams.get('cacheBust') || Date.now().toString();
   const requestId = searchParams.get('requestId') || `${strategy}-${Date.now()}`;
 
   // Check if we have cached data for this request
