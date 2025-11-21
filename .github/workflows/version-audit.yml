@@ -1,0 +1,46 @@
+name: Weekly Version Audit
+
+on:
+  schedule:
+    # Run every Monday at 3 AM UTC
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Dependency Version Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for outdated packages
+        run: |
+          echo "📦 Checking for outdated packages..."
+          npm outdated || true
+
+      - name: Check for available updates
+        run: |
+          echo "📦 Checking for available updates..."
+          npx npm-check-updates || true
+
+      - name: Security audit
+        run: |
+          echo "🔒 Running security audit..."
+          npm audit --audit-level=moderate || true
+
+      - name: Summary
+        run: |
+          echo "✅ Audit complete! Review output above for updates."
+          echo "📝 To update dependencies, run: npx npm-check-updates -u && npm install"
