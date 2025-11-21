@@ -20,7 +20,7 @@ export function SiteHeader() {
           <Link href="/lab" className="text-sm font-medium text-muted-foreground hover:text-foreground">
             Lab
           </Link>
-          <Link href="#analyze" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+          <Link href="/analyze" className="text-sm font-medium text-muted-foreground hover:text-foreground">
             Analyze
           </Link>
           <Link href="#trends" className="text-sm font-medium text-muted-foreground hover:text-foreground">
