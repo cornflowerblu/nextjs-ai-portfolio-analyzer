@@ -30,10 +30,13 @@ jobs:
           echo "📦 Checking for outdated packages..."
           npm outdated || true
 
+      - name: Install npm-check-updates
+        run: npm install -g npm-check-updates
+
       - name: Check for available updates
         run: |
           echo "📦 Checking for available updates..."
-          npx npm-check-updates || true
+          npm-check-updates
 
       - name: Security audit
         run: |
