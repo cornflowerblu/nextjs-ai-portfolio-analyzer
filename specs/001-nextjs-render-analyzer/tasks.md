@@ -89,24 +89,24 @@
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Create lab overview page in app/lab/page.tsx with navigation to all four demos
-- [ ] T038.1 [US2] Add navigation functionality to dashboard StrategyCard components to link to corresponding lab demo pages (e.g., clicking SSR card navigates to /lab/ssr)
-- [ ] T039 [P] [US2] Implement SSR demo page in app/lab/ssr/page.tsx with server-side rendering configuration
-- [ ] T040 [P] [US2] Implement SSG demo page in app/lab/ssg/page.tsx with static generation using generateStaticParams
-- [ ] T041 [P] [US2] Implement ISR demo page in app/lab/isr/page.tsx with revalidation configuration
-- [ ] T042 [P] [US2] Implement Cache Components demo in app/lab/cache/page.tsx showcasing Next.js 16 cache directive
-- [ ] T043 [P] [US2] Create DemoContainer component in components/lab/demo-container.tsx with controls and metrics overlay
-- [ ] T044 [P] [US2] Build MetricsDisplay component in components/lab/metrics-display.tsx showing real-time render metrics
-- [ ] T045 [P] [US2] Create CacheStatus component in components/lab/cache-status.tsx with hit/miss indicator and visual feedback
-- [ ] T046 [P] [US2] Build SourceCodeViewer component in components/lab/source-code-viewer.tsx using Shiki for syntax highlighting
-- [ ] T047 [P] [US2] Create ReRenderControls component in components/lab/re-render-controls.tsx with buttons to trigger refreshes
-- [ ] T048 [US2] Implement demo data API route in app/api/demo/[strategy]/route.ts to capture render metrics per strategy
-- [ ] T049 [US2] Add timestamp tracking to each demo to show when last rendered and cache age
-- [ ] T050 [US2] Integrate web-vitals library in lab pages to capture actual FCP, LCP, CLS, INP, TTFB on re-render
-- [ ] T051 [US2] Implement re-render logic with cache busting using query parameters or router refresh
-- [ ] T052 [US2] Display source code for each demo's page.tsx implementation in SourceCodeViewer
-- [ ] T053 [US2] Style lab section with side-by-side layout: demo content on left, metrics/code on right
-- [ ] T054 [US2] Test all four demos can be triggered to re-render and show updated metrics within 1 second
+- [X] T038 [P] [US2] Create lab overview page in app/lab/page.tsx with navigation to all four demos
+- [X] T038.1 [US2] Add navigation functionality to dashboard StrategyCard components to link to corresponding lab demo pages (e.g., clicking SSR card navigates to /lab/ssr)
+- [X] T039 [P] [US2] Implement SSR demo page in app/lab/ssr/page.tsx with server-side rendering configuration
+- [X] T040 [P] [US2] Implement SSG demo page in app/lab/ssg/page.tsx with static generation using generateStaticParams
+- [X] T041 [P] [US2] Implement ISR demo page in app/lab/isr/page.tsx with revalidation configuration
+- [X] T042 [P] [US2] Implement Cache Components demo in app/lab/cache/page.tsx showcasing Next.js 16 cache directive
+- [X] T043 [P] [US2] Create DemoContainer component in components/lab/demo-container.tsx with controls and metrics overlay
+- [X] T044 [P] [US2] Build MetricsDisplay component in components/lab/metrics-display.tsx showing real-time render metrics
+- [X] T045 [P] [US2] Create CacheStatus component in components/lab/cache-status.tsx with hit/miss indicator and visual feedback
+- [X] T046 [P] [US2] Build SourceCodeViewer component in components/lab/source-code-viewer.tsx using Shiki for syntax highlighting
+- [X] T047 [P] [US2] Create ReRenderControls component in components/lab/re-render-controls.tsx with buttons to trigger refreshes
+- [X] T048 [US2] Implement demo data API route in app/api/demo/[strategy]/route.ts to capture render metrics per strategy
+- [X] T049 [US2] Add timestamp tracking to each demo to show when last rendered and cache age
+- [X] T050 [US2] Integrate web-vitals library in lab pages to capture actual FCP, LCP, CLS, INP, TTFB on re-render
+- [X] T051 [US2] Implement re-render logic with cache busting using query parameters or router refresh
+- [X] T052 [US2] Display source code for each demo's page.tsx implementation in SourceCodeViewer
+- [X] T053 [US2] Style lab section with side-by-side layout: demo content on left, metrics/code on right
+- [X] T054 [US2] Test all four demos can be triggered to re-render and show updated metrics within 1 second
 
 **Checkpoint**: Lab functional - users can interact with live demos and observe rendering strategy behavior
 
