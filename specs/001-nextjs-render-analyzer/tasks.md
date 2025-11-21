@@ -213,20 +213,20 @@
 
 ### Implementation for User Story 6
 
-- [ ] T109 [P] [US6] Create trends page in app/trends/page.tsx with time-series charts for all strategies
-- [ ] T110 [P] [US6] Build TrendChart component in components/trends/trend-chart.tsx using Recharts LineChart
-- [ ] T111 [P] [US6] Create RegressionIndicator component in components/trends/regression-indicator.tsx highlighting performance drops
-- [ ] T112 [P] [US6] Build ProjectSelector component in components/trends/project-selector.tsx for multi-project switching
-- [ ] T113 [US6] Enhance historical data manager in lib/storage/historical.ts to query by date range
-- [ ] T114 [US6] Implement historical data API in app/api/historical/route.ts returning time-series performance data
-- [ ] T115 [US6] Store performance snapshots on every metrics capture with timestamp and strategy metadata
-- [ ] T116 [US6] Build aggregation logic to group historical data by day/week/month for trend views
-- [ ] T117 [US6] Implement regression detection algorithm comparing recent vs historical averages
-- [ ] T118 [US6] Add hover tooltips to trend charts showing exact metric values and timestamps
-- [ ] T119 [US6] Create date range selector for trends view (7 days, 30 days, 90 days options)
-- [ ] T120 [US6] Add annotations to charts for significant performance changes with automatic detection
-- [ ] T121 [US6] Implement multi-project tracking with project ID in KV keys
-- [ ] T122 [US6] Test trends display correctly for data spanning multiple weeks with clear temporal progression
+- [x] T109 [P] [US6] Create trends page in app/trends/page.tsx with time-series charts for all strategies
+- [x] T110 [P] [US6] Build TrendChart component in components/trends/trend-chart.tsx using Recharts LineChart
+- [x] T111 [P] [US6] Create RegressionIndicator component in components/trends/regression-indicator.tsx highlighting performance drops
+- [x] T112 [P] [US6] Build ProjectSelector component in components/trends/project-selector.tsx for multi-project switching
+- [x] T113 [US6] Enhance historical data manager in lib/storage/historical.ts to query by date range (Note: Already implemented in Phase 2)
+- [x] T114 [US6] Implement historical data API in app/api/historical/route.ts returning time-series performance data
+- [x] T115 [US6] Store performance snapshots on every metrics capture with timestamp and strategy metadata
+- [x] T116 [US6] Build aggregation logic to group historical data by day/week/month for trend views (Note: Already implemented in Phase 2)
+- [x] T117 [US6] Implement regression detection algorithm comparing recent vs historical averages (Note: Already implemented in Phase 2)
+- [x] T118 [US6] Add hover tooltips to trend charts showing exact metric values and timestamps
+- [x] T119 [US6] Create date range selector for trends view (7 days, 30 days, 90 days options)
+- [x] T120 [US6] Add annotations to charts for significant performance changes with automatic detection
+- [x] T121 [US6] Implement multi-project tracking with project ID in KV keys (Note: Already implemented in Phase 2)
+- [x] T122 [US6] Test trends display correctly for data spanning multiple weeks with clear temporal progression
 
 **Checkpoint**: Historical trends functional - users can track performance changes over time
 

@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { CoreWebVitals, CORE_WEB_VITALS_THRESHOLDS, getRating } from '@/types/performance';
 import { RenderingStrategyType } from '@/types/strategy';
+import { saveHistoricalData } from '@/lib/storage/historical';
 
 interface StrategyMetrics {
   strategy: RenderingStrategyType;
@@ -112,10 +113,25 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const strategy = searchParams.get('strategy') as RenderingStrategyType | null;
+    const projectId = searchParams.get('projectId') || 'default';
+    const saveHistory = searchParams.get('saveHistory') !== 'false'; // Save by default
 
     // If specific strategy requested, return only that strategy's metrics
     if (strategy && ['SSR', 'SSG', 'ISR', 'CACHE'].includes(strategy)) {
       const metrics = generateMockMetrics(strategy);
+      
+      // Save to historical data store (T115: Store performance snapshots)
+      if (saveHistory) {
+        await saveHistoricalData({
+          strategy,
+          projectId,
+          metrics,
+          metadata: {
+            environment: process.env.NODE_ENV as 'development' | 'production',
+          },
+        });
+      }
+      
       return NextResponse.json({
         strategy,
         metrics,
@@ -124,28 +140,31 @@ export async function GET(request: Request) {
     }
 
     // Otherwise, return metrics for all strategies
-    const allMetrics: StrategyMetrics[] = [
-      {
-        strategy: 'SSR',
-        metrics: generateMockMetrics('SSR'),
-        timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'SSG',
-        metrics: generateMockMetrics('SSG'),
-        timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'ISR',
-        metrics: generateMockMetrics('ISR'),
-        timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'CACHE',
-        metrics: generateMockMetrics('CACHE'),
-        timestamp: new Date().toISOString(),
-      },
-    ];
+    const strategies: RenderingStrategyType[] = ['SSR', 'SSG', 'ISR', 'CACHE'];
+    const timestamp = new Date().toISOString();
+    
+    // Generate metrics for all strategies
+    const allMetrics: StrategyMetrics[] = strategies.map(strat => ({
+      strategy: strat,
+      metrics: generateMockMetrics(strat),
+      timestamp,
+    }));
+
+    // Save to historical data store in parallel (T115: Store performance snapshots)
+    if (saveHistory) {
+      await Promise.all(
+        allMetrics.map(({ strategy, metrics }) =>
+          saveHistoricalData({
+            strategy,
+            projectId,
+            metrics,
+            metadata: {
+              environment: process.env.NODE_ENV as 'development' | 'production',
+            },
+          })
+        )
+      );
+    }
 
     return NextResponse.json(allMetrics);
   } catch (error) {

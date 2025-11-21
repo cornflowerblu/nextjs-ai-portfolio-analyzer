@@ -111,6 +111,14 @@ export function formatMetricValue(
 }
 
 /**
+ * Generic metric formatter for use with string keys
+ */
+export function formatMetric(value: number, metricKey: string): string {
+  // Delegate to formatMetricValue for consistent formatting
+  return formatMetricValue(metricKey as keyof CoreWebVitals, value);
+}
+
+/**
  * Format relative time (e.g., "2 minutes ago")
  */
 export function formatRelativeTime(timestamp: number | string | Date): string {
