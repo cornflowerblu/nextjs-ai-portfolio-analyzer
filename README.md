@@ -1,16 +1,30 @@
-# Next.js Rendering Strategy Analyzer
+# Next.js Rendering Strategy Analyzer ⚡
 
 An interactive web application that demonstrates and analyzes Next.js 16 rendering strategies (SSR, SSG, ISR, and Cache Components) with real-time Core Web Vitals metrics, AI-powered optimization insights, and Lighthouse-based website analysis.
 
+![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat-square&logo=tailwind-css)
+
 ## 🎯 What This App Does
 
-- **Compare Rendering Strategies**: Side-by-side dashboard showing SSR, SSG, ISR, and Cache Components with live Core Web Vitals metrics (FCP, LCP, CLS, INP, TTFB)
-- **Interactive Lab Demos**: Hands-on demos of each rendering strategy with real-time metrics, cache status indicators, and source code viewers
-- **URL Analysis**: Run Lighthouse tests on any website and get rendering strategy recommendations with projected performance improvements
-- **AI Optimization Insights**: Streaming AI assistant that analyzes performance data and provides actionable optimization suggestions
-- **Vercel Platform Showcase**: Live demos of Edge Functions vs Serverless, KV caching latency, Edge Config, and geographic latency testing
-- **Historical Trends**: Track Core Web Vitals evolution over time with regression detection and multi-project support
-- **Export Reports**: Generate PDF reports, Markdown implementation guides, and JSON optimization checklists
+- **📊 Compare Rendering Strategies**: Side-by-side dashboard showing SSR, SSG, ISR, and Cache Components with live Core Web Vitals metrics (FCP, LCP, CLS, INP, TTFB)
+- **🧪 Interactive Lab Demos**: Hands-on demos of each rendering strategy with real-time metrics, cache status indicators, and source code viewers
+- **🔍 URL Analysis**: Run Lighthouse tests on any website and get rendering strategy recommendations with projected performance improvements
+- **🤖 AI Optimization Insights**: Streaming AI assistant that analyzes performance data and provides actionable optimization suggestions
+- **🌍 Vercel Platform Showcase**: Live demos of Edge Functions vs Serverless, KV caching latency, Edge Config, and geographic latency testing
+- **📈 Historical Trends**: Track Core Web Vitals evolution over time with regression detection and multi-project support
+- **📄 Export Reports**: Generate PDF reports, Markdown implementation guides, and JSON optimization checklists
+
+## ✨ Key Features
+
+- ✅ **Responsive Design**: Optimized for mobile, tablet, and desktop
+- ✅ **Accessibility**: ARIA labels, keyboard navigation, and focus management
+- ✅ **Performance Monitoring**: Real-time Web Vitals tracking with instrumentation
+- ✅ **Error Handling**: Graceful error pages and user-friendly error messages
+- ✅ **Loading States**: Skeleton loaders for async content
+- ✅ **Dynamic Imports**: Code splitting for optimal bundle size (< 200KB initial load)
 
 ## 🏗️ Tech Stack
 
