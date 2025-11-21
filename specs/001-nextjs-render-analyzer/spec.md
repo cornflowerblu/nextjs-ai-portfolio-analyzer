@@ -3,7 +3,7 @@
 **Feature Branch**: `001-nextjs-render-analyzer`  
 **Created**: November 18, 2025  
 **Status**: Draft  
-**Input**: User description: "Build a web application that analyzes and compares Next.js rendering strategies with real-time performance metrics. The main dashboard displays side-by-side comparisons of SSR, SSG, ISR, and Cache Components rendering approaches, showing Core Web Vitals (FCP, LCP, CLS, INP, TTFB) for each strategy. The application has a lab section where developers can interact with live demos of each rendering strategy, seeing exactly how they work with visible metrics, render times, and cache status. Each demo shows its source code and allows triggering re-renders to observe performance differences. Users can test any website URL to see how it would perform with different rendering strategies, getting Lighthouse scores and migration recommendations. The system uses AI to analyze performance data and provide streaming, actionable insights about optimization opportunities. A parallel routes architecture loads metrics, comparisons, and AI insights independently without blocking each other. Performance data is stored historically to show trends over time. The AI assistant can explain why certain strategies perform better for specific use cases and suggest optimizations based on the actual metrics. The application showcases Vercel platform features including Edge Functions vs Serverless performance, KV caching with latency measurements, Edge Config for feature flags, and geographic latency testing. All metrics are visualized with interactive charts that update in real-time as new data comes in. Users can export performance reports, implementation guides, and optimization checklists. The entire experience demonstrates why Next.js 16's Cache Components and Vercel's platform provide superior performance compared to traditional approaches."
+**Input**: User description: "Build a web application that analyzes and compares Next.js rendering strategies with real-time performance metrics. The main dashboard displays side-by-side comparisons of SSR, SSG, ISR, and Cache Components rendering approaches, showing Core Web Vitals (FCP, LCP, CLS, INP, TTFB) for each strategy. The application has a lab section where developers can interact with live demos of each rendering strategy, seeing exactly how they work with visible metrics, render times, and cache status. Each demo shows its source code and allows triggering re-renders to observe performance differences. Users can test any website URL to see how it would perform with different rendering strategies, getting Lighthouse scores and migration recommendations. The system uses AI to analyze performance data and provide streaming, actionable insights about optimization opportunities. A parallel routes architecture loads metrics, comparisons, and AI insights independently without blocking each other. Performance data is stored historically to show trends over time. The AI assistant can explain why certain strategies perform better for specific use cases and suggest optimizations based on the actual metrics. The application showcases Vercel platform features including Edge Functions vs Serverless performance, KV caching with latency measurements, Edge Config for feature flags, and geographic latency testing. All metrics are visualized with interactive charts that update in real-time as new data comes in. The entire experience demonstrates why Next.js 16's Cache Components and Vercel's platform provide superior performance compared to traditional approaches."
 
 ## User Scenarios & Testing _(mandatory)_
 
@@ -106,23 +106,6 @@ A developer wants to track how their site's performance changes over time. The s
 2. **Given** trend charts are displayed, **When** hovering over data points, **Then** exact metric values and timestamps are shown
 3. **Given** historical data spans weeks or months, **When** analyzing trends, **Then** significant changes or regressions are highlighted with annotations
 4. **Given** multiple projects are tracked, **When** comparing historical data, **Then** the developer can switch between projects to see different performance trajectories
-
----
-
-### User Story 7 - Export Performance Reports and Guides (Priority: P7)
-
-A developer wants to share findings with their team or save insights for future reference. They can export performance reports with all metrics and charts, implementation guides showing how to adopt recommended rendering strategies, and optimization checklists with concrete action items. Exports are available in multiple formats suitable for documentation and presentations.
-
-**Why this priority**: Export functionality is convenient for collaboration but not essential for the core analysis experience. Users can screenshot or manually document findings if needed.
-
-**Independent Test**: Can be fully tested by clicking export buttons and verifying that generated files contain complete performance data, visual charts, and actionable recommendations.
-
-**Acceptance Scenarios**:
-
-1. **Given** performance analysis is complete, **When** a developer clicks "Export Report", **Then** a comprehensive document is generated containing all metrics, charts, and comparisons
-2. **Given** a rendering strategy is recommended, **When** exporting an implementation guide, **Then** step-by-step instructions with code examples are provided for adopting that strategy
-3. **Given** optimization suggestions are available, **When** exporting a checklist, **Then** a prioritized task list with specific action items is generated
-4. **Given** export options are presented, **When** selecting a format, **Then** the developer can choose between PDF (for presentations), Markdown (for documentation), or JSON (for programmatic access)
 
 ---
 

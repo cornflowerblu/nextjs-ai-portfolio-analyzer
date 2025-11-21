@@ -8,7 +8,7 @@
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (US1-US7)
+- **[Story]**: Which user story this task belongs to (US1-US6)
 - File paths follow structure defined in plan.md
 
 ---
@@ -232,35 +232,7 @@
 
 ---
 
-## Phase 9: User Story 7 - Export Performance Reports and Guides (Priority: P7)
-
-**Goal**: Export functionality for reports (PDF), implementation guides (Markdown), and optimization checklists (JSON)
-
-**Independent Test**: Click export buttons, verify generated files contain complete data, charts, and recommendations
-
-### Implementation for User Story 7
-
-- [ ] T123 [P] [US7] Create ExportButton component in components/export/export-button.tsx with format selection
-- [ ] T124 [P] [US7] Build FormatSelector component in components/export/format-selector.tsx for PDF/Markdown/JSON choice
-- [ ] T125 [P] [US7] Create ReportGenerator component in components/export/report-generator.tsx composing export content
-- [ ] T126 [P] [US7] Implement PDF generator in lib/export/pdf-generator.ts using library like jsPDF or Puppeteer
-- [ ] T127 [P] [US7] Create Markdown formatter in lib/export/markdown-formatter.ts converting data to Markdown syntax
-- [ ] T128 [P] [US7] Build JSON serializer in lib/export/json-serializer.ts with complete data structure
-- [ ] T129 [P] [US7] Create export types in types/export.ts defining format options and content structure
-- [ ] T130 [US7] Implement export API route in app/api/export/route.ts generating files on demand
-- [ ] T131 [US7] Add chart image export functionality for including visualizations in PDF/Markdown reports
-- [ ] T132 [US7] Generate implementation guides with step-by-step instructions and code examples per recommended strategy
-- [ ] T133 [US7] Create optimization checklists with prioritized action items based on AI insights and analysis
-- [ ] T134 [US7] Include all performance metrics, comparisons, and AI recommendations in comprehensive reports
-- [ ] T135 [US7] Add export buttons to dashboard, analyze page, and trends section
-- [ ] T136 [US7] Implement file download trigger with appropriate filename and content-type headers
-- [ ] T137 [US7] Test all three export formats generate complete, valid files with all expected content
-
-**Checkpoint**: Export functionality complete - users can share findings and implementation guides with teams
-
----
-
-## Phase 10: Polish & Cross-Cutting Concerns
+## Phase 9: Polish & Cross-Cutting Concerns
 
 **Purpose**: Final refinements, performance optimization, and production readiness
 
@@ -302,11 +274,9 @@ Phase 2 (Foundation) ← MUST complete before any user story
     │       ↓
     ├─→ Phase 7 (US5 - Platform) ← Independent from other stories
     │       ↓
-    ├─→ Phase 8 (US6 - Trends) ← Depends on US1 (metrics storage)
-    │       ↓
-    └─→ Phase 9 (US7 - Export) ← Depends on all previous stories for complete data
+    └─→ Phase 8 (US6 - Trends) ← Depends on US1 (metrics storage)
             ↓
-        Phase 10 (Polish)
+        Phase 9 (Polish)
 ```
 
 ## Parallel Execution Opportunities
@@ -344,11 +314,7 @@ Phase 2 (Foundation) ← MUST complete before any user story
 
 - T110, T111, T112 (different trend components)
 
-**Phase 9 (US7)**:
-
-- T123-T129 (all export-related components and utilities)
-
-**Phase 10 Polish**:
+**Phase 9 Polish**:
 
 - T138-T148 (most polish tasks are independent)
 
@@ -367,7 +333,7 @@ Phase 2 (Foundation) ← MUST complete before any user story
 1. **Week 1**: Setup + Foundation + US1 (MVP) → Deployable product
 2. **Week 2**: US2 (Lab) + US3 (Analysis) → Interactive learning
 3. **Week 3**: US4 (AI) + US5 (Platform) → Advanced features
-4. **Week 4**: US6 (Trends) + US7 (Export) + Polish → Complete product
+4. **Week 4**: US6 (Trends) + Polish → Complete product
 
 ### Testing Approach
 
@@ -375,7 +341,7 @@ Each phase includes its "Independent Test" criteria - complete that test before 
 
 ---
 
-**Total Tasks**: 155
+**Total Tasks**: 140
 
 - Setup: 10 tasks
 - Foundation: 13 tasks
@@ -385,9 +351,8 @@ Each phase includes its "Independent Test" criteria - complete that test before 
 - US4 (P4): 16 tasks
 - US5 (P5): 20 tasks
 - US6 (P6): 14 tasks
-- US7 (P7): 15 tasks
 - Polish: 18 tasks
 
-**Parallelizable Tasks**: 89 tasks marked with [P] (57% can run in parallel within their phase)
+**Parallelizable Tasks**: 80 tasks marked with [P] (57% can run in parallel within their phase)
 
 **MVP Scope**: Phase 1 (10) + Phase 2 (13) + Phase 3 (14) = 37 tasks to deliver core value
