@@ -98,6 +98,21 @@ describe('StrategyCard', () => {
 
       expect(mockOnClick).toHaveBeenCalledTimes(3);
     });
+
+    it('does not trigger card onClick when clicking demo link (stopPropagation)', async () => {
+      const user = userEvent.setup();
+      const strategy = RENDERING_STRATEGIES.SSR;
+
+      render(
+        <StrategyCard strategy={strategy} isActive={false} onClick={mockOnClick} />
+      );
+
+      const demoLink = screen.getByText('Try Live Demo');
+      await user.click(demoLink);
+
+      // The card's onClick should not be called because stopPropagation prevents event bubbling
+      expect(mockOnClick).not.toHaveBeenCalled();
+    });
   });
 
   describe('Active State', () => {
