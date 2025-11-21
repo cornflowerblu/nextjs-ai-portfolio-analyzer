@@ -53,7 +53,7 @@ export function CacheDemoClient({ cachedData, dynamicData, sourceCode }: CacheDe
   return (
     <div className="container mx-auto py-8 px-4">
       {/* Back Button */}
-      <Link href="/lab">
+      <Link href="/lab" className="cursor-pointer">
         <Button variant="ghost" className="mb-6">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Lab
