@@ -55,7 +55,6 @@ export default function DashboardPage() {
               key={strategy.id}
               strategy={strategy}
               isActive={false}
-              onClick={() => {}}
             />
           ))}
         </div>
