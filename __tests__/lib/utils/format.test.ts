@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   formatMs,
   formatMetricValue,
+  formatMetric,
   formatRelativeTime,
   formatPercent,
   formatBytes,
@@ -134,5 +135,65 @@ describe('formatDuration', () => {
 
   it('handles zero', () => {
     expect(formatDuration(0)).toBe('0ms');
+  });
+});
+
+describe('formatMetric', () => {
+  it('formats CLS with 3 decimal places', () => {
+    expect(formatMetric(0.1, 'cls')).toBe('0.100');
+    expect(formatMetric(0.05, 'cls')).toBe('0.050');
+    expect(formatMetric(0.001, 'cls')).toBe('0.001');
+    expect(formatMetric(0.25678, 'cls')).toBe('0.257');
+  });
+
+  it('formats FCP as seconds', () => {
+    expect(formatMetric(1200, 'fcp')).toBe('1.20s');
+    expect(formatMetric(500, 'fcp')).toBe('0.50s');
+    expect(formatMetric(2345, 'fcp')).toBe('2.35s');
+  });
+
+  it('formats LCP as seconds', () => {
+    expect(formatMetric(2500, 'lcp')).toBe('2.50s');
+    expect(formatMetric(1800, 'lcp')).toBe('1.80s');
+    expect(formatMetric(3456, 'lcp')).toBe('3.46s');
+  });
+
+  it('formats INP as rounded milliseconds', () => {
+    expect(formatMetric(200, 'inp')).toBe('200ms');
+    expect(formatMetric(150, 'inp')).toBe('150ms');
+    expect(formatMetric(123.456, 'inp')).toBe('123ms');
+    expect(formatMetric(199.8, 'inp')).toBe('200ms');
+  });
+
+  it('formats TTFB using formatMs', () => {
+    expect(formatMetric(800, 'ttfb')).toBe('800ms');
+    expect(formatMetric(600, 'ttfb')).toBe('600ms');
+    expect(formatMetric(1500, 'ttfb')).toBe('1.50s');
+    expect(formatMetric(50, 'ttfb')).toBe('50ms');
+  });
+
+  it('handles zero values', () => {
+    expect(formatMetric(0, 'cls')).toBe('0.000');
+    expect(formatMetric(0, 'fcp')).toBe('0.00s');
+    expect(formatMetric(0, 'lcp')).toBe('0.00s');
+    expect(formatMetric(0, 'inp')).toBe('0ms');
+    expect(formatMetric(0, 'ttfb')).toBe('0ms');
+  });
+
+  it('handles large values', () => {
+    expect(formatMetric(1.999, 'cls')).toBe('1.999');
+    expect(formatMetric(10000, 'fcp')).toBe('10.00s');
+    expect(formatMetric(15000, 'lcp')).toBe('15.00s');
+    expect(formatMetric(999, 'inp')).toBe('999ms');
+    expect(formatMetric(5000, 'ttfb')).toBe('5.00s');
+  });
+
+  it('handles unknown metric keys as default', () => {
+    expect(formatMetric(123.456, 'unknown')).toBe('123.456');
+    expect(formatMetric(100, 'custom')).toBe('100');
+  });
+
+  it('handles timestamp metric key', () => {
+    expect(formatMetric(1234567890, 'timestamp')).toBe('1234567890');
   });
 });
