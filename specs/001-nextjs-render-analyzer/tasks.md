@@ -89,24 +89,24 @@
 
 ### Implementation for User Story 2
 
-- [X] T038 [P] [US2] Create lab overview page in app/lab/page.tsx with navigation to all four demos
-- [X] T038.1 [US2] Add navigation functionality to dashboard StrategyCard components to link to corresponding lab demo pages (e.g., clicking SSR card navigates to /lab/ssr)
-- [X] T039 [P] [US2] Implement SSR demo page in app/lab/ssr/page.tsx with server-side rendering configuration
-- [X] T040 [P] [US2] Implement SSG demo page in app/lab/ssg/page.tsx with static generation using generateStaticParams
-- [X] T041 [P] [US2] Implement ISR demo page in app/lab/isr/page.tsx with revalidation configuration
-- [X] T042 [P] [US2] Implement Cache Components demo in app/lab/cache/page.tsx showcasing Next.js 16 cache directive
-- [X] T043 [P] [US2] Create DemoContainer component in components/lab/demo-container.tsx with controls and metrics overlay
-- [X] T044 [P] [US2] Build MetricsDisplay component in components/lab/metrics-display.tsx showing real-time render metrics
-- [X] T045 [P] [US2] Create CacheStatus component in components/lab/cache-status.tsx with hit/miss indicator and visual feedback
-- [X] T046 [P] [US2] Build SourceCodeViewer component in components/lab/source-code-viewer.tsx using Shiki for syntax highlighting
-- [X] T047 [P] [US2] Create ReRenderControls component in components/lab/re-render-controls.tsx with buttons to trigger refreshes
-- [X] T048 [US2] Implement demo data API route in app/api/demo/[strategy]/route.ts to capture render metrics per strategy
-- [X] T049 [US2] Add timestamp tracking to each demo to show when last rendered and cache age
-- [X] T050 [US2] Integrate web-vitals library in lab pages to capture actual FCP, LCP, CLS, INP, TTFB on re-render
-- [X] T051 [US2] Implement re-render logic with cache busting using query parameters or router refresh
-- [X] T052 [US2] Display source code for each demo's page.tsx implementation in SourceCodeViewer
-- [X] T053 [US2] Style lab section with side-by-side layout: demo content on left, metrics/code on right
-- [X] T054 [US2] Test all four demos can be triggered to re-render and show updated metrics within 1 second
+- [x] T038 [P] [US2] Create lab overview page in app/lab/page.tsx with navigation to all four demos
+- [x] T038.1 [US2] Add navigation functionality to dashboard StrategyCard components to link to corresponding lab demo pages (e.g., clicking SSR card navigates to /lab/ssr)
+- [x] T039 [P] [US2] Implement SSR demo page in app/lab/ssr/page.tsx with server-side rendering configuration
+- [x] T040 [P] [US2] Implement SSG demo page in app/lab/ssg/page.tsx with static generation using generateStaticParams
+- [x] T041 [P] [US2] Implement ISR demo page in app/lab/isr/page.tsx with revalidation configuration
+- [x] T042 [P] [US2] Implement Cache Components demo in app/lab/cache/page.tsx showcasing Next.js 16 cache directive
+- [x] T043 [P] [US2] Create DemoContainer component in components/lab/demo-container.tsx with controls and metrics overlay
+- [x] T044 [P] [US2] Build MetricsDisplay component in components/lab/metrics-display.tsx showing real-time render metrics
+- [x] T045 [P] [US2] Create CacheStatus component in components/lab/cache-status.tsx with hit/miss indicator and visual feedback
+- [x] T046 [P] [US2] Build SourceCodeViewer component in components/lab/source-code-viewer.tsx using Shiki for syntax highlighting
+- [x] T047 [P] [US2] Create ReRenderControls component in components/lab/re-render-controls.tsx with buttons to trigger refreshes
+- [x] T048 [US2] Implement demo data API route in app/api/demo/[strategy]/route.ts to capture render metrics per strategy
+- [x] T049 [US2] Add timestamp tracking to each demo to show when last rendered and cache age
+- [x] T050 [US2] Integrate web-vitals library in lab pages to capture actual FCP, LCP, CLS, INP, TTFB on re-render
+- [x] T051 [US2] Implement re-render logic with cache busting using query parameters or router refresh
+- [x] T052 [US2] Display source code for each demo's page.tsx implementation in SourceCodeViewer
+- [x] T053 [US2] Style lab section with side-by-side layout: demo content on left, metrics/code on right
+- [x] T054 [US2] Test all four demos can be triggered to re-render and show updated metrics within 1 second
 
 **Checkpoint**: Lab functional - users can interact with live demos and observe rendering strategy behavior
 
@@ -120,24 +120,24 @@
 
 ### Implementation for User Story 3
 
-- [ ] T055 [P] [US3] Create analyze page in app/analyze/page.tsx with URL input form and results display
-- [ ] T056 [P] [US3] Build UrlInputForm component in components/analyze/url-input-form.tsx with validation using Zod
-- [ ] T057 [P] [US3] Create LighthouseScores component in components/analyze/lighthouse-scores.tsx displaying 4 Lighthouse metrics
-- [ ] T058 [P] [US3] Build StrategyRecommendations component in components/analyze/strategy-recommendations.tsx with migration suggestions
-- [ ] T059 [P] [US3] Create PerformanceComparison component in components/analyze/performance-comparison.tsx showing before/after metrics
-- [ ] T060 [P] [US3] Setup Lighthouse integration in lib/lighthouse/runner.ts to execute tests programmatically
-- [ ] T061 [P] [US3] Implement Lighthouse result parser in lib/lighthouse/parser.ts to extract key metrics and scores
-- [ ] T062 [P] [US3] Build strategy simulator in lib/lighthouse/simulator.ts to estimate performance with different strategies
-- [ ] T063 [P] [US3] Create Lighthouse types in types/lighthouse.ts for scores, metrics, and recommendations
-- [ ] T064 [US3] Implement analyze API route in app/api/analyze/route.ts to run Lighthouse and return results
-- [ ] T065 [US3] Add URL validation in analyze API to check for valid HTTP(S) URLs and reject invalid protocols
-- [ ] T066 [US3] Implement Lighthouse result caching in KV with 1-hour TTL to avoid redundant tests
-- [ ] T067 [US3] Handle timeout errors in analyze API with 60-second limit and clear error messages
-- [ ] T068 [US3] Build recommendation engine that compares current Lighthouse score with simulated strategy scores
-- [ ] T069 [US3] Display expected performance gains (e.g., "LCP: 3.2s → 1.1s with SSG") in PerformanceComparison
-- [ ] T070 [US3] Add loading states with progress indicator while Lighthouse test is running
-- [ ] T071 [US3] Implement error handling for unreachable URLs with user-friendly messages
-- [ ] T072 [US3] Test complete URL analysis flow completes in under 60 seconds for typical websites
+- [x] T055 [P] [US3] Create analyze page in app/analyze/page.tsx with URL input form and results display
+- [x] T056 [P] [US3] Build UrlInputForm component in components/analyze/url-input-form.tsx with validation using Zod
+- [x] T057 [P] [US3] Create LighthouseScores component in components/analyze/lighthouse-scores.tsx displaying 4 Lighthouse metrics
+- [x] T058 [P] [US3] Build StrategyRecommendations component in components/analyze/strategy-recommendations.tsx with migration suggestions
+- [x] T059 [P] [US3] Create PerformanceComparison component in components/analyze/performance-comparison.tsx showing before/after metrics
+- [x] T060 [P] [US3] Setup Lighthouse integration in lib/lighthouse/runner.ts to execute tests programmatically (Note: Implemented using PageSpeed Insights API instead of local Lighthouse for better serverless compatibility)
+- [x] T061 [P] [US3] Implement Lighthouse result parser in lib/lighthouse/parser.ts to extract key metrics and scores
+- [x] T062 [P] [US3] Build strategy simulator in lib/lighthouse/simulator.ts to estimate performance with different strategies
+- [x] T063 [P] [US3] Create Lighthouse types in types/lighthouse.ts for scores, metrics, and recommendations
+- [x] T064 [US3] Implement analyze API route in app/api/analyze/route.ts to run Lighthouse and return results
+- [x] T065 [US3] Add URL validation in analyze API to check for valid HTTP(S) URLs and reject invalid protocols
+- [x] T066 [US3] Implement Lighthouse result caching in KV with 1-hour TTL to avoid redundant tests
+- [x] T067 [US3] Handle timeout errors in analyze API with 60-second limit and clear error messages
+- [x] T068 [US3] Build recommendation engine that compares current Lighthouse score with simulated strategy scores
+- [x] T069 [US3] Display expected performance gains (e.g., "LCP: 3.2s → 1.1s with SSG") in PerformanceComparison
+- [x] T070 [US3] Add loading states with progress indicator while Lighthouse test is running
+- [x] T071 [US3] Implement error handling for unreachable URLs with user-friendly messages
+- [x] T072 [US3] Test complete URL analysis flow completes in under 60 seconds for typical websites
 
 **Checkpoint**: URL analysis functional - users can analyze existing websites and get strategy recommendations
 
@@ -151,22 +151,22 @@
 
 ### Implementation for User Story 4
 
-- [ ] T073 [P] [US4] Setup AI provider client in lib/ai/client.ts using Vercel AI SDK with OpenAI or Anthropic
-- [ ] T074 [P] [US4] Create prompt templates in lib/ai/prompts.ts for performance analysis and optimization suggestions
-- [ ] T075 [P] [US4] Implement streaming handler in lib/ai/streaming.ts to process AI responses incrementally
-- [ ] T076 [P] [US4] Create AI response types in types/ai.ts for insights, suggestions, and chat messages
-- [ ] T077 [P] [US4] Build InsightsPanel component in components/ai/insights-panel.tsx as container for AI content
-- [ ] T078 [P] [US4] Create StreamingResponse component in components/ai/streaming-response.tsx showing real-time AI text
-- [ ] T079 [P] [US4] Build ChatInterface component in components/ai/chat-interface.tsx for follow-up questions
-- [ ] T080 [P] [US4] Create OptimizationCard component in components/ai/optimization-card.tsx for individual suggestions
-- [ ] T081 [US4] Implement insights API route in app/api/insights/route.ts with streaming SSE response
-- [ ] T082 [US4] Pass performance metrics as context to AI prompt including Core Web Vitals and strategy comparisons
-- [ ] T083 [US4] Format AI responses to include specific metric references and concrete action items
-- [ ] T084 [US4] Implement follow-up question handling with context preservation from previous messages
-- [ ] T085 [US4] Add retry mechanism for AI streaming interruptions with exponential backoff
-- [ ] T086 [US4] Update dashboard @insights parallel route to use InsightsPanel with real AI integration
-- [ ] T087 [US4] Style AI insights with distinct visual treatment and streaming indicator animation
-- [ ] T088 [US4] Test AI insights begin streaming within 3 seconds and provide actionable recommendations
+- [x] T073 [P] [US4] Setup AI provider client in lib/ai/client.ts using Vercel AI SDK with OpenAI or Anthropic
+- [x] T074 [P] [US4] Create prompt templates in lib/ai/prompts.ts for performance analysis and optimization suggestions
+- [x] T075 [P] [US4] Implement streaming handler in lib/ai/streaming.ts to process AI responses incrementally
+- [x] T076 [P] [US4] Create AI response types in types/ai.ts for insights, suggestions, and chat messages
+- [x] T077 [P] [US4] Build InsightsPanel component in components/ai/insights-panel.tsx as container for AI content
+- [x] T078 [P] [US4] Create StreamingResponse component in components/ai/streaming-response.tsx showing real-time AI text
+- [x] T079 [P] [US4] Build ChatInterface component in components/ai/chat-interface.tsx for follow-up questions
+- [x] T080 [P] [US4] Create OptimizationCard component in components/ai/optimization-card.tsx for individual suggestions
+- [x] T081 [US4] Implement insights API route in app/api/insights/route.ts with streaming SSE response
+- [x] T082 [US4] Pass performance metrics as context to AI prompt including Core Web Vitals and strategy comparisons
+- [x] T083 [US4] Format AI responses to include specific metric references and concrete action items
+- [x] T084 [US4] Implement follow-up question handling with context preservation from previous messages
+- [x] T085 [US4] Add retry mechanism for AI streaming interruptions with exponential backoff
+- [x] T086 [US4] Update dashboard @insights parallel route to use InsightsPanel with real AI integration
+- [x] T087 [US4] Style AI insights with distinct visual treatment and streaming indicator animation
+- [x] T088 [US4] Test AI insights begin streaming within 3 seconds and provide actionable recommendations
 
 **Checkpoint**: AI assistant functional - users receive streaming optimization insights based on performance data
 
