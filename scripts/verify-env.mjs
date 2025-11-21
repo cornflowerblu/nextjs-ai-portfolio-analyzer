@@ -8,31 +8,38 @@ import { execSync } from 'node:child_process';
  */
 
 function check(name, range) {
+  let result;
   try {
-    const installed = execSync(`npm ls ${name} --json`, {
+    result = execSync(`npm ls ${name} --json 2>/dev/null || true`, {
       encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
     });
-    const parsed = JSON.parse(installed);
-    const version =
-      parsed.dependencies?.[name]?.version ||
-      parsed.devDependencies?.[name]?.version;
-    
-    if (!version) {
-      console.error(`❌ Missing ${name}`);
-      process.exit(1);
-    }
-    
-    if (!semver.satisfies(version, range)) {
-      console.error(`❌ Version mismatch: ${name}@${version} not in ${range}`);
-      process.exit(1);
-    }
-    
-    console.log(`✅ ${name}@${version} (expected ${range})`);
-  } catch (error) {
-    console.error(`❌ Failed to check ${name}: ${error.message}`);
+  } catch (execError) {
+    // This should not happen, but if it does, report and exit.
+    console.error(`❌ Failed to run npm ls for ${name}: ${execError.message}`);
     process.exit(1);
   }
+  let parsed;
+  try {
+    parsed = JSON.parse(result || '{}');
+  } catch (parseError) {
+    console.error(`❌ Failed to parse package info for ${name}`);
+    process.exit(1);
+  }
+  const version =
+    parsed.dependencies?.[name]?.version ||
+    parsed.devDependencies?.[name]?.version;
+  
+  if (!version) {
+    console.error(`❌ Missing ${name}`);
+    process.exit(1);
+  }
+  
+  if (!semver.satisfies(version, range)) {
+    console.error(`❌ Version mismatch: ${name}@${version} not in ${range}`);
+    process.exit(1);
+  }
+  
+  console.log(`✅ ${name}@${version} (expected ${range})`);
 }
 
 console.log('🔍 Verifying environment...\n');
