@@ -7,10 +7,10 @@ import { test, expect } from '@playwright/test';
 
 const pages = [
   { path: '/', selector: 'text=Understand Next.js Rendering Strategies' },
-  { path: '/dashboard', selector: 'text=SSR' },
+  { path: '/dashboard', selector: 'h1:has-text("Performance Dashboard")' },
   { path: '/lab', selector: 'text=Rendering Strategy Lab' },
   { path: '/analyze', selector: 'text=Website Performance Analyzer' },
-  { path: '/platform', selector: 'text=Platform Features' },
+  { path: '/platform', selector: 'h1:has-text("Vercel Platform Features")' },
   { path: '/trends', selector: 'text=Performance Trends' },
 ];
 
