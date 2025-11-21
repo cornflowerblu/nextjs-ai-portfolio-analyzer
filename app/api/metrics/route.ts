@@ -6,6 +6,7 @@
 import { NextResponse } from 'next/server';
 import { CoreWebVitals, CORE_WEB_VITALS_THRESHOLDS, getRating } from '@/types/performance';
 import { RenderingStrategyType } from '@/types/strategy';
+import { saveHistoricalData } from '@/lib/storage/historical';
 
 interface StrategyMetrics {
   strategy: RenderingStrategyType;
@@ -112,10 +113,25 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const strategy = searchParams.get('strategy') as RenderingStrategyType | null;
+    const projectId = searchParams.get('projectId') || 'default';
+    const saveHistory = searchParams.get('saveHistory') !== 'false'; // Save by default
 
     // If specific strategy requested, return only that strategy's metrics
     if (strategy && ['SSR', 'SSG', 'ISR', 'CACHE'].includes(strategy)) {
       const metrics = generateMockMetrics(strategy);
+      
+      // Save to historical data store (T115: Store performance snapshots)
+      if (saveHistory) {
+        await saveHistoricalData({
+          strategy,
+          projectId,
+          metrics,
+          metadata: {
+            environment: process.env.NODE_ENV as 'development' | 'production',
+          },
+        });
+      }
+      
       return NextResponse.json({
         strategy,
         metrics,
@@ -124,28 +140,30 @@ export async function GET(request: Request) {
     }
 
     // Otherwise, return metrics for all strategies
-    const allMetrics: StrategyMetrics[] = [
-      {
-        strategy: 'SSR',
-        metrics: generateMockMetrics('SSR'),
+    const strategies: RenderingStrategyType[] = ['SSR', 'SSG', 'ISR', 'CACHE'];
+    const allMetrics: StrategyMetrics[] = [];
+
+    for (const strat of strategies) {
+      const metrics = generateMockMetrics(strat);
+      
+      // Save to historical data store (T115: Store performance snapshots)
+      if (saveHistory) {
+        await saveHistoricalData({
+          strategy: strat,
+          projectId,
+          metrics,
+          metadata: {
+            environment: process.env.NODE_ENV as 'development' | 'production',
+          },
+        });
+      }
+
+      allMetrics.push({
+        strategy: strat,
+        metrics,
         timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'SSG',
-        metrics: generateMockMetrics('SSG'),
-        timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'ISR',
-        metrics: generateMockMetrics('ISR'),
-        timestamp: new Date().toISOString(),
-      },
-      {
-        strategy: 'CACHE',
-        metrics: generateMockMetrics('CACHE'),
-        timestamp: new Date().toISOString(),
-      },
-    ];
+      });
+    }
 
     return NextResponse.json(allMetrics);
   } catch (error) {
