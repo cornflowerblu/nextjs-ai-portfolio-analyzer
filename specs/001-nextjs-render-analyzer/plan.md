@@ -7,36 +7,43 @@
 ## Tech Stack
 
 ### Frontend Framework
+
 - **Next.js 16**: Latest version with Cache Components support
 - **React 19**: For UI components and client-side interactivity
 - **TypeScript**: Type safety throughout the application
 
 ### Styling & UI
+
 - **Tailwind CSS**: Utility-first styling
 - **shadcn/ui**: Component library for consistent UI patterns
 - **Recharts**: Interactive charts for performance visualizations
 - **Framer Motion**: Smooth animations and transitions
 
 ### Data & State Management
+
 - **React Server Components**: Default for static/server content
 - **Vercel KV (Redis)**: Caching and historical data storage
 - **Vercel Edge Config**: Feature flags and configuration
 - **Zustand** (optional): Client-side state management if needed
 
 ### Performance & Monitoring
+
 - **web-vitals**: Browser-side Core Web Vitals measurement
 - **Lighthouse CI**: Server-side URL analysis
 - **Next.js instrumentation**: Performance monitoring
 
 ### AI Integration
+
 - **Vercel AI SDK**: Streaming AI responses
 - **OpenAI API**: GPT-4 for optimization insights (or Anthropic Claude)
 
 ### Code Display
+
 - **Shiki**: Syntax highlighting for demo source code
 - **React Syntax Highlighter**: Alternative for dynamic highlighting
 
 ### Deployment Platform
+
 - **Vercel**: Required for Edge Functions, KV, Edge Config, and geographic distribution
 
 ## Project Structure
@@ -83,7 +90,6 @@ ai-portfolio-analyzer/
 │   │   ├── metrics/route.ts                # Performance metrics endpoint
 │   │   ├── demo/[strategy]/route.ts        # Lab demo data endpoints
 │   │   ├── platform/[feature]/route.ts     # Platform feature measurements
-│   │   ├── export/route.ts                 # Report export endpoint
 │   │   └── historical/route.ts             # Historical data endpoint
 │   │
 │   └── edge/                               # Edge Functions
@@ -128,15 +134,10 @@ ai-portfolio-analyzer/
 │   │   ├── feature-flag-toggle.tsx         # Edge Config demo
 │   │   └── geo-map.tsx                     # Geographic latency map
 │   │
-│   ├── trends/                             # Historical trends components
-│   │   ├── trend-chart.tsx                 # Time-series visualization
-│   │   ├── regression-indicator.tsx        # Performance regression alerts
-│   │   └── project-selector.tsx            # Multi-project switching
-│   │
-│   └── export/                             # Export functionality
-│       ├── export-button.tsx               # Export trigger
-│       ├── format-selector.tsx             # PDF/Markdown/JSON selection
-│       └── report-generator.tsx            # Report composition
+│   └── trends/                             # Historical trends components
+│       ├── trend-chart.tsx                 # Time-series visualization
+│       ├── regression-indicator.tsx        # Performance regression alerts
+│       └── project-selector.tsx            # Multi-project switching
 │
 ├── lib/                                    # Utility libraries
 │   ├── performance/                        # Performance measurement
@@ -164,11 +165,6 @@ ai-portfolio-analyzer/
 │   │   ├── geo-test.ts                     # Geographic latency testing
 │   │   └── function-timer.ts               # Function execution timing
 │   │
-│   ├── export/                             # Export functionality
-│   │   ├── pdf-generator.ts                # PDF report generation
-│   │   ├── markdown-formatter.ts           # Markdown export
-│   │   └── json-serializer.ts              # JSON data export
-│   │
 │   └── utils/                              # General utilities
 │       ├── format.ts                       # Data formatting
 │       ├── colors.ts                       # Chart color schemes
@@ -178,8 +174,7 @@ ai-portfolio-analyzer/
 │   ├── performance.ts                      # Performance metric types
 │   ├── strategy.ts                         # Rendering strategy types
 │   ├── lighthouse.ts                       # Lighthouse result types
-│   ├── ai.ts                               # AI response types
-│   └── export.ts                           # Export format types
+│   └── ai.ts                               # AI response types
 │
 ├── public/                                 # Static assets
 │   └── examples/                           # Example data for demos
@@ -204,6 +199,7 @@ ai-portfolio-analyzer/
 ### Parallel Routes Architecture
 
 The dashboard uses Next.js parallel routes (`@metrics`, `@comparison`, `@insights`) to:
+
 - Load sections independently without blocking
 - Enable selective refreshing of UI sections
 - Improve perceived performance through progressive loading
@@ -241,21 +237,25 @@ The dashboard uses Next.js parallel routes (`@metrics`, `@comparison`, `@insight
 ## Key Design Patterns
 
 ### Progressive Enhancement
+
 - Core functionality works without JavaScript
 - Enhanced interactivity with client-side hydration
 - Graceful degradation for unsupported browsers
 
 ### Component Composition
+
 - Server Components by default for better performance
 - Client Components only where interactivity is needed
 - Clear "use client" boundaries
 
 ### Error Boundaries
+
 - Parallel route failures don't crash entire dashboard
 - Friendly error messages with retry actions
 - Fallback content for failed loads
 
 ### Performance First
+
 - Minimize client-side JavaScript bundles
 - Use dynamic imports for code splitting
 - Optimize images and assets
@@ -278,7 +278,6 @@ LIGHTHOUSE_SERVER_URL=...            # If self-hosting
 # Feature Flags
 ENABLE_AI_INSIGHTS=true
 ENABLE_HISTORICAL_TRENDS=true
-ENABLE_EXPORT_FEATURES=true
 ```
 
 ## Dependencies (package.json highlights)
@@ -318,52 +317,59 @@ ENABLE_EXPORT_FEATURES=true
 ## Implementation Strategy
 
 ### Phase 1: Foundation (Setup & Infrastructure)
+
 - Initialize Next.js 16 project
 - Setup Tailwind CSS and shadcn/ui
 - Configure TypeScript and ESLint
 - Setup Vercel KV and Edge Config
 
 ### Phase 2: Core Dashboard (P1 - User Story 1)
+
 - Implement parallel routes architecture
 - Create strategy comparison cards
 - Implement Core Web Vitals measurement
 - Build real-time metrics display
 
 ### Phase 3: Interactive Lab (P2 - User Story 2)
+
 - Create lab section with demo pages
 - Implement re-render controls
 - Add cache status indicators
 - Build source code viewer
 
 ### Phase 4: URL Analysis (P3 - User Story 3)
+
 - Integrate Lighthouse CI
 - Build URL input form
 - Implement strategy simulation
 - Create recommendations engine
 
 ### Phase 5: AI Insights (P4 - User Story 4)
+
 - Setup AI provider integration
 - Implement streaming responses
 - Build chat interface
 - Create optimization suggestions
 
 ### Phase 6: Platform Features (P5 - User Story 5)
+
 - Implement Edge vs Serverless comparison
 - Build KV caching demo
 - Create Edge Config demonstration
 - Implement geo-latency testing
 
 ### Phase 7: Historical Trends (P6 - User Story 6)
+
 - Setup historical data storage
 - Build trend visualization
 - Implement regression detection
 - Add multi-project support
 
-### Phase 8: Export & Polish (P7 - User Story 7)
-- Implement PDF generation
-- Add Markdown export
-- Create JSON serialization
+### Phase 8: Polish & Testing
+
 - Final polish and testing
+- Performance optimization
+- Cross-browser testing
 
 ## Testing Strategy
 
@@ -376,6 +382,7 @@ ENABLE_EXPORT_FEATURES=true
 ## MVP Definition
 
 **Minimum Viable Product = User Story 1 (P1)**
+
 - Dashboard with four rendering strategy comparisons
 - Core Web Vitals display for each strategy
 - Real-time metric updates
