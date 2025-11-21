@@ -8,6 +8,7 @@
 'use client';
 
 import useSWR from 'swr';
+  import { SiteHeader } from '@/components/site-header';
 import { StrategyCard } from '@/components/dashboard/strategy-card';
 import { RealTimeIndicator } from '@/components/dashboard/real-time-indicator';
 import { RENDERING_STRATEGIES } from '@/types/strategy';
@@ -30,9 +31,11 @@ export default function DashboardPage() {
   const isUpdating = isLoading && !!metricsData; // Loading but have cached data
 
   return (
-    <>
-      {/* Header */}
-      <header className="space-y-2">
+    <div>
+      <SiteHeader />
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <header className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">
@@ -55,11 +58,11 @@ export default function DashboardPage() {
               key={strategy.id}
               strategy={strategy}
               isActive={false}
-              onClick={() => {}}
             />
           ))}
         </div>
       </section>
-    </>
+      </div>
+    </div>
   );
 }
