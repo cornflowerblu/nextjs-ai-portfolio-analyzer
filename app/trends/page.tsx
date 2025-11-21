@@ -114,8 +114,9 @@ export default function TrendsPage() {
           for (const metric of METRICS) {
             const points: TrendDataPoint[] = [];
 
+            // Granularity is set when aggregation is requested (hour/day/week/month)
             if (granularity !== null) {
-              // Aggregated data
+              // Aggregated data with statistical values (avg, min, max)
               data.data.forEach((agg: AggregatedMetrics) => {
                 points.push({
                   timestamp: agg.timestamp,

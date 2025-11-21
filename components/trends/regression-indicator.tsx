@@ -114,7 +114,7 @@ export function RegressionIndicator({
                         <span className="font-medium text-sm">
                           {METRIC_LABELS[reg.metric] || reg.metric.toUpperCase()}
                         </span>
-                        <Badge variant={severity === 'destructive' || severity === 'default' || severity === 'secondary' || severity === 'outline' ? severity : 'default'}>
+                        <Badge variant={['destructive', 'default', 'secondary', 'outline'].includes(severity) ? severity as 'destructive' | 'default' | 'secondary' | 'outline' : 'default'}>
                           +{(reg.change * 100).toFixed(1)}%
                         </Badge>
                       </div>

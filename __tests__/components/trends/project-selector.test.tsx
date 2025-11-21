@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ProjectSelector, type Project } from '@/components/trends/project-selector';
 
 describe('ProjectSelector', () => {
@@ -39,7 +39,7 @@ describe('ProjectSelector', () => {
 
   it('displays selected project name', () => {
     const onSelect = vi.fn();
-    const { container } = render(
+    render(
       <ProjectSelector
         projects={mockProjects}
         selectedProjectId="project-1"
@@ -54,7 +54,7 @@ describe('ProjectSelector', () => {
 
   it('displays metrics count badge', () => {
     const onSelect = vi.fn();
-    const { container } = render(
+    render(
       <ProjectSelector
         projects={mockProjects}
         selectedProjectId="project-1"
