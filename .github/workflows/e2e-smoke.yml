@@ -42,9 +42,23 @@ jobs:
       - name: Run smoke tests
         run: |
           npm run start &
-          sleep 5
+          SERVER_PID=$!
+          # Wait for server to be ready
+          for i in {1..30}; do
+            if curl -sf http://localhost:3000 >/dev/null 2>&1; then
+              echo "Server is ready"
+              break
+            fi
+            if ! kill -0 $SERVER_PID 2>/dev/null; then
+              echo "Server process died"
+              exit 1
+            fi
+            sleep 1
+          done
           npm run e2e
-
+          EXIT_CODE=$?
+          kill $SERVER_PID || true
+          exit $EXIT_CODE
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
