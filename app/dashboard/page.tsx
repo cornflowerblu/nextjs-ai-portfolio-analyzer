@@ -33,26 +33,28 @@ export default function DashboardPage() {
   return (
     <div>
       <SiteHeader />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header */}
-        <header className="mb-8">
-        <div className="flex items-center justify-between">
+        <header className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               Performance Dashboard
             </h1>
-            <p className="text-lg text-muted-foreground mt-2">
+            <p className="text-base sm:text-lg text-muted-foreground mt-2">
               Real-time Core Web Vitals comparison across SSR, SSG, ISR, and Cache Components
             </p>
           </div>
-          <RealTimeIndicator lastUpdate={lastUpdate} isUpdating={isUpdating} />
+          <div className="sm:shrink-0">
+            <RealTimeIndicator lastUpdate={lastUpdate} isUpdating={isUpdating} />
+          </div>
         </div>
       </header>
 
       {/* Strategy Cards Grid */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Rendering Strategies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">Rendering Strategies</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Object.values(RENDERING_STRATEGIES).map((strategy) => (
             <StrategyCard
               key={strategy.id}
