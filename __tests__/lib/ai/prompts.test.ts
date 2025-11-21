@@ -162,5 +162,49 @@ Summary: Consider these optimizations:
       expect(highImpact).toBeTruthy();
       expect(lowImpact).toBeTruthy();
     });
+
+    it('should concatenate multi-line suggestion descriptions', () => {
+      const text = `
+Performance analysis summary goes here.
+
+1. Optimize images to reduce LCP
+This will improve loading times significantly.
+Consider using next/image for automatic optimization.
+Expected improvement: 500ms reduction in LCP.
+
+2. Use SSG for static pages
+This provides the best performance for content that doesn't change frequently.
+      `;
+      const result = parseOptimizationSuggestions(text);
+      
+      expect(result.suggestions.length).toBe(2);
+      
+      const firstSuggestion = result.suggestions[0];
+      expect(firstSuggestion.title).toContain('Optimize images');
+      expect(firstSuggestion.description).toContain('improve loading times');
+      expect(firstSuggestion.description).toContain('next/image');
+      expect(firstSuggestion.description).toContain('500ms reduction');
+      
+      const secondSuggestion = result.suggestions[1];
+      expect(secondSuggestion.title).toContain('Use SSG');
+      expect(secondSuggestion.description).toContain('best performance');
+      expect(secondSuggestion.description).toContain('doesn\'t change frequently');
+    });
+
+    it('should handle empty description lines correctly', () => {
+      const text = `
+1. Optimize performance
+
+Additional details here.
+More information.
+      `;
+      const result = parseOptimizationSuggestions(text);
+      
+      expect(result.suggestions.length).toBe(1);
+      expect(result.suggestions[0].description).toContain('Additional details');
+      expect(result.suggestions[0].description).toContain('More information');
+      // Should have spaces between concatenated lines
+      expect(result.suggestions[0].description).toMatch(/details.*More/);
+    });
   });
 });
