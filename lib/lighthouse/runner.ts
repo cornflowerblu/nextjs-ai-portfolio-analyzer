@@ -17,6 +17,12 @@ export interface RawLighthouseResult {
   fullReport: unknown;
 }
 
+/**
+ * Default Lighthouse options
+ * - timeout: 60 seconds max for analysis
+ * - formFactor: Mobile viewport (375x667, 2x scale)
+ * - throttling: Simulated slow 4G (150ms RTT, 1.6Mbps throughput, 4x CPU slowdown)
+ */
 const DEFAULT_OPTIONS: LighthouseRunnerOptions = {
   timeout: 60000, // 60 seconds
   formFactor: 'mobile',

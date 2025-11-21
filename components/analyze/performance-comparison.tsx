@@ -6,6 +6,7 @@
  */
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatMetricDisplay } from '@/lib/lighthouse/parser';
 import type { LighthouseMetrics, RenderingStrategy, CoreWebVitalsMetrics } from '@/types/lighthouse';
 
 interface PerformanceComparisonProps {
@@ -16,17 +17,9 @@ interface PerformanceComparisonProps {
 interface MetricComparison {
   name: string;
   key: keyof CoreWebVitalsMetrics;
-  unit: string;
   current: number;
   projected: number;
   improvement: number;
-}
-
-function formatMetricValue(value: number, unit: string): string {
-  if (unit === 'score') {
-    return value.toFixed(3);
-  }
-  return Math.round(value).toString();
 }
 
 function calculateImprovement(current: number, projected: number): number {
@@ -46,7 +39,6 @@ export function PerformanceComparison({ currentMetrics, bestStrategy }: Performa
       return {
         name: metricKey,
         key: metricKey,
-        unit: metricKey === 'CLS' ? 'score' : 'ms',
         current,
         projected: projectedValue,
         improvement,
@@ -85,8 +77,10 @@ export function PerformanceComparison({ currentMetrics, bestStrategy }: Performa
                   <p className="text-xs text-gray-600 mb-1">Current</p>
                   <div className="bg-red-50 border-2 border-red-200 rounded px-3 py-2">
                     <p className="text-lg font-bold text-red-700">
-                      {formatMetricValue(comp.current, comp.unit)}
-                      <span className="text-sm font-normal ml-1">{comp.unit}</span>
+                      {formatMetricDisplay(comp.key, comp.current).value}
+                      <span className="text-sm font-normal ml-1">
+                        {formatMetricDisplay(comp.key, comp.current).unit}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -101,8 +95,10 @@ export function PerformanceComparison({ currentMetrics, bestStrategy }: Performa
                   <p className="text-xs text-gray-600 mb-1">With {bestStrategy.id.toUpperCase()}</p>
                   <div className="bg-green-50 border-2 border-green-200 rounded px-3 py-2">
                     <p className="text-lg font-bold text-green-700">
-                      {formatMetricValue(comp.projected, comp.unit)}
-                      <span className="text-sm font-normal ml-1">{comp.unit}</span>
+                      {formatMetricDisplay(comp.key, comp.projected).value}
+                      <span className="text-sm font-normal ml-1">
+                        {formatMetricDisplay(comp.key, comp.projected).unit}
+                      </span>
                     </p>
                   </div>
                 </div>

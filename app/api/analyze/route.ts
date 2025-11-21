@@ -67,6 +67,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
       );
     }
 
+    // Dynamic import to avoid bundling Lighthouse (do this early)
+    const { runLighthouse } = await import('@/lib/lighthouse/runner');
+
     // Check cache first
     const cacheKey = `lighthouse:${url}`;
     const cachedResult = await kvGet<AnalysisResult>(cacheKey);
@@ -82,8 +85,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
     // Run Lighthouse test with timeout
     let rawResult;
     try {
-      // Dynamic import to avoid bundling Lighthouse
-      const { runLighthouse } = await import('@/lib/lighthouse/runner');
       rawResult = await runLighthouse(url, {
         timeout: 60000, // 60 seconds
         formFactor: 'mobile',

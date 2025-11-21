@@ -114,10 +114,21 @@ export function calculateImprovement(
 
 /**
  * Format metric value with appropriate unit
+ * Shared utility for consistent formatting across components
  */
 export function formatMetricValue(metric: keyof CoreWebVitalsMetrics, value: number): string {
   if (metric === 'CLS') {
     return value.toFixed(3);
   }
   return `${Math.round(value)}ms`;
+}
+
+/**
+ * Format metric with unit for display (returns value and unit separately)
+ */
+export function formatMetricDisplay(metric: keyof CoreWebVitalsMetrics, value: number): { value: string; unit: string } {
+  if (metric === 'CLS') {
+    return { value: value.toFixed(3), unit: 'score' };
+  }
+  return { value: Math.round(value).toString(), unit: 'ms' };
 }
