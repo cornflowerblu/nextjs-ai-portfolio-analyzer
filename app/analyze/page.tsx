@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { SiteHeader } from '@/components/site-header';
 import { UrlInputForm } from '@/components/analyze/url-input-form';
 import { LighthouseScores } from '@/components/analyze/lighthouse-scores';
 import { StrategyRecommendations } from '@/components/analyze/strategy-recommendations';
@@ -48,8 +49,10 @@ export default function AnalyzePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div>
+      <SiteHeader />
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-gray-900">
@@ -165,6 +168,7 @@ export default function AnalyzePage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, RefreshCw, Download, TrendingUp } from 'lucide-react';
+import { SiteHeader } from '@/components/site-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -199,151 +200,154 @@ export default function TrendsPage() {
   }, [historicalData, selectedProject, dateRange]);
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <TrendingUp className="h-8 w-8" />
-              Performance Trends
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Historical Core Web Vitals data showing performance evolution over time
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={fetchHistoricalData}
-              disabled={loading}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-gray-500" />
-            <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
-              <SelectTrigger className="w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DATE_RANGES.map((range) => (
-                  <SelectItem key={range.value} value={range.value}>
-                    {range.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <ProjectSelector
-            projects={projects}
-            selectedProjectId={selectedProject}
-            onProjectSelect={setSelectedProject}
-          />
-
-          <div className="flex items-center gap-2">
-            <Badge variant="outline">Showing {STRATEGIES.length} strategies</Badge>
-            <Badge variant="outline">
-              {(() => {
-                const { start, end } = getDateRangeDates(dateRange);
-                return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-              })()}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      {/* Regressions Alert */}
-      {regressions.length > 0 && (
-        <RegressionIndicator regressions={regressions} />
-      )}
-
-      {/* Loading State */}
-      {loading && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
-              <p className="text-gray-600 dark:text-gray-400">Loading trend data...</p>
+    <div>
+      <SiteHeader />
+      <div className="container mx-auto px-4 py-8 space-y-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold flex items-center gap-2">
+                <TrendingUp className="h-8 w-8" />
+                Performance Trends
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Historical Core Web Vitals data showing performance evolution over time
+              </p>
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={fetchHistoricalData}
+                disabled={loading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button variant="outline" onClick={handleExport}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+          </div>
 
-      {/* Trend Charts */}
-      {!loading && (
-        <div className="space-y-6">
-          {METRICS.map((metric) => {
-            const data = historicalData.get(metric.key) || [];
-            
-            return (
-              <Card key={metric.key}>
-                <CardHeader>
-                  <CardTitle>{metric.label}</CardTitle>
-                  <CardDescription>
-                    Time-series visualization of {metric.label.toLowerCase()} across all rendering strategies
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {data.length > 0 ? (
-                    <TrendChart
-                      data={data}
-                      metric={metric.key as 'fcp' | 'lcp' | 'cls' | 'inp' | 'ttfb'}
-                      metricLabel={`${metric.label} (${metric.unit})`}
-                      strategies={STRATEGIES}
-                      height={350}
-                      showAnnotations={true}
-                      annotations={annotations.filter((a) => 
-                        a.label.toLowerCase().includes(metric.key)
-                      )}
-                    />
-                  ) : (
-                    <div className="py-12 text-center text-gray-500">
-                      No historical data available for this metric.
-                      <br />
-                      <span className="text-sm">
-                        Data will appear here as metrics are captured over time.
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
+          {/* Filters */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DATE_RANGES.map((range) => (
+                    <SelectItem key={range.value} value={range.value}>
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <ProjectSelector
+              projects={projects}
+              selectedProjectId={selectedProject}
+              onProjectSelect={setSelectedProject}
+            />
+
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">Showing {STRATEGIES.length} strategies</Badge>
+              <Badge variant="outline">
+                {(() => {
+                  const { start, end } = getDateRangeDates(dateRange);
+                  return `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+                })()}
+              </Badge>
+            </div>
+          </div>
         </div>
-      )}
 
-      {/* Empty State */}
-      {!loading && historicalData.size === 0 && (
-        <Card>
-          <CardContent className="py-12">
-            <div className="flex flex-col items-center justify-center gap-4 text-center">
-              <TrendingUp className="h-12 w-12 text-gray-400" />
-              <div>
-                <h3 className="text-lg font-semibold mb-2">No Historical Data</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                  No performance metrics have been captured yet for the selected time range.
-                </p>
-                <p className="text-sm text-gray-500">
-                  Visit the <a href="/dashboard" className="text-blue-600 hover:underline">Dashboard</a> or{' '}
-                  <a href="/lab" className="text-blue-600 hover:underline">Lab</a> to start capturing metrics.
-                </p>
+        {/* Regressions Alert */}
+        {regressions.length > 0 && (
+          <RegressionIndicator regressions={regressions} />
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center justify-center gap-4">
+                <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+                <p className="text-gray-600 dark:text-gray-400">Loading trend data...</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Trend Charts */}
+        {!loading && (
+          <div className="space-y-6">
+            {METRICS.map((metric) => {
+              const data = historicalData.get(metric.key) || [];
+              
+              return (
+                <Card key={metric.key}>
+                  <CardHeader>
+                    <CardTitle>{metric.label}</CardTitle>
+                    <CardDescription>
+                      Time-series visualization of {metric.label.toLowerCase()} across all rendering strategies
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {data.length > 0 ? (
+                      <TrendChart
+                        data={data}
+                        metric={metric.key as 'fcp' | 'lcp' | 'cls' | 'inp' | 'ttfb'}
+                        metricLabel={`${metric.label} (${metric.unit})`}
+                        strategies={STRATEGIES}
+                        height={350}
+                        showAnnotations={true}
+                        annotations={annotations.filter((a) => 
+                          a.label.toLowerCase().includes(metric.key)
+                        )}
+                      />
+                    ) : (
+                      <div className="py-12 text-center text-gray-500">
+                        No historical data available for this metric.
+                        <br />
+                        <span className="text-sm">
+                          Data will appear here as metrics are captured over time.
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && historicalData.size === 0 && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <TrendingUp className="h-12 w-12 text-gray-400" />
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">No Historical Data</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    No performance metrics have been captured yet for the selected time range.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Visit the <a href="/dashboard" className="text-blue-600 hover:underline">Dashboard</a> or{' '}
+                    <a href="/lab" className="text-blue-600 hover:underline">Lab</a> to start capturing metrics.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 }

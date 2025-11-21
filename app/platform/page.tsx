@@ -4,6 +4,7 @@
  */
 
 import Link from 'next/link';
+import { SiteHeader } from '@/components/site-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Zap, Database, Flag, Globe } from 'lucide-react';
@@ -49,14 +50,16 @@ const platformFeatures = [
 
 export default function PlatformPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Vercel Platform Features</h1>
-        <p className="text-lg text-muted-foreground">
-          Explore platform capabilities with real measurements and live demos
-        </p>
-      </div>
+    <div>
+      <SiteHeader />
+      <div className="container mx-auto py-8 px-4">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Vercel Platform Features</h1>
+          <p className="text-lg text-muted-foreground">
+            Explore platform capabilities with real measurements and live demos
+          </p>
+        </div>
 
       {/* Feature Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -92,7 +95,7 @@ export default function PlatformPage() {
       </div>
 
       {/* Info Section */}
-      <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+      <Card className="bg-linear-to-r from-blue-50 to-purple-50 border-blue-200">
         <CardHeader>
           <CardTitle>Why Platform Features Matter</CardTitle>
           <CardDescription>
@@ -132,6 +135,7 @@ export default function PlatformPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
