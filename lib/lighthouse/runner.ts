@@ -1,6 +1,6 @@
 /**
- * Lighthouse test runner
- * Executes Lighthouse tests programmatically on URLs
+ * PageSpeed Insights API runner
+ * Runs Lighthouse tests via Google's PageSpeed Insights API
  */
 
 import type { LighthouseScores, LighthouseMetrics } from '@/types/lighthouse';
@@ -18,10 +18,9 @@ export interface RawLighthouseResult {
 }
 
 /**
- * Default Lighthouse options
+ * Default options
  * - timeout: 60 seconds max for analysis
- * - formFactor: Mobile viewport (375x667, 2x scale)
- * - throttling: Simulated slow 4G (150ms RTT, 1.6Mbps throughput, 4x CPU slowdown)
+ * - formFactor: Mobile (default for PageSpeed Insights)
  */
 const DEFAULT_OPTIONS: LighthouseRunnerOptions = {
   timeout: 60000, // 60 seconds
@@ -29,93 +28,111 @@ const DEFAULT_OPTIONS: LighthouseRunnerOptions = {
   throttling: true,
 };
 
+// PageSpeed Insights API configuration
+const PAGESPEED_API_URL = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+
 /**
- * Run Lighthouse test on a URL
+ * PageSpeed Insights API Response Interface
+ */
+interface PageSpeedResponse {
+  lighthouseResult: {
+    categories: {
+      performance?: { score: number };
+      accessibility?: { score: number };
+      'best-practices'?: { score: number };
+      seo?: { score: number };
+    };
+    audits: {
+      [key: string]: {
+        numericValue?: number;
+        score?: number;
+        displayValue?: string;
+      };
+    };
+  };
+}
+
+/**
+ * Run Lighthouse test via PageSpeed Insights API
  */
 export async function runLighthouse(
   url: string,
   options: LighthouseRunnerOptions = {}
 ): Promise<RawLighthouseResult> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  
-  // Dynamic import for lighthouse and chrome-launcher (server-side only)
-  const lighthouse = (await import('lighthouse')).default;
-  const chromeLauncher = await import('chrome-launcher');
-  
-  // Launch Chrome
-  const chrome = await chromeLauncher.launch({
-    chromeFlags: ['--headless', '--no-sandbox', '--disable-gpu'],
+
+  // Build API URL with parameters
+  const apiUrl = new URL(PAGESPEED_API_URL);
+  apiUrl.searchParams.set('url', url);
+  apiUrl.searchParams.set('strategy', opts.formFactor === 'desktop' ? 'desktop' : 'mobile');
+
+  // Add API key if available (optional but recommended for production)
+  const apiKey = process.env.PAGESPEED_API_KEY;
+  if (apiKey) {
+    apiUrl.searchParams.set('key', apiKey);
+  }
+
+  // Request specific Lighthouse categories
+  const categories = ['performance', 'accessibility', 'best-practices', 'seo'];
+  categories.forEach(category => {
+    apiUrl.searchParams.append('category', category);
   });
 
-  try {
-    // Configure Lighthouse options
-    const lighthouseOptions = {
-      logLevel: 'error' as const,
-      output: 'json' as const,
-      port: chrome.port,
-      onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
-      formFactor: opts.formFactor,
-      throttling: opts.throttling ? {
-        rttMs: 150,
-        throughputKbps: 1638.4,
-        cpuSlowdownMultiplier: 4,
-      } : undefined,
-      screenEmulation: {
-        mobile: opts.formFactor === 'mobile',
-        width: opts.formFactor === 'mobile' ? 375 : 1920,
-        height: opts.formFactor === 'mobile' ? 667 : 1080,
-        deviceScaleFactor: opts.formFactor === 'mobile' ? 2 : 1,
-        disabled: false,
-      },
-    };
+  // Create timeout promise
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error('PageSpeed Insights API timeout')), opts.timeout);
+  });
 
-    // Run Lighthouse with timeout
-    const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Lighthouse timeout')), opts.timeout);
-    });
+  // Make API request with timeout
+  const fetchPromise = fetch(apiUrl.toString(), {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+    },
+  });
 
-    const runnerResult = await Promise.race([
-      lighthouse(url, lighthouseOptions),
-      timeoutPromise,
-    ]);
+  const response = await Promise.race([fetchPromise, timeoutPromise]);
 
-    if (!runnerResult || !runnerResult.lhr) {
-      throw new Error('Lighthouse returned no results');
-    }
-
-    const lhr = runnerResult.lhr;
-
-    // Extract scores
-    const scores: LighthouseScores = {
-      performance: (lhr.categories.performance?.score || 0) * 100,
-      accessibility: (lhr.categories.accessibility?.score || 0) * 100,
-      bestPractices: (lhr.categories['best-practices']?.score || 0) * 100,
-      seo: (lhr.categories.seo?.score || 0) * 100,
-    };
-
-    // Extract metrics
-    const metrics: LighthouseMetrics = {
-      FCP: lhr.audits['first-contentful-paint']?.numericValue || 0,
-      LCP: lhr.audits['largest-contentful-paint']?.numericValue || 0,
-      CLS: lhr.audits['cumulative-layout-shift']?.numericValue || 0,
-      INP: lhr.audits['interaction-to-next-paint']?.numericValue || 0,
-      TTFB: lhr.audits['server-response-time']?.numericValue || 0,
-      SI: lhr.audits['speed-index']?.numericValue || 0,
-      TBT: lhr.audits['total-blocking-time']?.numericValue || 0,
-      speedIndex: lhr.audits['speed-index']?.numericValue || 0,
-      totalBlockingTime: lhr.audits['total-blocking-time']?.numericValue || 0,
-      interactive: lhr.audits['interactive']?.numericValue || 0,
-    };
-
-    return {
-      scores,
-      metrics,
-      fullReport: lhr,
-    };
-  } finally {
-    // Always kill Chrome
-    await chrome.kill();
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`PageSpeed Insights API error: ${response.status} - ${errorText}`);
   }
+
+  const data = await response.json() as PageSpeedResponse;
+
+  if (!data.lighthouseResult) {
+    throw new Error('PageSpeed Insights returned no Lighthouse results');
+  }
+
+  const lhr = data.lighthouseResult;
+
+  // Extract scores (convert from 0-1 to 0-100)
+  const scores: LighthouseScores = {
+    performance: (lhr.categories.performance?.score || 0) * 100,
+    accessibility: (lhr.categories.accessibility?.score || 0) * 100,
+    bestPractices: (lhr.categories['best-practices']?.score || 0) * 100,
+    seo: (lhr.categories.seo?.score || 0) * 100,
+  };
+
+  // Extract metrics (in milliseconds)
+  const metrics: LighthouseMetrics = {
+    FCP: lhr.audits['first-contentful-paint']?.numericValue || 0,
+    LCP: lhr.audits['largest-contentful-paint']?.numericValue || 0,
+    CLS: lhr.audits['cumulative-layout-shift']?.numericValue || 0,
+    INP: lhr.audits['interaction-to-next-paint']?.numericValue || 0,
+    TTFB: lhr.audits['server-response-time']?.numericValue || 0,
+    SI: lhr.audits['speed-index']?.numericValue || 0,
+    TBT: lhr.audits['total-blocking-time']?.numericValue || 0,
+    speedIndex: lhr.audits['speed-index']?.numericValue || 0,
+    totalBlockingTime: lhr.audits['total-blocking-time']?.numericValue || 0,
+    interactive: lhr.audits['interactive']?.numericValue || 0,
+  };
+
+  return {
+    scores,
+    metrics,
+    fullReport: lhr,
+  };
 }
 
 /**

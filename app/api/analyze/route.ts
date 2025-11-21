@@ -91,9 +91,39 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
         throttling: true,
       });
     } catch (error) {
-      // Handle Lighthouse-specific errors
+      // Handle PageSpeed Insights API errors
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+
+      // Check for API not enabled error (403)
+      if (errorMessage.includes('403') && errorMessage.includes('SERVICE_DISABLED')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: 'PageSpeed Insights API not enabled',
+              code: 'API_NOT_ENABLED',
+              details: 'The PageSpeed Insights API needs to be enabled. Please contact the administrator to enable it in Google Cloud Console.',
+            },
+          },
+          { status: 503 }
+        );
+      }
+
+      // Check for API quota/rate limit errors
+      if (errorMessage.includes('429') || errorMessage.includes('RATE_LIMIT')) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: {
+              message: 'Rate limit exceeded',
+              code: 'RATE_LIMIT',
+              details: 'Too many requests. Please try again later.',
+            },
+          },
+          { status: 429 }
+        );
+      }
+
       if (errorMessage.includes('timeout')) {
         return NextResponse.json(
           {
@@ -126,8 +156,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<AnalysisR
         {
           success: false,
           error: {
-            message: 'Lighthouse analysis failed',
-            code: 'LIGHTHOUSE_ERROR',
+            message: 'Analysis failed',
+            code: 'ANALYSIS_ERROR',
             details: errorMessage,
           },
         },

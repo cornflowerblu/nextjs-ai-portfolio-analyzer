@@ -61,7 +61,7 @@ export interface AnalysisResult {
 
 export interface AnalysisError {
   message: string;
-  code: 'TIMEOUT' | 'UNREACHABLE' | 'INVALID_URL' | 'LIGHTHOUSE_ERROR' | 'UNKNOWN';
+  code: 'TIMEOUT' | 'UNREACHABLE' | 'INVALID_URL' | 'API_NOT_ENABLED' | 'RATE_LIMIT' | 'ANALYSIS_ERROR' | 'UNKNOWN';
   details?: string;
 }
 
