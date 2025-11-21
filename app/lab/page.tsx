@@ -4,6 +4,7 @@
  */
 
 import Link from 'next/link';
+import { SiteHeader } from '@/components/site-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,9 +20,11 @@ const strategyOrder: RenderingStrategyType[] = ['SSR', 'SSG', 'ISR', 'CACHE'];
 
 export default function LabPage() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Header */}
-      <div className="mb-8 space-y-4">
+    <div className="min-h-screen">
+      <SiteHeader />
+      <div className="container mx-auto py-8 px-4">
+        {/* Header */}
+        <div className="mb-8 space-y-4">
         <div className="flex items-center gap-3">
           <FlaskConical className="h-10 w-10 text-primary" />
           <div>
@@ -143,6 +146,7 @@ export default function LabPage() {
           Each demo is fully interactive. Click buttons to trigger re-renders and observe how
           different strategies handle caching, revalidation, and performance optimization.
         </p>
+      </div>
       </div>
     </div>
   );

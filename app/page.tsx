@@ -1,21 +1,9 @@
+import { SiteHeader } from '@/components/site-header';
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold">⚡</div>
-            <span className="text-xl font-semibold">Next.js Rendering Analyzer</span>
-          </div>
-          <nav className="hidden gap-6 md:flex">
-            <a href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground">Dashboard</a>
-            <a href="/lab" className="text-sm font-medium text-muted-foreground hover:text-foreground">Lab</a>
-            <a href="#analyze" className="text-sm font-medium text-muted-foreground hover:text-foreground">Analyze</a>
-            <a href="#trends" className="text-sm font-medium text-muted-foreground hover:text-foreground">Trends</a>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-16 md:py-24">
