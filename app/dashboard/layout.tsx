@@ -16,18 +16,20 @@ export default function DashboardLayout({
   insights: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen p-8 space-y-8">
+    <>
       {/* Main page content: header, real-time indicator, strategy cards */}
       {children}
 
-      {/* Metrics section - loading handled by slot's loading.tsx */}
-      {metrics}
-
-      {/* Comparison section - loading handled by slot's loading.tsx */}
-      {comparison}
-
-      {/* Insights section - loading handled by slot's loading.tsx */}
-      {insights}
-    </div>
+      {/* Parallel route sections - only render container if there's content */}
+      {(metrics || comparison || insights) && (
+        <div className="container mx-auto px-4 pb-8">
+          <div className="space-y-8">
+            {metrics}
+            {comparison}
+            {insights}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
