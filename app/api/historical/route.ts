@@ -132,10 +132,11 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching historical data:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch historical data', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    const isProd = process.env.NODE_ENV === 'production';
+    const responseBody = isProd
+      ? { error: 'Failed to fetch historical data' }
+      : { error: 'Failed to fetch historical data', details: error instanceof Error ? error.message : 'Unknown error' };
+    return NextResponse.json(responseBody, { status: 500 });
   }
 }
 
@@ -208,9 +209,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error saving historical data:', error);
-    return NextResponse.json(
-      { error: 'Failed to save historical data', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    const isProd = process.env.NODE_ENV === 'production';
+    const responseBody = isProd
+      ? { error: 'Failed to save historical data' }
+      : { error: 'Failed to save historical data', details: error instanceof Error ? error.message : 'Unknown error' };
+    return NextResponse.json(responseBody, { status: 500 });
   }
 }

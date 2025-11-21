@@ -10,7 +10,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts';
 import type { RenderingStrategyType } from '@/types/strategy';
 import { formatMetric } from '@/lib/utils/format';
@@ -44,13 +43,24 @@ const STRATEGY_COLORS: Record<RenderingStrategyType, string> = {
   CACHE: '#8b5cf6', // purple
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipPayload {
+  color: string;
+  name: string;
+  value: number;
+  dataKey: string;
+}
+
+const CustomTooltip = ({ active, payload, label }: { 
+  active?: boolean; 
+  payload?: TooltipPayload[]; 
+  label?: string;
+}) => {
   if (!active || !payload || !payload.length) return null;
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
       <p className="text-sm font-medium mb-2">{label}</p>
-      {payload.map((entry: any, index: number) => (
+      {payload.map((entry: TooltipPayload, index: number) => (
         <div key={index} className="flex items-center gap-2 text-sm">
           <div
             className="w-3 h-3 rounded-full"
@@ -77,7 +87,13 @@ export function TrendChart({
 }: TrendChartProps) {
   // Group data by timestamp for proper chart rendering
   const chartData = React.useMemo(() => {
-    const grouped = new Map<number, any>();
+    interface ChartDataPoint {
+      timestamp: number;
+      date: string;
+      [strategy: string]: number | string;
+    }
+    
+    const grouped = new Map<number, ChartDataPoint>();
 
     data.forEach((point) => {
       if (!grouped.has(point.timestamp)) {
@@ -87,7 +103,9 @@ export function TrendChart({
         });
       }
       const entry = grouped.get(point.timestamp);
-      entry[point.strategy] = point.value;
+      if (entry) {
+        entry[point.strategy] = point.value;
+      }
     });
 
     return Array.from(grouped.values()).sort((a, b) => a.timestamp - b.timestamp);
@@ -105,7 +123,10 @@ export function TrendChart({
       return {
         ...annotation,
         x: dataPoint.timestamp,
-        y: Math.max(...strategies.map((s) => dataPoint[s] || 0)),
+        y: Math.max(...strategies.map((s) => {
+          const val = dataPoint[s];
+          return typeof val === 'number' ? val : 0;
+        })),
       };
     }).filter(Boolean);
   }, [annotations, chartData, strategies, showAnnotations]);

@@ -54,6 +54,7 @@ export function ProjectSelector({
         <Button
           variant="outline"
           className={`justify-between min-w-[200px] ${className}`}
+          aria-label={selectedProject?.name ? `Selected project: ${selectedProject.name}` : 'Select a project from the dropdown'}
         >
           <div className="flex items-center gap-2 overflow-hidden">
             <span className="truncate">

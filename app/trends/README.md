@@ -118,13 +118,13 @@ Save a new historical data point.
 {
   "strategy": "SSR",
   "projectId": "default",
+  "timestamp": "2024-01-01T12:00:00.000Z",
   "metrics": {
     "fcp": { "value": 1200, "rating": "good", "delta": 0 },
     "lcp": { "value": 2000, "rating": "good", "delta": 0 },
     "cls": { "value": 0.05, "rating": "good", "delta": 0 },
     "inp": { "value": 150, "rating": "good", "delta": 0 },
-    "ttfb": { "value": 500, "rating": "good", "delta": 0 },
-    "timestamp": "2024-01-01T12:00:00.000Z"
+    "ttfb": { "value": 500, "rating": "good", "delta": 0 }
   },
   "metadata": {
     "url": "https://example.com",

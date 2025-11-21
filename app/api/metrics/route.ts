@@ -141,28 +141,29 @@ export async function GET(request: Request) {
 
     // Otherwise, return metrics for all strategies
     const strategies: RenderingStrategyType[] = ['SSR', 'SSG', 'ISR', 'CACHE'];
-    const allMetrics: StrategyMetrics[] = [];
+    const timestamp = new Date().toISOString();
+    
+    // Generate metrics for all strategies
+    const allMetrics: StrategyMetrics[] = strategies.map(strat => ({
+      strategy: strat,
+      metrics: generateMockMetrics(strat),
+      timestamp,
+    }));
 
-    for (const strat of strategies) {
-      const metrics = generateMockMetrics(strat);
-      
-      // Save to historical data store (T115: Store performance snapshots)
-      if (saveHistory) {
-        await saveHistoricalData({
-          strategy: strat,
-          projectId,
-          metrics,
-          metadata: {
-            environment: process.env.NODE_ENV as 'development' | 'production',
-          },
-        });
-      }
-
-      allMetrics.push({
-        strategy: strat,
-        metrics,
-        timestamp: new Date().toISOString(),
-      });
+    // Save to historical data store in parallel (T115: Store performance snapshots)
+    if (saveHistory) {
+      await Promise.all(
+        allMetrics.map(({ strategy, metrics }) =>
+          saveHistoricalData({
+            strategy,
+            projectId,
+            metrics,
+            metadata: {
+              environment: process.env.NODE_ENV as 'development' | 'production',
+            },
+          })
+        )
+      );
     }
 
     return NextResponse.json(allMetrics);

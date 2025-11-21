@@ -114,14 +114,8 @@ export function formatMetricValue(
  * Generic metric formatter for use with string keys
  */
 export function formatMetric(value: number, metricKey: string): string {
-  if (metricKey === 'cls') {
-    return value.toFixed(3);
-  } else if (metricKey === 'fcp' || metricKey === 'lcp') {
-    return `${(value / 1000).toFixed(2)}s`;
-  } else if (metricKey === 'inp' || metricKey === 'ttfb') {
-    return `${Math.round(value)}ms`;
-  }
-  return value.toString();
+  // Delegate to formatMetricValue for consistent formatting
+  return formatMetricValue(metricKey as keyof CoreWebVitals, value);
 }
 
 /**

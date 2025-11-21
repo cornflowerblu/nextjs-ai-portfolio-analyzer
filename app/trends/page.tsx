@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Calendar, RefreshCw, Download, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,7 +78,7 @@ export default function TrendsPage() {
     },
   ]);
 
-  const fetchHistoricalData = async () => {
+  const fetchHistoricalData = useCallback(async () => {
     setLoading(true);
     try {
       const { start, end, granularity } = getDateRangeDates(dateRange);
@@ -112,10 +112,9 @@ export default function TrendsPage() {
         if (data.success && data.data) {
           // Transform data for each metric
           for (const metric of METRICS) {
-            const key = `${strategy}-${metric.key}`;
             const points: TrendDataPoint[] = [];
 
-            if (granularity === 'hour' || granularity === 'day' || granularity === 'week' || granularity === 'month') {
+            if (granularity !== null) {
               // Aggregated data
               data.data.forEach((agg: AggregatedMetrics) => {
                 points.push({
@@ -146,7 +145,7 @@ export default function TrendsPage() {
           // Collect regressions
           if (data.regressions && data.regressions.length > 0) {
             allRegressions.push(
-              ...data.regressions.map((r: any) => ({
+              ...data.regressions.map((r: { metric: string; current: number; baseline: number; change: number }) => ({
                 ...r,
                 strategy,
               }))
@@ -173,13 +172,13 @@ export default function TrendsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateRange, selectedProject]);
 
   useEffect(() => {
     fetchHistoricalData();
-  }, [selectedProject, dateRange]);
+  }, [fetchHistoricalData]);
 
-  const handleExport = () => {
+  const handleExport = useCallback(() => {
     // Export data as CSV
     const csv: string[] = ['Timestamp,Strategy,Metric,Value'];
     
@@ -196,7 +195,7 @@ export default function TrendsPage() {
     a.download = `performance-trends-${selectedProject}-${dateRange}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, [historicalData, selectedProject, dateRange]);
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
@@ -299,7 +298,7 @@ export default function TrendsPage() {
                   {data.length > 0 ? (
                     <TrendChart
                       data={data}
-                      metric={metric.key as any}
+                      metric={metric.key as 'fcp' | 'lcp' | 'cls' | 'inp' | 'ttfb'}
                       metricLabel={`${metric.label} (${metric.unit})`}
                       strategies={STRATEGIES}
                       height={350}
