@@ -93,8 +93,14 @@ export function StreamingResponse({
                 setContent(fullText);
               } else if (parsed.type === 'suggestions') {
                 setSuggestions(parsed.suggestions);
+              } else if (parsed.type === 'error') {
+                throw new Error(parsed.content || 'AI service error');
               }
-            } catch {
+            } catch (parseError) {
+              // If it's a thrown Error from error type, re-throw it
+              if (parseError instanceof Error && parseError.message !== 'Unexpected token') {
+                throw parseError;
+              }
               // Skip invalid JSON
             }
           }

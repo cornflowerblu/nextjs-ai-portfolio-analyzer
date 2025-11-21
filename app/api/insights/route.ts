@@ -13,6 +13,14 @@ export const runtime = 'edge'; // Use edge runtime for streaming
 
 export async function POST(request: NextRequest) {
   try {
+    // Log environment info (without exposing keys)
+    const aiProvider = process.env.AI_PROVIDER || 'openai';
+    const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+    const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
+    console.log('AI Provider:', aiProvider);
+    console.log('Has OpenAI key:', hasOpenAIKey);
+    console.log('Has Anthropic key:', hasAnthropicKey);
+
     // Validate AI credentials
     if (!validateAICredentials()) {
       return new Response(
@@ -45,7 +53,22 @@ export async function POST(request: NextRequest) {
     const userPrompt = createAnalysisPrompt(performanceContext);
 
     // Stream AI response
-    const result = await createTextStream(SYSTEM_PROMPT, userPrompt);
+    let result;
+    try {
+      console.log('Creating AI text stream...');
+      result = await createTextStream(SYSTEM_PROMPT, userPrompt);
+      console.log('AI stream created successfully');
+    } catch (error) {
+      console.error('Failed to create AI stream:', error);
+      const errorMessage = formatStreamError(error);
+      return new Response(
+        JSON.stringify({ error: errorMessage }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
 
     // Create a readable stream that formats the AI response as Server-Sent Events
     const stream = new ReadableStream({
@@ -53,7 +76,14 @@ export async function POST(request: NextRequest) {
         const encoder = new TextEncoder();
 
         try {
+          let chunkCount = 0;
+          console.log('Starting stream iteration...');
+
           for await (const chunk of result.textStream) {
+            chunkCount++;
+            if (chunkCount === 1) {
+              console.log('Received first chunk');
+            }
             // Send each chunk as SSE
             const data = JSON.stringify({
               type: 'text',
@@ -62,10 +92,13 @@ export async function POST(request: NextRequest) {
             controller.enqueue(encoder.encode(`data: ${data}\n\n`));
           }
 
+          console.log(`Stream completed. Total chunks: ${chunkCount}`);
+
           // Send completion signal
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (error) {
+          console.error('Stream error:', error);
           const errorMessage = formatStreamError(error);
           const errorData = JSON.stringify({
             type: 'error',
