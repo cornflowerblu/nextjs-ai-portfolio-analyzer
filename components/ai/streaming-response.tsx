@@ -5,8 +5,9 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { TextSkeleton } from '@/components/ui/skeleton';
 import type { PerformanceContext, OptimizationSuggestion } from '@/types/ai';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { OptimizationCard } from './optimization-card';
@@ -25,22 +26,34 @@ export function StreamingResponse({
   const [error, setError] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasStartedRef = useRef(false);
+  const performanceContextRef = useRef(performanceContext);
 
-  const startAnalysis = async () => {
+  // Update ref when context changes, but don't trigger re-analysis
+  useEffect(() => {
+    performanceContextRef.current = performanceContext;
+  }, [performanceContext]);
+
+  const startAnalysis = useCallback(async () => {
+    // Prevent multiple simultaneous requests
+    if (isStreaming) return;
+
     setIsStreaming(true);
     setContent('');
     setError(null);
     setSuggestions([]);
+    hasStartedRef.current = true;
 
     // Create abort controller for this request
-    abortControllerRef.current = new AbortController();
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       const response = await fetch('/api/insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ performanceContext }),
-        signal: abortControllerRef.current.signal,
+        body: JSON.stringify({ performanceContext: performanceContextRef.current }),
+        signal: abortController.signal,
       });
 
       if (!response.ok) {
@@ -82,34 +95,38 @@ export function StreamingResponse({
         }
       }
     } catch (err) {
+      // Only set error if this wasn't an intentional abort
       if (err instanceof Error && err.name === 'AbortError') {
-        setError('Analysis cancelled');
-      } else {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'An error occurred while analyzing performance'
-        );
+        // Don't show error for aborts - user cancelled or component unmounted
+        return;
       }
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An error occurred while analyzing performance'
+      );
     } finally {
       setIsStreaming(false);
-      abortControllerRef.current = null;
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null;
+      }
     }
-  };
+  }, [isStreaming]);
 
   // Auto-start analysis when component mounts if autoStart is true
-  // startAnalysis is intentionally not in deps to avoid re-triggering on every render
-  // It only needs to run once when autoStart changes from false to true
   useEffect(() => {
-    if (autoStart) {
+    let mounted = true;
+
+    if (autoStart && !hasStartedRef.current && mounted) {
       void startAnalysis();
     }
-    
+
     return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
+      mounted = false;
+      // Don't abort immediately - give the request a chance to complete
+      // This prevents React Strict Mode from cancelling valid requests
     };
+    // startAnalysis is intentionally omitted from deps to prevent re-triggering on state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStart]);
 
@@ -144,19 +161,40 @@ export function StreamingResponse({
 
   return (
     <div className="space-y-4">
-      {isStreaming && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          <span>Analyzing performance metrics...</span>
+      {/* Loading indicator */}
+      {isStreaming && !content && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Analyzing performance metrics...</span>
+          </div>
+          <TextSkeleton lines={8} />
         </div>
       )}
 
+      {/* Content container with fixed minimum height to prevent layout shifts */}
       {content && (
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <div className="whitespace-pre-wrap">{content}</div>
+        <div className="min-h-[300px]">
           {isStreaming && (
-            <span className="inline-block h-4 w-1 animate-pulse bg-primary" />
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Analyzing performance metrics...</span>
+            </div>
           )}
+
+          <div
+            className="prose prose-sm dark:prose-invert max-w-none"
+            style={{
+              contain: 'layout',
+            }}
+          >
+            <div className="whitespace-pre-wrap">
+              {content}
+              {isStreaming && (
+                <span className="inline-block h-4 w-1 animate-pulse bg-primary ml-1" />
+              )}
+            </div>
+          </div>
         </div>
       )}
 
