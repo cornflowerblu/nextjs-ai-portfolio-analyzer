@@ -7,7 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import type { PerformanceContext } from '@/types/ai';
+import type { PerformanceContext, OptimizationSuggestion } from '@/types/ai';
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { OptimizationCard } from './optimization-card';
 
@@ -23,7 +23,7 @@ export function StreamingResponse({
   const [isStreaming, setIsStreaming] = useState(false);
   const [content, setContent] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [suggestions, setSuggestions] = useState<OptimizationSuggestion[]>([]);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const startAnalysis = async () => {
@@ -75,7 +75,7 @@ export function StreamingResponse({
               } else if (parsed.type === 'suggestions') {
                 setSuggestions(parsed.suggestions);
               }
-            } catch (e) {
+            } catch {
               // Skip invalid JSON
             }
           }
@@ -99,7 +99,7 @@ export function StreamingResponse({
 
   useEffect(() => {
     if (autoStart) {
-      startAnalysis();
+      void startAnalysis();
     }
     
     return () => {
@@ -107,6 +107,7 @@ export function StreamingResponse({
         abortControllerRef.current.abort();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoStart]);
 
   if (error) {

@@ -107,7 +107,11 @@ export function parseOptimizationSuggestions(text: string): {
   }> = [];
 
   let currentSection = 'summary';
-  let currentSuggestion: any = null;
+  let currentSuggestion: {
+    title: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+  } | null = null;
 
   for (const line of lines) {
     const trimmed = line.trim();
