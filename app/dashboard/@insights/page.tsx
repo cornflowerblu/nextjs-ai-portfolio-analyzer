@@ -8,6 +8,7 @@
 
 import { InsightsPanel } from '@/components/ai/insights-panel';
 import useSWR from 'swr';
+import { useMemo } from 'react';
 import type { StrategyMetrics } from '@/types/metrics';
 import type { PerformanceContext } from '@/types/ai';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,6 +20,20 @@ export default function InsightsSlot() {
     refreshInterval: 1000,
     revalidateOnFocus: true,
   });
+
+  // Memoize performance context to prevent unnecessary re-analysis
+  // Must be called before conditional returns to satisfy Rules of Hooks
+  const performanceContext: PerformanceContext = useMemo(() => {
+    if (!metrics) return { strategies: [], timestamp: new Date().toISOString() };
+
+    return {
+      strategies: metrics.map((m) => ({
+        strategy: m.strategy,
+        metrics: m.metrics,
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  }, [metrics]);
 
   if (error) {
     return (
@@ -52,14 +67,6 @@ export default function InsightsSlot() {
       </section>
     );
   }
-
-  const performanceContext: PerformanceContext = {
-    strategies: metrics.map((m) => ({
-      strategy: m.strategy,
-      metrics: m.metrics,
-    })),
-    timestamp: new Date().toISOString(),
-  };
 
   return <InsightsPanel performanceContext={performanceContext} autoAnalyze={true} />;
 }
