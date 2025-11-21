@@ -36,8 +36,9 @@ See [`specs/001-nextjs-render-analyzer/plan.md`](specs/001-nextjs-render-analyze
 
 - Node.js 18+
 - npm/yarn/pnpm/bun
-- Vercel account (for KV, Edge Config)
-- OpenAI or Anthropic API key
+- Chrome/Chromium (for Lighthouse analysis)
+- Vercel account (optional, for KV caching)
+- OpenAI or Anthropic API key (optional, for AI insights)
 
 ### Installation
 
@@ -45,11 +46,11 @@ See [`specs/001-nextjs-render-analyzer/plan.md`](specs/001-nextjs-render-analyze
 # Install dependencies
 npm install
 
-# Copy environment template
-cp .env.example .env.local
+# Set environment variable for Next.js build (required for font loading)
+export NEXT_TURBOPACK_EXPERIMENTAL_USE_SYSTEM_TLS_CERTS=1
 
-# Add your API keys to .env.local
-# Required: VERCEL_KV_*, OPENAI_API_KEY or ANTHROPIC_API_KEY
+# Optional: Configure Redis for caching
+# export REDIS_URL=your_redis_url
 ```
 
 ### Development
@@ -70,11 +71,11 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 
 ## 🎯 Implementation Phases
 
-1. **Phase 1**: Setup (10 tasks) - Project initialization
-2. **Phase 2**: Foundation (13 tasks) - Core infrastructure
-3. **Phase 3**: Dashboard MVP (14 tasks) - Strategy comparisons 🎯
-4. **Phase 4**: Lab Demos (17 tasks) - Interactive rendering demos
-5. **Phase 5**: URL Analysis (18 tasks) - Lighthouse integration
+1. **Phase 1**: Setup (10 tasks) - Project initialization ✅
+2. **Phase 2**: Foundation (13 tasks) - Core infrastructure ✅
+3. **Phase 3**: Dashboard MVP (14 tasks) - Strategy comparisons ✅ 🎯
+4. **Phase 4**: Lab Demos (17 tasks) - Interactive rendering demos 🚧
+5. **Phase 5**: URL Analysis (18 tasks) - Lighthouse integration ✅
 6. **Phase 6**: AI Insights (16 tasks) - Streaming optimization suggestions
 7. **Phase 7**: Platform Features (20 tasks) - Vercel capabilities showcase
 8. **Phase 8**: Historical Trends (14 tasks) - Performance tracking over time
@@ -82,14 +83,28 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 10. **Phase 10**: Polish (18 tasks) - Production readiness
 
 **MVP Scope**: Phases 1-3 (37 tasks) deliver a deployable product with core value.
+**Current Status**: Phase 5 (URL Analysis) completed with full Lighthouse integration.
 
 ## 🧪 Testing
 
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+```
+
 Each phase includes specific test criteria. Example:
 
-- **Phase 3 Test**: Load dashboard at `/`, verify all four rendering strategies display with Core Web Vitals metrics
+- **Phase 3 Test**: Load dashboard at `/`, verify all four rendering strategies display with Core Web Vitals metrics ✅
 - **Phase 4 Test**: Navigate to `/lab/ssr`, trigger re-render, verify metrics update and cache status displays
-- **Phase 5 Test**: Enter `https://example.com`, wait for analysis, verify Lighthouse scores and recommendations display
+- **Phase 5 Test**: Enter `https://example.com` at `/analyze`, wait for analysis, verify Lighthouse scores and recommendations display ✅
+
+**Test Coverage**: 146 tests passing across 9 test suites
 
 ## 📊 Performance Targets
 
