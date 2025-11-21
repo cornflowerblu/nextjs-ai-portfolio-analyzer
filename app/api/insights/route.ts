@@ -10,6 +10,7 @@ import type { PerformanceContext } from '@/types/ai';
 import { NextRequest } from 'next/server';
 
 export const runtime = 'edge'; // Use edge runtime for streaming
+export const maxDuration = 60; // Allow up to 60 seconds for AI streaming
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,6 +77,10 @@ export async function POST(request: NextRequest) {
         const encoder = new TextEncoder();
 
         try {
+          // Send initial connection confirmation
+          controller.enqueue(encoder.encode(': connected\n\n'));
+          console.log('Stream connection established');
+
           let chunkCount = 0;
           console.log('Starting stream iteration...');
 
