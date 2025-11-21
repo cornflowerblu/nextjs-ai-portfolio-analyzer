@@ -31,7 +31,7 @@ export default function Home() {
             <a href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               View Dashboard
             </a>
-            <a href="#" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
+            <a href="/lab" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
               Try Lab Demos
             </a>
           </div>
