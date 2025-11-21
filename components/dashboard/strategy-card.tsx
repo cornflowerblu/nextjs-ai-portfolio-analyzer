@@ -37,16 +37,21 @@ export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCa
     }
   };
 
+  const handleDemoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Link href={`/lab/${strategy.id.toLowerCase()}`} className="block h-full">
+    <Link
+      href={`/lab/${strategy.id.toLowerCase()}`}
+      className={`block h-full ${isActive ? 'ring-2 ring-primary' : ''}`}
+    >
       <Card
         role="button"
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        className={`transition-all hover:shadow-lg cursor-pointer flex flex-col h-full ${
-          isActive ? 'ring-2 ring-primary' : ''
-        }`}
+        className="transition-all hover:shadow-lg cursor-pointer flex flex-col h-full"
       >
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -87,7 +92,10 @@ export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCa
           </div>
         </div>
         {/* Lab Demo Link aligned to bottom */}
-        <div className="mt-auto flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium border rounded-md bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all">
+        <div
+          onClick={handleDemoClick}
+          className="mt-auto flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium border rounded-md bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
+        >
           <FlaskConical className="h-4 w-4" />
           Try Live Demo
         </div>
