@@ -32,18 +32,16 @@ export function getAIModel() {
   const config = getAIConfig();
 
   if (config.provider === 'anthropic') {
-    const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
-    if (!apiKey) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not set in environment variables');
     }
-    return anthropic(config.model, { apiKey });
+    return anthropic(config.model);
   }
 
-  const apiKey = process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) {
+  if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is not set in environment variables');
   }
-  return openai(config.model, { apiKey });
+  return openai(config.model);
 }
 
 /**
