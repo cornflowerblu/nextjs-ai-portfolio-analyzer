@@ -65,6 +65,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 - **[Specification](specs/001-nextjs-render-analyzer/spec.md)**: Complete feature requirements and user stories
 - **[Implementation Plan](specs/001-nextjs-render-analyzer/plan.md)**: Technical architecture and project structure
 - **[Tasks](specs/001-nextjs-render-analyzer/tasks.md)**: 155 detailed implementation tasks organized by phase
+- **[AI Insights Guide](docs/AI_INSIGHTS.md)**: AI-powered optimization insights documentation
 - **[Confluence Space](https://rurich.atlassian.net/wiki/spaces/NAPA)**: Project documentation and task tracking
 - **[Jira Board](https://rurich.atlassian.net/jira/software/projects/NAPA/boards/104)**: Sprint planning and issue tracking
 
