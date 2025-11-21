@@ -18,8 +18,8 @@ export function OptimizationCard({ suggestion }: OptimizationCardProps) {
   const impactConfig = {
     high: {
       icon: TrendingUp,
-      className: 'border-red-500/50 bg-red-500/10',
-      badgeVariant: 'destructive' as const,
+      className: 'border-green-500/50 bg-green-500/10',
+      badgeVariant: 'default' as const,
     },
     medium: {
       icon: AlertCircle,

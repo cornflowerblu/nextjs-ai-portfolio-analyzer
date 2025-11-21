@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Insights API error:', error);
     const errorMessage = formatStreamError(error);
+    console.error('Insights API error:', errorMessage);
 
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,

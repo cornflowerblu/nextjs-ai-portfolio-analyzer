@@ -97,6 +97,9 @@ export function StreamingResponse({
     }
   };
 
+  // Auto-start analysis when component mounts if autoStart is true
+  // startAnalysis is intentionally not in deps to avoid re-triggering on every render
+  // It only needs to run once when autoStart changes from false to true
   useEffect(() => {
     if (autoStart) {
       void startAnalysis();
