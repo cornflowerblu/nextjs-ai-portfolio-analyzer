@@ -24,7 +24,7 @@ test.describe('Smoke Tests', () => {
         }
       });
 
-      await page.goto(p.path);
+      await page.goto(p.path, { timeout: 10_000 });
       await expect(page.locator(p.selector)).toBeVisible({ timeout: 10_000 });
       
       // Allow some expected warnings (e.g., React hydration) but fail on critical errors
