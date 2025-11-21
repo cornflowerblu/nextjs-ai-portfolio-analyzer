@@ -8,7 +8,6 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { RenderingStrategy } from '@/types/strategy';
 import { getStrategyColor } from '@/lib/utils/colors';
 import { FlaskConical } from 'lucide-react';
@@ -19,12 +18,23 @@ interface StrategyCardProps {
   onClick?: () => void;
 }
 
-export function StrategyCard({ strategy, isActive = false }: StrategyCardProps) {
+export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCardProps) {
   const colorClasses = getStrategyColor(strategy.id);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick();
+    }
+  };
 
   return (
     <Card
-      className={`transition-all hover:shadow-lg ${
+      role="button"
+      tabIndex={0}
+      onClick={onClick}
+      onKeyDown={handleKeyDown}
+      className={`transition-all hover:shadow-lg cursor-pointer ${
         isActive ? 'ring-2 ring-primary' : ''
       }`}
     >
@@ -63,11 +73,13 @@ export function StrategyCard({ strategy, isActive = false }: StrategyCardProps) 
           </div>
           
           {/* Lab Demo Link */}
-          <Link href={`/lab/${strategy.id.toLowerCase()}`} className="block">
-            <Button variant="outline" size="sm" className="w-full">
-              <FlaskConical className="mr-2 h-4 w-4" />
-              Try Live Demo
-            </Button>
+          <Link
+            href={`/lab/${strategy.id.toLowerCase()}`}
+            className="flex items-center justify-center gap-2 w-full px-3 py-2 text-sm font-medium border rounded-md bg-background shadow-xs hover:bg-accent hover:text-accent-foreground transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FlaskConical className="h-4 w-4" />
+            Try Live Demo
           </Link>
         </div>
       </CardContent>
