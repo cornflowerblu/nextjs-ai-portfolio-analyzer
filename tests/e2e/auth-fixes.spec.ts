@@ -42,7 +42,7 @@ test.describe('Authentication Fixes', () => {
     await expect(userMenuTrigger).toBeVisible({ timeout: 5000 });
     
     // Take a screenshot to verify
-    await page.screenshot({ path: '/tmp/session-on-load.png' });
+    await page.screenshot({ path: 'test-results/session-on-load.png' });
     
     console.log('✓ User menu is visible on initial page load with session cookie');
   });
@@ -96,7 +96,7 @@ test.describe('Authentication Fixes', () => {
     await expect(userMenu).toBeVisible();
     console.log('✓ User menu visible on different page');
     
-    await page.screenshot({ path: '/tmp/session-persistence.png' });
+    await page.screenshot({ path: 'test-results/session-persistence.png' });
   });
 
   test('should navigate to dashboard after successful login', async ({ page }) => {

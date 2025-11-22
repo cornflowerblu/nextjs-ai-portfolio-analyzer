@@ -8,6 +8,10 @@
 import { useState } from 'react';
 import { signInWithGoogle } from '@/lib/firebase/auth';
 
+// Delay to ensure session cookie is set before redirect
+// This allows the server-side session endpoint to complete before navigation
+const SESSION_ESTABLISHMENT_DELAY_MS = 500;
+
 export function SignInButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +23,8 @@ export function SignInButton() {
     try {
       await signInWithGoogle();
       
-      // Small delay to ensure session is established before redirect
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Wait for session to be established before redirect
+      await new Promise(resolve => setTimeout(resolve, SESSION_ESTABLISHMENT_DELAY_MS));
       
       // Get redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
