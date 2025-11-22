@@ -51,6 +51,9 @@ export function UserMenu() {
         }
       } catch (error) {
         console.error('Error checking session:', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
       return false; // No session found
     };
@@ -69,8 +72,8 @@ export function UserMenu() {
             displayName: authUser.displayName,
             photoURL: authUser.photoURL,
           });
-        } else if (!hasSession) {
-          // Only clear user if we also don't have a server session
+        } else {
+          // Always clear user if Firebase auth is null, regardless of server session
           setUser(null);
         }
         setIsLoading(false);
