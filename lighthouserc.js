@@ -38,6 +38,8 @@ module.exports = {
         'render-blocking-insight': ['warn', { maxLength: 3 }], // Some blocking is acceptable
         'render-blocking-resources': ['warn', { maxLength: 1 }], // Allow one render-blocking resource (font preload)
         'label-content-name-mismatch': ['error', { minScore: 0.9 }], // Ensure accessible names match visible text
+        // Console errors check - allow Firebase warnings in CI environments
+        'errors-in-console': ['warn', { minScore: 0.9 }],
         // Disable problematic audits that produce NaN or are not applicable
         'color-contrast': 'off',
         'lcp-lazy-loaded': 'off',
