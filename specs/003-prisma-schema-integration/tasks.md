@@ -124,7 +124,9 @@
 
 ---
 
-## Phase 6: User Story 4 - Record Lighthouse test history (Priority: P2)
+## Phase 6: User Story 4 - Record Lighthouse test history (Priority: P2) ⏭️ SKIPPED
+
+**Status**: SKIPPED - Schema models remain for future implementation
 
 **Goal**: Store Lighthouse scores over time for historical quality comparison
 
@@ -132,24 +134,26 @@
 
 ### Tests for User Story 4
 
-- [ ] T042 [P] [US4] Unit test for createLighthouseTest in **tests**/lib/db/lighthouse.test.ts
-- [ ] T043 [P] [US4] Unit test for listLighthouseTests with url filter in **tests**/lib/db/lighthouse.test.ts
-- [ ] T044 [US4] Integration test for POST /api/lighthouse in **tests**/app/api/lighthouse/route.test.ts
-- [ ] T045 [US4] Integration test for GET /api/lighthouse with url filter in **tests**/app/api/lighthouse/route.test.ts
+- [ ] ~~T042 [P] [US4] Unit test for createLighthouseTest in **tests**/lib/db/lighthouse.test.ts~~ SKIPPED
+- [ ] ~~T043 [P] [US4] Unit test for listLighthouseTests with url filter in **tests**/lib/db/lighthouse.test.ts~~ SKIPPED
+- [ ] ~~T044 [US4] Integration test for POST /api/lighthouse in **tests**/app/api/lighthouse/route.test.ts~~ SKIPPED
+- [ ] ~~T045 [US4] Integration test for GET /api/lighthouse with url filter in **tests**/app/api/lighthouse/route.test.ts~~ SKIPPED
 
 ### Implementation for User Story 4
 
-- [ ] T046 [P] [US4] Create createLighthouseTest function in lib/db/lighthouse.ts
-- [ ] T047 [P] [US4] Create listLighthouseTests function with url filter and pagination in lib/db/lighthouse.ts
-- [ ] T048 [US4] Implement POST handler in app/api/lighthouse/route.ts with score validation
-- [ ] T049 [US4] Implement GET handler in app/api/lighthouse/route.ts with url query param
-- [ ] T050 [US4] Add runtime='nodejs' export to app/api/lighthouse/route.ts
+- [ ] ~~T046 [P] [US4] Create createLighthouseTest function in lib/db/lighthouse.ts~~ SKIPPED
+- [ ] ~~T047 [P] [US4] Create listLighthouseTests function with url filter and pagination in lib/db/lighthouse.ts~~ SKIPPED
+- [ ] ~~T048 [US4] Implement POST handler in app/api/lighthouse/route.ts with score validation~~ SKIPPED
+- [ ] ~~T049 [US4] Implement GET handler in app/api/lighthouse/route.ts with url query param~~ SKIPPED
+- [ ] ~~T050 [US4] Add runtime='nodejs' export to app/api/lighthouse/route.ts~~ SKIPPED
 
-**Checkpoint**: User Story 4 complete - Lighthouse history tracking enabled
+**Note**: LighthouseTest model remains in schema for future implementation
 
 ---
 
-## Phase 7: User Story 5 - Generate and track reports (Priority: P2)
+## Phase 7: User Story 5 - Generate and track reports (Priority: P2) ⏭️ SKIPPED
+
+**Status**: SKIPPED - Schema models remain for future implementation
 
 **Goal**: Create report metadata records for exportable artifacts (PDF/Markdown/JSON)
 
@@ -157,28 +161,30 @@
 
 ### Tests for User Story 5
 
-- [ ] T051 [P] [US5] Unit test for createReport in **tests**/lib/db/reports.test.ts
-- [ ] T052 [P] [US5] Unit test for listReports with pagination in **tests**/lib/db/reports.test.ts
-- [ ] T053 [P] [US5] Unit test for updateReportStatus in **tests**/lib/db/reports.test.ts
-- [ ] T054 [US5] Integration test for POST /api/reports in **tests**/app/api/reports/route.test.ts
-- [ ] T055 [US5] Integration test for GET /api/reports with pagination in **tests**/app/api/reports/route.test.ts
+- [ ] ~~T051 [P] [US5] Unit test for createReport in **tests**/lib/db/reports.test.ts~~ SKIPPED
+- [ ] ~~T052 [P] [US5] Unit test for listReports with pagination in **tests**/lib/db/reports.test.ts~~ SKIPPED
+- [ ] ~~T053 [P] [US5] Unit test for updateReportStatus in **tests**/lib/db/reports.test.ts~~ SKIPPED
+- [ ] ~~T054 [US5] Integration test for POST /api/reports in **tests**/app/api/reports/route.test.ts~~ SKIPPED
+- [ ] ~~T055 [US5] Integration test for GET /api/reports with pagination in **tests**/app/api/reports/route.test.ts~~ SKIPPED
 
 ### Implementation for User Story 5
 
-- [ ] T056 [P] [US5] Create createReport function in lib/db/reports.ts
-- [ ] T057 [P] [US5] Create listReports function with pagination in lib/db/reports.ts
-- [ ] T058 [P] [US5] Create updateReportStatus function in lib/db/reports.ts
-- [ ] T059 [US5] Implement POST handler in app/api/reports/route.ts (sets status=pending)
-- [ ] T060 [US5] Implement GET handler in app/api/reports/route.ts with pagination
-- [ ] T061 [US5] Add runtime='nodejs' export to app/api/reports/route.ts
+- [ ] ~~T056 [P] [US5] Create createReport function in lib/db/reports.ts~~ SKIPPED
+- [ ] ~~T057 [P] [US5] Create listReports function with pagination in lib/db/reports.ts~~ SKIPPED
+- [ ] ~~T058 [P] [US5] Create updateReportStatus function in lib/db/reports.ts~~ SKIPPED
+- [ ] ~~T059 [US5] Implement POST handler in app/api/reports/route.ts (sets status=pending)~~ SKIPPED
+- [ ] ~~T060 [US5] Implement GET handler in app/api/reports/route.ts with pagination~~ SKIPPED
+- [ ] ~~T061 [US5] Add runtime='nodejs' export to app/api/reports/route.ts~~ SKIPPED
 
-**Checkpoint**: All user stories complete - full persistence layer operational
+**Note**: Report model remains in schema for future implementation
 
 ---
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-**Purpose**: Improvements that affect multiple user stories
+**Purpose**: Improvements that affect implemented user stories (US1-US3)
+
+**Checkpoint**: Core user stories (Auth, Analyses, Web Vitals) complete - persistence layer operational for MVP features
 
 - [ ] T062 [P] Add JSDoc comments to all lib/db/\* functions
 - [ ] T063 [P] Add input validation schemas using Zod for all API routes
@@ -198,13 +204,13 @@
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
-- **User Stories (Phase 3-7)**: All depend on Foundational phase completion
+- **User Stories (Phase 3-5)**: All depend on Foundational phase completion
   - User Story 1 (P1): Can start after Foundational - No dependencies on other stories
   - User Story 2 (P1): Can start after Foundational - No dependencies on other stories
   - User Story 3 (P1): Can start after Foundational - No dependencies on other stories
-  - User Story 4 (P2): Can start after Foundational - No dependencies on other stories
-  - User Story 5 (P2): Can start after Foundational - No dependencies on other stories
-- **Polish (Phase 8)**: Depends on all desired user stories being complete
+  - ~~User Story 4 (P2)~~: SKIPPED
+  - ~~User Story 5 (P2)~~: SKIPPED
+- **Polish (Phase 8)**: Depends on implemented user stories (US1-US3) being complete
 
 ### Within Each User Story
 
@@ -250,48 +256,54 @@ Task: "Create POST /api/auth/verify route..."
 
 ### Incremental Delivery
 
-1. Complete Setup + Foundational → Foundation ready
+1. Complete Setup + Foundational → Foundation ready ✅
 2. Add User Story 1 → Test independently → Deploy/Demo (MVP: Auth + User persistence!)
 3. Add User Story 2 → Test independently → Deploy/Demo (AI insights persistence)
 4. Add User Story 3 → Test independently → Deploy/Demo (Web Vitals tracking)
-5. Add User Story 4 → Test independently → Deploy/Demo (Lighthouse history)
-6. Add User Story 5 → Test independently → Deploy/Demo (Report tracking)
-7. Each story adds value without breaking previous stories
+5. ~~Add User Story 4~~ → SKIPPED (Lighthouse history deferred)
+6. ~~Add User Story 5~~ → SKIPPED (Report tracking deferred)
+7. Polish & Deploy → Full MVP with Auth, Analyses, and Web Vitals
+
+**Note**: Each implemented story adds value without breaking previous stories. Skipped models remain in schema for future implementation.
 
 ### Parallel Team Strategy
 
 With multiple developers:
 
-1. Team completes Setup + Foundational together
+1. Team completes Setup + Foundational together ✅
 2. Once Foundational is done:
    - Developer A: User Story 1 (Auth/Users)
    - Developer B: User Story 2 (Analyses)
    - Developer C: User Story 3 (Web Vitals)
-   - Developer D: User Story 4 (Lighthouse)
-   - Developer E: User Story 5 (Reports)
+   - ~~Developer D: User Story 4 (Lighthouse)~~ SKIPPED
+   - ~~Developer E: User Story 5 (Reports)~~ SKIPPED
 3. Stories complete and integrate independently
+4. Polish phase can run in parallel across all implemented features
 
 ---
 
 ## Summary
 
-**Total Tasks**: 70
+**Total Tasks**: 70 (52 active, 18 skipped)
 **Task Count per User Story**:
 
-- Setup: 5 tasks
-- Foundational: 12 tasks (BLOCKING)
+- Setup: 5 tasks ✅
+- Foundational: 12 tasks (BLOCKING) ✅
 - User Story 1 (P1): 6 tasks (3 tests + 3 implementation)
 - User Story 2 (P1): 9 tasks (4 tests + 5 implementation)
 - User Story 3 (P1): 9 tasks (4 tests + 5 implementation)
-- User Story 4 (P2): 9 tasks (4 tests + 5 implementation)
-- User Story 5 (P2): 10 tasks (5 tests + 6 implementation)
+- ~~User Story 4 (P2): 9 tasks~~ ⏭️ SKIPPED
+- ~~User Story 5 (P2): 10 tasks~~ ⏭️ SKIPPED
 - Polish: 9 tasks
 
-**Parallel Opportunities**: 35+ tasks can run in parallel once dependencies are met
+**Active Implementation Scope**: 41 tasks (Phases 1-5, 8)
 
-**MVP Scope**: Phases 1-3 (Setup + Foundational + User Story 1) = 23 tasks
+**Parallel Opportunities**: 20+ tasks can run in parallel once dependencies are met
 
-- Delivers: Firebase Auth integration, user persistence, per-user data isolation
+**MVP Scope**: Phases 1-5 (Setup + Foundational + User Stories 1-3) = 41 tasks
+
+- Delivers: Firebase Auth integration, user persistence, AI analyses, Web Vitals tracking
+- LighthouseTest and Report models remain in schema for future implementation
 - Can be deployed and validated independently
 
 **Constitutional Compliance**:
