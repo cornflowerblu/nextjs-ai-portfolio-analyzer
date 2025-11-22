@@ -44,7 +44,7 @@ function initializeFirebaseAdmin() {
 // Lazy initialization - only initialize when needed
 let firebaseAdmin: admin.app.App | null = null;
 
-function getFirebaseAdmin(): admin.app.App {
+function getFirebaseAdminInstance() {
   if (!firebaseAdmin) {
     firebaseAdmin = initializeFirebaseAdmin();
   }
@@ -119,4 +119,6 @@ export async function getUserFromToken(authorizationHeader: string | null | unde
  * Get Firebase Admin instance
  * Useful for direct access to Admin SDK features
  */
-export { getFirebaseAdmin };
+export function getFirebaseAdmin() {
+  return getFirebaseAdminInstance();
+}

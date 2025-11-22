@@ -67,7 +67,7 @@ test.describe('Login Bug Investigation', () => {
     try {
       await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 5000 });
       console.log('Navigation occurred to:', page.url());
-    } catch (e) {
+    } catch {
       console.log('No navigation occurred within 5 seconds - potential hang detected');
     }
   });

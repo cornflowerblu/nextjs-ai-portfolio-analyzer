@@ -25,6 +25,8 @@ export default defineConfig({
         '**/*.config.*',
         '**/*.d.ts',
         '__mocks__/',
+        'lib/generated/**',  // Exclude Prisma generated files
+        '**/prisma/runtime/**',  // Exclude Prisma runtime
       ],
       thresholds: {
         lines: 55,
