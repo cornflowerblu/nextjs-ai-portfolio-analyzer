@@ -43,17 +43,21 @@ export async function signInWithGoogle() {
     // Get ID token for session creation
     const idToken = await user.getIdToken();
     
-    // Create session on server
-    const response = await fetch('/api/auth/session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ idToken }),
-    });
+    // Create session on server (optional - don't block on failure)
+    try {
+      const response = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      });
 
-    if (!response.ok) {
-      throw new Error('Failed to create session');
+      if (!response.ok) {
+        console.warn('Failed to create server session, continuing with client-only auth');
+      }
+    } catch (sessionError) {
+      console.warn('Session creation failed, continuing with client-only auth:', sessionError);
     }
 
     return user;
