@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import { signOut, onAuthStateChange } from '@/lib/firebase/auth';
 import { User } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,24 +17,66 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+// Unified user data structure
+interface UserData {
+  email: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+}
+
 export function UserMenu() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((authUser) => {
-      setUser(authUser);
-      setIsLoading(false);
-    });
+    // First, check server-side session
+    const checkServerSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user) {
+            setUser({
+              email: data.user.email,
+              displayName: data.user.name,
+              photoURL: data.user.picture,
+            });
+            setIsLoading(false);
+            return true; // Session found
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      }
+      return false; // No session found
+    };
 
-    return () => unsubscribe();
+    // Check server session first
+    checkServerSession().then((hasSession) => {
+      // Then subscribe to Firebase auth state changes
+      const unsubscribe = onAuthStateChange((authUser: User | null) => {
+        if (authUser) {
+          setUser({
+            email: authUser.email,
+            displayName: authUser.displayName,
+            photoURL: authUser.photoURL,
+          });
+        } else if (!hasSession) {
+          // Only clear user if we also don't have a server session
+          setUser(null);
+        }
+        setIsLoading(false);
+      });
+
+      return () => unsubscribe();
+    });
   }, []);
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/login');
+      // Use window.location for full page reload after sign out
+      window.location.href = '/login';
     } catch (error) {
       console.error('Sign out error:', error);
     }

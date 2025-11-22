@@ -7,12 +7,10 @@
 
 import { useState } from 'react';
 import { signInWithGoogle } from '@/lib/firebase/auth';
-import { useRouter } from 'next/navigation';
 
 export function SignInButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   const handleSignIn = async () => {
     setIsLoading(true);
@@ -21,18 +19,21 @@ export function SignInButton() {
     try {
       await signInWithGoogle();
       
+      // Small delay to ensure session is established before redirect
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       // Get redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
       const from = params.get('from') || '/dashboard';
       
-      router.push(from);
+      // Use window.location for more reliable navigation after auth
+      window.location.href = from;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
       setError(errorMessage);
-    } finally {
-      // Always clear loading state, even on success (navigation may take time)
       setIsLoading(false);
     }
+    // Note: Don't clear loading state on success - let the redirect happen
   };
 
   return (
