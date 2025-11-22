@@ -12,7 +12,8 @@ import { test, expect } from '@playwright/test';
 // Set these via: TEST_GOOGLE_EMAIL and TEST_GOOGLE_PASSWORD
 const TEST_EMAIL = process.env.TEST_GOOGLE_EMAIL || 'qa@slingshotgrp.com';
 const TEST_PASSWORD = process.env.TEST_GOOGLE_PASSWORD || 'QATesting08560!';
-
+const TEST_EMAIL = process.env.TEST_GOOGLE_EMAIL || 'person@example.com';
+const TEST_PASSWORD = process.env.TEST_GOOGLE_PASSWORD || 'mySuperSecretPa$$word';
 test.describe('Google Login Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Clear any existing auth state
