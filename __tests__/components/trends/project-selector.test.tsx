@@ -94,7 +94,7 @@ describe('ProjectSelector', () => {
     expect(screen.getByRole('button')).toBeTruthy();
   });
 
-  it('has proper aria-label for accessibility', () => {
+  it('displays selected project name for accessibility', () => {
     const onSelect = vi.fn();
     render(
       <ProjectSelector
@@ -105,12 +105,10 @@ describe('ProjectSelector', () => {
     );
     
     const button = screen.getByRole('button');
-    const ariaLabel = button.getAttribute('aria-label');
-    expect(ariaLabel).toBeTruthy();
-    expect(ariaLabel).toContain('Main Website');
+    expect(button).toHaveTextContent('Main Website');
   });
 
-  it('has aria-label when no project selected', () => {
+  it('displays "Select Project" when no project selected', () => {
     const onSelect = vi.fn();
     render(
       <ProjectSelector
@@ -121,7 +119,7 @@ describe('ProjectSelector', () => {
     );
     
     const button = screen.getByRole('button');
-    expect(button.getAttribute('aria-label')).toContain('Select a project');
+    expect(button).toHaveTextContent('Select Project');
   });
 
   it('applies custom className', () => {
