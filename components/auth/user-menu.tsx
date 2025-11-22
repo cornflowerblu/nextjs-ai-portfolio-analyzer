@@ -29,13 +29,17 @@ export function UserMenu() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Track if component is still mounted
+    let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
+
     // First, check server-side session
     const checkServerSession = async () => {
       try {
         const response = await fetch('/api/auth/session');
         if (response.ok) {
           const data = await response.json();
-          if (data.user) {
+          if (data.user && isMounted) {
             setUser({
               email: data.user.email,
               displayName: data.user.name,
@@ -51,10 +55,14 @@ export function UserMenu() {
       return false; // No session found
     };
 
-    // Check server session first
+    // Check server session first, then subscribe to Firebase auth state changes
     checkServerSession().then((hasSession) => {
-      // Then subscribe to Firebase auth state changes
-      const unsubscribe = onAuthStateChange((authUser: User | null) => {
+      if (!isMounted) return;
+      
+      // Subscribe to Firebase auth state changes
+      unsubscribe = onAuthStateChange((authUser: User | null) => {
+        if (!isMounted) return;
+        
         if (authUser) {
           setUser({
             email: authUser.email,
@@ -67,9 +75,15 @@ export function UserMenu() {
         }
         setIsLoading(false);
       });
-
-      return () => unsubscribe();
     });
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const handleSignOut = async () => {

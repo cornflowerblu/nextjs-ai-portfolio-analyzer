@@ -8,9 +8,10 @@
 
 import { test, expect } from '@playwright/test';
 
-// Test credentials provided
-const TEST_EMAIL = 'qa@slingshotgrp.com';
-const TEST_PASSWORD = 'QATesting08560!';
+// Test credentials from environment variables
+// Set these via: TEST_GOOGLE_EMAIL and TEST_GOOGLE_PASSWORD
+const TEST_EMAIL = process.env.TEST_GOOGLE_EMAIL || 'qa@slingshotgrp.com';
+const TEST_PASSWORD = process.env.TEST_GOOGLE_PASSWORD || 'QATesting08560!';
 
 test.describe('Google Login Flow', () => {
   test.beforeEach(async ({ page }) => {
@@ -118,8 +119,10 @@ test.describe('Google Login Flow', () => {
     
     console.log('User menu visible on dashboard:', isUserMenuVisible);
     
-    // Take screenshot for debugging
-    await page.screenshot({ path: '/tmp/after-login.png', fullPage: true });
+    // Take screenshot for debugging (works on Unix-like systems)
+    if (process.platform !== 'win32') {
+      await page.screenshot({ path: '/tmp/after-login.png', fullPage: true });
+    }
     
     // The test passes if we can access dashboard (even if redirect didn't work)
     expect(currentUrl.includes('/dashboard') || isUserMenuVisible).toBeTruthy();
@@ -170,8 +173,10 @@ test.describe('Google Login Flow', () => {
     
     console.log('User menu visible after reload:', isVisibleAfterReload);
     
-    // Take screenshots
-    await page.screenshot({ path: '/tmp/session-persistence.png', fullPage: true });
+    // Take screenshots (works on Unix-like systems)
+    if (process.platform !== 'win32') {
+      await page.screenshot({ path: '/tmp/session-persistence.png', fullPage: true });
+    }
     
     // Session should persist across reloads
     expect(isVisibleAfterReload).toBeTruthy();
