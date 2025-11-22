@@ -15,12 +15,10 @@
  */
 
 import { PrismaClient } from '@/lib/generated/prisma';
-import { Pool } from '@neondatabase/serverless';
 import { PrismaNeon } from '@prisma/adapter-neon';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
-  pool: Pool | undefined;
 };
 
 /**
@@ -43,9 +41,9 @@ function createPrismaClient() {
     throw new Error('Database connection string not found. Set POSTGRES_PRISMA_URL, POSTGRES_URL, or DATABASE_URL.');
   }
 
-  // Use Neon adapter for Prisma 7 compatibility
-  const pool = new Pool({ connectionString });
-  const adapter = new PrismaNeon(pool);
+  // Use Neon adapter for Prisma 7 - PrismaNeon accepts connectionString directly
+  // See: https://www.prisma.io/docs/orm/overview/databases/neon
+  const adapter = new PrismaNeon({ connectionString });
 
   return new PrismaClient({
     adapter,
@@ -54,16 +52,32 @@ function createPrismaClient() {
 }
 
 /**
- * Singleton PrismaClient instance
+ * Get singleton PrismaClient instance
+ * 
+ * Lazy-loads the Prisma client on first use to ensure environment variables
+ * are loaded before attempting to connect to the database.
  * 
  * In production, creates a new PrismaClient with PostgreSQL adapter.
  * In development, reuses the same instance to avoid connection exhaustion.
  */
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
+export function getPrismaClient() {
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = createPrismaClient();
+  }
+  return globalForPrisma.prisma;
 }
+
+/**
+ * Singleton PrismaClient instance (lazy-loaded via getter)
+ * 
+ * This getter ensures the client is only created when first accessed,
+ * after Next.js has loaded all environment variables.
+ */
+export const prisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    return getPrismaClient()[prop as keyof PrismaClient];
+  }
+});
 
 /**
  * Helper to disconnect Prisma Client

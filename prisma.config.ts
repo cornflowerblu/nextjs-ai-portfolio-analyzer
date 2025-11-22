@@ -10,7 +10,8 @@ export default defineConfig({
   },
   datasource: {
     // Use Vercel's pooled connection for Prisma, with multiple fallbacks
+    // For migrations, prefer non-pooling URL
     // Uses placeholder for builds without database access (prisma generate only)
-    url: process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || process.env.DATABASE_URL || "postgresql://placeholder",
+    url: process.env.POSTGRES_URL || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL || "postgresql://placeholder",
   },
 });
