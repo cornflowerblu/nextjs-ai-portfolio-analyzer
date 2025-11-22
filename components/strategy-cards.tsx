@@ -30,8 +30,8 @@ export function StrategyCards() {
       <div className="mb-8">
         <h2 className="text-center text-3xl font-bold mb-4">Rendering Strategies</h2>
         <p className="text-center text-muted-foreground max-w-2xl mx-auto">
-          Next.js offers multiple rendering strategies, each optimized for different use cases. 
-          Explore interactive demos to see how SSR, SSG, ISR, and Cache Components work in practice, 
+          Next.js 16 introduces Cache Components alongside other rendering strategies, each optimized for different use cases.
+          Explore interactive demos to see how SSR, SSG, ISR, and the new Cache Components work in practice,
           and understand when to use each approach for optimal performance.
         </p>
       </div>
