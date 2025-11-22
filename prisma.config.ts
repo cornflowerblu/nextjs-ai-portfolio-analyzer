@@ -9,7 +9,8 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    // Use Vercel's pooled connection for Prisma, fallback to DATABASE_URL
-    url: env("POSTGRES_PRISMA_URL") ?? env("POSTGRES_URL"),
+    // Use Vercel's pooled connection for Prisma, fallback to POSTGRES_URL
+    // Allow undefined for builds without database access (prisma generate only)
+    url: env("POSTGRES_PRISMA_URL") ?? env("POSTGRES_URL") ?? env("DATABASE_URL") ?? "postgresql://placeholder",
   },
 });
