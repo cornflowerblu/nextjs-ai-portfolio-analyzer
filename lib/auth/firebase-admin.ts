@@ -42,7 +42,7 @@ function initializeFirebaseAdmin() {
 }
 
 // Lazy initialization - only initialize when needed
-let firebaseAdmin: admin.app.App | null = null;
+const firebaseAdmin: admin.app.App | null = null;
 
 /**
  * Get Firebase Admin instance, initializing if necessary
