@@ -189,11 +189,18 @@ export default function Home() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-16">
         <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card p-8 text-center shadow-lg md:p-12">
-          <h2 className="text-3xl font-bold">Coming Soon</h2>
+          <h2 className="text-3xl font-bold">Ready to Explore?</h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            This dashboard is currently under development. Check back soon for the full experience!
+            Sign in to access real-time performance metrics, AI-powered insights, and interactive demos.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a 
+              href="/dashboard" 
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              <span>🚀</span>
+              View Dashboard
+            </a>
             <a 
               href="https://github.com/cornflowerblu/nextjs-ai-portfolio-analyzer" 
               target="_blank"
@@ -201,7 +208,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-6 py-3 text-sm font-medium hover:bg-accent"
             >
               <span>⭐</span>
-              View on GitHub
+              Star on GitHub
             </a>
           </div>
         </div>
