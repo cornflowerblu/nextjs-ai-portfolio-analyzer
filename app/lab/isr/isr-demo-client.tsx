@@ -52,14 +52,9 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       if (remaining === 0 && !isRevalidating) {
         setIsRevalidating(true);
         // Trigger Next.js to fetch fresh data from the server
-        try {
-          router.refresh();
-          // Keep the revalidation UI visible for a few seconds
-          setTimeout(() => setIsRevalidating(false), REVALIDATION_DISPLAY_DURATION);
-        } catch (error) {
-          console.error('Failed to refresh:', error);
-          setIsRevalidating(false);
-        }
+        router.refresh();
+        // Keep the revalidation UI visible for a few seconds
+        setTimeout(() => setIsRevalidating(false), REVALIDATION_DISPLAY_DURATION);
       }
     };
 
