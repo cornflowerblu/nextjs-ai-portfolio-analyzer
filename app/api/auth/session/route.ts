@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyIdToken } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
+import { isUserAllowed } from '@/lib/firebase/access-control';
 
 const SESSION_COOKIE_NAME = 'session';
 const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
@@ -25,17 +26,8 @@ export async function POST(request: NextRequest) {
     // Verify the ID token
     const decodedToken = await verifyIdToken(idToken);
 
-    // Check access control (email allowlist + domain restriction)
-    const allowedEmails = (process.env.NEXT_PUBLIC_ALLOWED_EMAILS || '').split(',').filter(Boolean);
-    const allowedDomains = (process.env.NEXT_PUBLIC_ALLOWED_DOMAINS || '').split(',').filter(Boolean);
-    
-    const email = decodedToken.email?.toLowerCase() || '';
-    const emailDomain = email.split('@')[1];
-    
-    const isEmailAllowed = allowedEmails.some(allowed => allowed.toLowerCase() === email);
-    const isDomainAllowed = emailDomain && allowedDomains.some(domain => domain.toLowerCase() === emailDomain);
-    
-    if (!isEmailAllowed && !isDomainAllowed) {
+    // Check access control using shared utility
+    if (!isUserAllowed(decodedToken.email)) {
       return NextResponse.json(
         { error: 'Access denied. Your email is not authorized.' },
         { status: 403 }

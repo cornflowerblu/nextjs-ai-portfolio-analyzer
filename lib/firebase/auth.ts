@@ -11,40 +11,7 @@ import {
   User,
 } from 'firebase/auth';
 import { getFirebaseAuth } from './config';
-
-/**
- * Access control configuration
- * Combines email allowlist and domain restriction
- */
-const ACCESS_CONTROL = {
-  // Allowed email addresses (exact match)
-  allowedEmails: (process.env.NEXT_PUBLIC_ALLOWED_EMAILS || '').split(',').filter(Boolean),
-  
-  // Allowed domains (e.g., 'slingshotgrp.com')
-  allowedDomains: (process.env.NEXT_PUBLIC_ALLOWED_DOMAINS || '').split(',').filter(Boolean),
-};
-
-/**
- * Check if user has access based on email allowlist and domain restriction
- */
-export function isUserAllowed(email: string | null | undefined): boolean {
-  if (!email) return false;
-
-  const emailLower = email.toLowerCase();
-  
-  // Check exact email match
-  if (ACCESS_CONTROL.allowedEmails.some(allowed => allowed.toLowerCase() === emailLower)) {
-    return true;
-  }
-
-  // Check domain match
-  const emailDomain = emailLower.split('@')[1];
-  if (emailDomain && ACCESS_CONTROL.allowedDomains.some(domain => domain.toLowerCase() === emailDomain)) {
-    return true;
-  }
-
-  return false;
-}
+import { isUserAllowed } from './access-control';
 
 /**
  * Sign in with Google popup

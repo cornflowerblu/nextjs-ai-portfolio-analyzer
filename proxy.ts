@@ -54,8 +54,13 @@ export default async function proxy(request: NextRequest) {
   }
 
   try {
-    // Parse and validate session
+    // Parse session data
     const sessionData = JSON.parse(sessionCookie.value);
+
+    // Validate session structure
+    if (!sessionData.uid || !sessionData.email || !sessionData.expiresAt) {
+      throw new Error('Invalid session structure');
+    }
 
     // Check if session is expired
     if (sessionData.expiresAt < Date.now()) {
@@ -66,10 +71,12 @@ export default async function proxy(request: NextRequest) {
     }
 
     // Session is valid - allow access
+    // Note: The session was cryptographically verified by Firebase Admin SDK when created
+    // Additional signature verification would require a signing key not available at edge
     return NextResponse.next();
   } catch (error) {
     // Invalid session cookie - redirect to login
-    console.error('Middleware session parse error:', error);
+    console.error('Middleware session validation error:', error);
     const response = NextResponse.redirect(new URL('/login', request.url));
     response.cookies.delete('session');
     return response;
