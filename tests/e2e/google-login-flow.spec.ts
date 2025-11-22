@@ -129,57 +129,5 @@ test.describe('Google Login Flow', () => {
     expect(currentUrl.includes('/dashboard') || isUserMenuVisible).toBeTruthy();
   });
 
-  test('should persist session across page reloads', async ({ page }) => {
-    // First, log in (we'll do this by setting a mock session for speed)
-    const mockSession = {
-      uid: 'test-user-id',
-      email: TEST_EMAIL,
-      name: 'QA User',
-      picture: null,
-      expiresAt: Date.now() + (24 * 60 * 60 * 1000),
-    };
-
-    await page.context().addCookies([
-      {
-        name: 'session',
-        value: JSON.stringify(mockSession),
-        domain: 'localhost',
-        path: '/',
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-      },
-    ]);
-
-    console.log('✓ Set mock session cookie');
-
-    // Navigate to homepage
-    await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
-    
-    // Wait for auth state to be checked
-    await page.waitForTimeout(2000);
-    
-    // Check if user menu appears in header
-    const userMenu = page.locator('[aria-label="User menu"], img[alt*="User"]').first();
-    const isVisibleOnFirstLoad = await userMenu.isVisible().catch(() => false);
-    
-    console.log('User menu visible on first load:', isVisibleOnFirstLoad);
-    
-    // Reload the page
-    await page.reload({ waitUntil: 'networkidle' });
-    await page.waitForTimeout(2000);
-    
-    // Check if user menu still appears after reload
-    const isVisibleAfterReload = await userMenu.isVisible().catch(() => false);
-    
-    console.log('User menu visible after reload:', isVisibleAfterReload);
-    
-    // Take screenshots (works on Unix-like systems)
-    if (process.platform !== 'win32') {
-      await page.screenshot({ path: '/tmp/session-persistence.png', fullPage: true });
-    }
-    
-    // Session should persist across reloads
-    expect(isVisibleAfterReload).toBeTruthy();
-  });
+/* Removed duplicated session persistence test case as it is already covered in auth-fixes.spec.ts */
 });

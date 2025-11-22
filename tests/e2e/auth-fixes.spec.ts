@@ -142,7 +142,7 @@ test.describe('Authentication Fixes', () => {
     
     console.log('✓ Successfully navigated to dashboard with session');
     
-    await page.screenshot({ path: '/tmp/post-login-dashboard.png' });
+    await page.screenshot({ path: 'test-results/post-login-dashboard.png' });
   });
 
   test('should check session API endpoint works', async ({ page }) => {
