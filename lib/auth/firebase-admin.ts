@@ -12,33 +12,59 @@ import * as admin from 'firebase-admin';
 /**
  * Initialize Firebase Admin SDK
  * 
- * Uses service account credentials from environment variables:
- * - FIREBASE_PROJECT_ID
- * - FIREBASE_CLIENT_EMAIL
- * - FIREBASE_PRIVATE_KEY (with newlines replaced by \\n in env)
+ * Supports two authentication methods:
+ * 1. Service Account JSON (FIREBASE_SERVICE_ACCOUNT_KEY)
+ * 2. Individual credentials (FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY)
+ * 
+ * Method 1 is easier for local development, Method 2 is better for production with secret managers.
  */
 function initializeFirebaseAdmin() {
   if (admin.apps.length > 0) {
     return admin.app();
   }
 
+  // Method 1: Try service account JSON first (easiest for local dev)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    try {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+      return admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    } catch (error) {
+      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:', error);
+      // Fall through to try individual credentials
+    }
+  }
+
+  // Method 2: Try individual credentials (better for production)
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-  if (!projectId || !clientEmail || !privateKey) {
-    // During build time, environment variables might not be available
-    // We'll throw the error only when the functions are actually called
-    return null;
+  if (projectId && clientEmail && privateKey) {
+    return admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
   }
 
-  return admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
-  });
+  // Method 3: Try application default credentials (for local development with gcloud)
+  try {
+    console.log('Attempting Method 3: Application Default Credentials...');
+    return admin.initializeApp({
+      credential: admin.credential.applicationDefault(),
+      projectId: projectId,
+    });
+  } catch (error) {
+    console.log('Application Default Credentials not available:', error);
+    // Fall through to error
+  }
+
+  // No valid credentials found
+  return null;
 }
 
 // Lazy initialization - only initialize when needed
@@ -57,7 +83,9 @@ function getFirebaseAdminInstance() {
   const app = initializeFirebaseAdmin();
   if (!app) {
     throw new Error(
-      'Missing Firebase Admin credentials. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
+      'Missing Firebase Admin credentials. Please set one of:\n' +
+      '1. FIREBASE_SERVICE_ACCOUNT_KEY (full JSON service account), or\n' +
+      '2. FIREBASE_PROJECT_ID + FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (individual values)'
     );
   }
   return app;
