@@ -8,6 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    exclude: ['**/tests/e2e/**', '**/node_modules/**'],
+    include: ['__tests__/**/*.{test,spec}.{js,ts,jsx,tsx}', 'tests/**/*.{test,spec}.{js,ts,jsx,tsx}'],
     server: {
       deps: {
         inline: ['@radix-ui/*'],
