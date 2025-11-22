@@ -82,13 +82,16 @@ async function handleEdgeVsServerless(request: NextRequest) {
     })
   );
   
+  // Helper function to filter valid execution times
+  const filterValidTimes = (results: Array<{ executionTime?: number }>): number[] => {
+    return results
+      .map(r => r.executionTime)
+      .filter((t): t is number => typeof t === 'number' && !isNaN(t) && t > 0);
+  };
+  
   // Calculate statistics - filter out invalid results and ensure we have valid numbers
-  const edgeTimes = edgeResults
-    .map(r => r.executionTime)
-    .filter(t => typeof t === 'number' && !isNaN(t) && t > 0);
-  const serverlessTimes = serverlessResults
-    .map(r => r.executionTime)
-    .filter(t => typeof t === 'number' && !isNaN(t) && t > 0);
+  const edgeTimes = filterValidTimes(edgeResults);
+  const serverlessTimes = filterValidTimes(serverlessResults);
   
   // Ensure we have at least some valid results
   if (edgeTimes.length === 0 || serverlessTimes.length === 0) {
@@ -97,6 +100,9 @@ async function handleEdgeVsServerless(request: NextRequest) {
   
   const edgeAvg = edgeTimes.reduce((a, b) => a + b, 0) / edgeTimes.length;
   const serverlessAvg = serverlessTimes.reduce((a, b) => a + b, 0) / serverlessTimes.length;
+  
+  // Calculate speedup with guard against division by zero
+  const speedup = edgeAvg > 0 ? serverlessAvg / edgeAvg : 1;
   
   return NextResponse.json({
     edge: {
@@ -111,7 +117,7 @@ async function handleEdgeVsServerless(request: NextRequest) {
       min: Math.min(...serverlessTimes),
       max: Math.max(...serverlessTimes),
     },
-    speedup: serverlessAvg / edgeAvg,
+    speedup,
   });
 }
 

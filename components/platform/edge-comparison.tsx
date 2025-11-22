@@ -109,7 +109,7 @@ export function EdgeComparison() {
   // Helper function to safely format numbers
   const safeToFixed = (value: number | null | undefined, decimals: number = 2): string => {
     if (value == null || isNaN(value)) {
-      return '0.00';
+      return '0.' + '0'.repeat(decimals);
     }
     return value.toFixed(decimals);
   };
