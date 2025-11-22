@@ -81,6 +81,7 @@ Open [http://localhost:3000](http://localhost:3000) to see the dashboard.
 - **[Implementation Plan](specs/001-nextjs-render-analyzer/plan.md)**: Technical architecture and project structure
 - **[Tasks](specs/001-nextjs-render-analyzer/tasks.md)**: 155 detailed implementation tasks organized by phase
 - **[AI Insights Guide](docs/AI_INSIGHTS.md)**: AI-powered optimization insights documentation
+- **[60-Minute Dynamic Data Demo](docs/QUICK_DATA_DEMO.md)**: Fast path to showcase Vercel Postgres + KV with ISR vs dynamic routes
 - **[Confluence Space](https://rurich.atlassian.net/wiki/spaces/NAPA)**: Project documentation and task tracking
 - **[Jira Board](https://rurich.atlassian.net/jira/software/projects/NAPA/boards/104)**: Sprint planning and issue tracking
 
