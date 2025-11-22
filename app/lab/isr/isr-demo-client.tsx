@@ -51,7 +51,12 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       
       // Trigger revalidation when timer hits zero
       // Only trigger if we haven't already refreshed for this timestamp
-      if (remaining === 0 && !isRevalidating && lastRefreshTimestamp !== isrData.timestamp) {
+      const timerExpired = remaining === 0;
+      const notCurrentlyRevalidating = !isRevalidating;
+      const notAlreadyRefreshedForThisTimestamp = lastRefreshTimestamp !== isrData.timestamp;
+      const shouldTriggerRevalidation = timerExpired && notCurrentlyRevalidating && notAlreadyRefreshedForThisTimestamp;
+      
+      if (shouldTriggerRevalidation) {
         setIsRevalidating(true);
         setLastRefreshTimestamp(isrData.timestamp);
         // Trigger Next.js to fetch fresh data from the server
