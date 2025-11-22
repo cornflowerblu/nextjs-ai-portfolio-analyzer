@@ -18,6 +18,11 @@ import { isUserAllowed } from './access-control';
  */
 export async function signInWithGoogle() {
   const auth = getFirebaseAuth();
+  
+  if (!auth) {
+    throw new Error('Firebase authentication is not configured. Please contact the administrator.');
+  }
+  
   const provider = new GoogleAuthProvider();
   
   // Force account selection
@@ -64,6 +69,11 @@ export async function signInWithGoogle() {
 export async function signOut() {
   const auth = getFirebaseAuth();
   
+  if (!auth) {
+    console.warn('Firebase authentication is not configured.');
+    return;
+  }
+  
   try {
     // Clear session on server
     await fetch('/api/auth/session', {
@@ -84,6 +94,10 @@ export async function signOut() {
 export function getCurrentUser(): Promise<User | null> {
   const auth = getFirebaseAuth();
   
+  if (!auth) {
+    return Promise.resolve(null);
+  }
+  
   return new Promise((resolve) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       unsubscribe();
@@ -97,6 +111,13 @@ export function getCurrentUser(): Promise<User | null> {
  */
 export function onAuthStateChange(callback: (user: User | null) => void) {
   const auth = getFirebaseAuth();
+  
+  if (!auth) {
+    // Call callback with null immediately if auth not configured
+    callback(null);
+    return () => {}; // Return no-op unsubscribe function
+  }
+  
   return onAuthStateChanged(auth, callback);
 }
 
@@ -105,6 +126,11 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
  */
 export async function getIdToken(): Promise<string | null> {
   const auth = getFirebaseAuth();
+  
+  if (!auth) {
+    return null;
+  }
+  
   const user = auth.currentUser;
   
   if (!user) return null;
