@@ -27,9 +27,9 @@ function initializeFirebaseAdmin() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      'Missing Firebase Admin credentials. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
-    );
+    // During build time, environment variables might not be available
+    // We'll throw the error only when the functions are actually called
+    return null;
   }
 
   return admin.initializeApp({
@@ -41,8 +41,27 @@ function initializeFirebaseAdmin() {
   });
 }
 
-// Initialize on module load
+// Initialize on module load (may return null during build)
 const firebaseAdmin = initializeFirebaseAdmin();
+
+/**
+ * Get Firebase Admin instance, initializing if necessary
+ * Throws error if credentials are missing
+ */
+function getFirebaseAdminInstance() {
+  if (firebaseAdmin) {
+    return firebaseAdmin;
+  }
+
+  // Try to initialize again (in case env vars were not available during module load)
+  const app = initializeFirebaseAdmin();
+  if (!app) {
+    throw new Error(
+      'Missing Firebase Admin credentials. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
+    );
+  }
+  return app;
+}
 
 /**
  * Verify Firebase ID token from Authorization header
@@ -65,7 +84,8 @@ export async function verifyFirebaseToken(idToken: string | null | undefined) {
   }
 
   try {
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+    const app = getFirebaseAdminInstance();
+    const decodedToken = await app.auth().verifyIdToken(idToken);
     return decodedToken;
   } catch (error) {
     throw new Error(`Invalid or expired token: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -112,5 +132,5 @@ export async function getUserFromToken(authorizationHeader: string | null | unde
  * Useful for direct access to Admin SDK features
  */
 export function getFirebaseAdmin() {
-  return firebaseAdmin;
+  return getFirebaseAdminInstance();
 }
