@@ -17,8 +17,11 @@ export function StrategyCards() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const handleCardClick = (strategyId: string, strategyName: string) => {
-    analytics.navigateTo(`lab-${strategyId.toLowerCase()}`);
-    // Also track as a demo trigger
+    // Track navigation to lab page
+    const labPath = `lab-${strategyId.toLowerCase()}`;
+    analytics.navigateTo(labPath);
+    
+    // Also track as a demo trigger for more specific analytics
     analytics.triggerDemo(strategyName);
   };
 
