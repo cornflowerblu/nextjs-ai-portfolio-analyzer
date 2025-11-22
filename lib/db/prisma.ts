@@ -4,8 +4,8 @@
  * This module provides a singleton instance of PrismaClient to prevent
  * creating multiple instances during hot reload in development.
  * 
- * Database URL is configured in prisma.config.ts and uses Vercel's
- * POSTGRES_PRISMA_URL (pooled) with fallback to POSTGRES_URL.
+ * Prisma 7 requires using an adapter. We use @prisma/adapter-pg for PostgreSQL.
+ * Database URL is configured using Vercel's environment variables.
  * 
  * Uses @prisma/adapter-neon for Prisma 7 compatibility in production/development.
  * Test environments use a mocked Prisma client.
@@ -20,6 +20,7 @@ import { PrismaNeon } from '@prisma/adapter-neon';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
 };
 
 /**
@@ -55,7 +56,7 @@ function createPrismaClient() {
 /**
  * Singleton PrismaClient instance
  * 
- * In production, creates a new PrismaClient.
+ * In production, creates a new PrismaClient with PostgreSQL adapter.
  * In development, reuses the same instance to avoid connection exhaustion.
  */
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();

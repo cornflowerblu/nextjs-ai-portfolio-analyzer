@@ -27,9 +27,9 @@ function initializeFirebaseAdmin() {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (!projectId || !clientEmail || !privateKey) {
-    throw new Error(
-      'Missing Firebase Admin credentials. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
-    );
+    // During build time, environment variables might not be available
+    // We'll throw the error only when the functions are actually called
+    return null;
   }
 
   return admin.initializeApp({
@@ -49,6 +49,25 @@ function getFirebaseAdminInstance() {
     firebaseAdmin = initializeFirebaseAdmin();
   }
   return firebaseAdmin;
+}
+
+/**
+ * Get Firebase Admin instance, initializing if necessary
+ * Throws error if credentials are missing
+ */
+function getFirebaseAdminInstance() {
+  if (firebaseAdmin) {
+    return firebaseAdmin;
+  }
+
+  // Try to initialize again (in case env vars were not available during module load)
+  const app = initializeFirebaseAdmin();
+  if (!app) {
+    throw new Error(
+      'Missing Firebase Admin credentials. Please set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY environment variables.'
+    );
+  }
+  return app;
 }
 
 /**
