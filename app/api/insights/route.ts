@@ -5,7 +5,7 @@
 
 import { createTextStream, formatStreamError } from '@/lib/ai/streaming';
 import { SYSTEM_PROMPT, createAnalysisPrompt } from '@/lib/ai/prompts';
-import { validateAICredentials } from '@/lib/ai/client';
+import { validateAICredentials, getAIConfig } from '@/lib/ai/client';
 import type { PerformanceContext } from '@/types/ai';
 import { NextRequest } from 'next/server';
 
@@ -15,10 +15,11 @@ export const maxDuration = 60; // Allow up to 60 seconds for AI streaming
 export async function POST(request: NextRequest) {
   try {
     // Log environment info (without exposing keys)
-    const aiProvider = process.env.AI_PROVIDER || 'openai';
+    const config = getAIConfig();
     const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
     const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
-    console.log('AI Provider:', aiProvider);
+    console.log('AI Provider:', config.provider);
+    console.log('AI Model:', config.model);
     console.log('Has OpenAI key:', hasOpenAIKey);
     console.log('Has Anthropic key:', hasAnthropicKey);
 

@@ -73,18 +73,16 @@ export function StreamingResponse({
 
       const decoder = new TextDecoder();
       let fullText = '';
-      let chunkCount = 0;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          if (chunkCount === 0) {
+          if (fullText.trim() === '') {
             throw new Error('AI service returned an empty response. Please try again.');
           }
           break;
         }
 
-        chunkCount++;
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
 
@@ -101,14 +99,17 @@ export function StreamingResponse({
               } else if (parsed.type === 'suggestions') {
                 setSuggestions(parsed.suggestions);
               } else if (parsed.type === 'error') {
+                // Intentional error from server
                 throw new Error(parsed.content || 'AI service error');
               }
             } catch (parseError) {
-              // If it's a thrown Error from error type, re-throw it
-              if (parseError instanceof Error && parseError.message !== 'Unexpected token') {
-                throw parseError;
+              // Re-throw intentional errors, skip JSON parsing errors
+              if (parseError instanceof SyntaxError) {
+                // Skip JSON parsing errors like "Unexpected token" or "Unexpected end of JSON input"
+                return;
               }
-              // Skip invalid JSON
+              // Re-throw all other errors (including intentional errors from server)
+              throw parseError;
             }
           }
         }
