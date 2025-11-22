@@ -14,9 +14,9 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        node: ['22.x', '24.x']
+        node: ["22.x", "24.x"]
       fail-fast: false
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -38,8 +38,14 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          # Allow test domain for E2E tests
+          NEXT_PUBLIC_ALLOWED_DOMAINS: slingshotgrp.com
 
       - name: Run smoke tests
+        env:
+          # Allow test domain for E2E tests
+          NEXT_PUBLIC_ALLOWED_DOMAINS: slingshotgrp.com
         run: |
           npm run start &
           SERVER_PID=$!
