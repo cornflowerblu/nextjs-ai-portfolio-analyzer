@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
 
 export default function Home() {
@@ -16,12 +17,12 @@ export default function Home() {
             AI-powered insights, and Lighthouse analysis.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <a href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <Link href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               View Dashboard
-            </a>
-            <a href="/lab" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
+            </Link>
+            <Link href="/lab" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
               Try Lab Demos
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -194,13 +195,13 @@ export default function Home() {
             Sign in to access real-time performance metrics, AI-powered insights, and interactive demos.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
+            <Link 
               href="/dashboard" 
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               <span>🚀</span>
               View Dashboard
-            </a>
+            </Link>
             <a 
               href="https://github.com/cornflowerblu/nextjs-ai-portfolio-analyzer" 
               target="_blank"
