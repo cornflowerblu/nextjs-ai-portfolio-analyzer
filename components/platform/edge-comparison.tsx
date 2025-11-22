@@ -50,6 +50,12 @@ export function EdgeComparison() {
         throw new Error('Failed to fetch comparison data');
       }
       const result = await response.json();
+      
+      // Validate the response structure
+      if (!result.edge || !result.serverless) {
+        throw new Error('Invalid response structure');
+      }
+      
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load comparison');
@@ -100,21 +106,29 @@ export function EdgeComparison() {
     return null;
   }
 
+  // Helper function to safely format numbers
+  const safeToFixed = (value: number | null | undefined, decimals: number = 2): string => {
+    if (value == null || isNaN(value)) {
+      return '0.' + '0'.repeat(decimals);
+    }
+    return value.toFixed(decimals);
+  };
+
   const chartData = [
     {
       metric: 'Average',
-      Edge: data.edge.avg.toFixed(2),
-      Serverless: data.serverless.avg.toFixed(2),
+      Edge: safeToFixed(data.edge.avg),
+      Serverless: safeToFixed(data.serverless.avg),
     },
     {
       metric: 'Min',
-      Edge: data.edge.min.toFixed(2),
-      Serverless: data.serverless.min.toFixed(2),
+      Edge: safeToFixed(data.edge.min),
+      Serverless: safeToFixed(data.serverless.min),
     },
     {
       metric: 'Max',
-      Edge: data.edge.max.toFixed(2),
-      Serverless: data.serverless.max.toFixed(2),
+      Edge: safeToFixed(data.edge.max),
+      Serverless: safeToFixed(data.serverless.max),
     },
   ];
 
@@ -133,19 +147,19 @@ export function EdgeComparison() {
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Edge Average</p>
               <p className="text-2xl font-bold text-green-600">
-                {data.edge.avg.toFixed(2)}ms
+                {safeToFixed(data.edge.avg)}ms
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Serverless Average</p>
               <p className="text-2xl font-bold text-orange-600">
-                {data.serverless.avg.toFixed(2)}ms
+                {safeToFixed(data.serverless.avg)}ms
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Speedup</p>
               <p className="text-2xl font-bold text-blue-600">
-                {data.speedup.toFixed(2)}x
+                {safeToFixed(data.speedup)}x
               </p>
             </div>
           </div>

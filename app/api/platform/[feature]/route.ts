@@ -54,43 +54,70 @@ async function handleEdgeVsServerless(request: NextRequest) {
   
   const edgeResults = await Promise.all(
     Array.from({ length: iterations }, async () => {
-      const start = performance.now();
-      const response = await fetch(`${baseUrl}/edge/measure`);
-      const data = await response.json();
-      const totalTime = performance.now() - start;
-      return { ...data, totalTime };
+      try {
+        const start = performance.now();
+        const response = await fetch(`${baseUrl}/edge/measure`);
+        const data = await response.json();
+        const totalTime = performance.now() - start;
+        return { ...data, totalTime };
+      } catch (error) {
+        console.error('Edge function error:', error);
+        return { executionTime: 0, totalTime: 0, type: 'edge', error: true };
+      }
     })
   );
   
   const serverlessResults = await Promise.all(
     Array.from({ length: iterations }, async () => {
-      const start = performance.now();
-      const response = await fetch(`${baseUrl}/api/platform/serverless`);
-      const data = await response.json();
-      const totalTime = performance.now() - start;
-      return { ...data, totalTime };
+      try {
+        const start = performance.now();
+        const response = await fetch(`${baseUrl}/api/platform/serverless`);
+        const data = await response.json();
+        const totalTime = performance.now() - start;
+        return { ...data, totalTime };
+      } catch (error) {
+        console.error('Serverless function error:', error);
+        return { executionTime: 0, totalTime: 0, type: 'serverless', error: true };
+      }
     })
   );
   
-  // Calculate statistics
-  const edgeTimes = edgeResults.map(r => r.executionTime);
-  const serverlessTimes = serverlessResults.map(r => r.executionTime);
+  // Helper function to filter valid execution times
+  const filterValidTimes = (results: Array<{ executionTime?: number }>): number[] => {
+    return results
+      .map(r => r.executionTime)
+      .filter((t): t is number => typeof t === 'number' && !isNaN(t) && t > 0);
+  };
+  
+  // Calculate statistics - filter out invalid results and ensure we have valid numbers
+  const edgeTimes = filterValidTimes(edgeResults);
+  const serverlessTimes = filterValidTimes(serverlessResults);
+  
+  // Ensure we have at least some valid results
+  if (edgeTimes.length === 0 || serverlessTimes.length === 0) {
+    throw new Error('Failed to get valid measurements from endpoints');
+  }
+  
+  const edgeAvg = edgeTimes.reduce((a, b) => a + b, 0) / edgeTimes.length;
+  const serverlessAvg = serverlessTimes.reduce((a, b) => a + b, 0) / serverlessTimes.length;
+  
+  // Calculate speedup with guard against division by zero
+  const speedup = edgeAvg > 0 ? serverlessAvg / edgeAvg : 1;
   
   return NextResponse.json({
     edge: {
       results: edgeResults,
-      avg: edgeTimes.reduce((a, b) => a + b, 0) / edgeTimes.length,
+      avg: edgeAvg,
       min: Math.min(...edgeTimes),
       max: Math.max(...edgeTimes),
     },
     serverless: {
       results: serverlessResults,
-      avg: serverlessTimes.reduce((a, b) => a + b, 0) / serverlessTimes.length,
+      avg: serverlessAvg,
       min: Math.min(...serverlessTimes),
       max: Math.max(...serverlessTimes),
     },
-    speedup: (serverlessTimes.reduce((a, b) => a + b, 0) / serverlessTimes.length) / 
-             (edgeTimes.reduce((a, b) => a + b, 0) / edgeTimes.length),
+    speedup,
   });
 }
 
