@@ -44,13 +44,6 @@ function initializeFirebaseAdmin() {
 // Lazy initialization - only initialize when needed
 let firebaseAdmin: admin.app.App | null = null;
 
-function getFirebaseAdminInstance() {
-  if (!firebaseAdmin) {
-    firebaseAdmin = initializeFirebaseAdmin();
-  }
-  return firebaseAdmin;
-}
-
 /**
  * Get Firebase Admin instance, initializing if necessary
  * Throws error if credentials are missing
