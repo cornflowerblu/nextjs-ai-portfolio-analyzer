@@ -125,6 +125,10 @@ export async function listWebVitalsMetrics(
 ): Promise<ListWebVitalsMetricsResult> {
   const { userId, url, strategy, limit = 50, offset = 0 } = options;
 
+  // Enforce maximum limit for safety (defense-in-depth)
+  const safeLimit = Math.min(Math.max(1, limit), 100);
+  const safeOffset = Math.max(0, offset);
+
   // Build where clause with optional filters
   const where: {
     userId: string;
@@ -143,8 +147,8 @@ export async function listWebVitalsMetrics(
     prisma.webVitalsMetric.findMany({
       where,
       orderBy: { collectedAt: 'desc' },
-      take: limit,
-      skip: offset,
+      take: safeLimit,
+      skip: safeOffset,
     }),
     prisma.webVitalsMetric.count({ where }),
   ]);
