@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { DemoContainer } from '@/components/lab/demo-container';
 import { useDemo } from '@/lib/lab/use-demo';
 import { Badge } from '@/components/ui/badge';
@@ -29,12 +30,17 @@ interface ISRDemoClientProps {
 }
 
 export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
+  const router = useRouter();
   const { metrics, cacheInfo, isLoading, reRender, refresh } = useDemo({
     strategy: 'ISR',
   });
 
   const [timeUntilRevalidation, setTimeUntilRevalidation] = useState(60);
   const [isRevalidating, setIsRevalidating] = useState(false);
+  const [lastRefreshTimestamp, setLastRefreshTimestamp] = useState<number | null>(null);
+
+  // Duration to show revalidation UI state (in milliseconds)
+  const REVALIDATION_DISPLAY_DURATION = 3000;
 
   // Countdown to next revalidation
   useEffect(() => {
@@ -43,10 +49,20 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
       setTimeUntilRevalidation(remaining);
       
-      // Show revalidation state when timer hits zero
-      if (remaining === 0 && !isRevalidating) {
+      // Trigger revalidation when timer hits zero
+      // Only trigger if we haven't already refreshed for this timestamp
+      const timerExpired = remaining === 0;
+      const notCurrentlyRevalidating = !isRevalidating;
+      const notAlreadyRefreshedForThisTimestamp = lastRefreshTimestamp !== isrData.timestamp;
+      const shouldTriggerRevalidation = timerExpired && notCurrentlyRevalidating && notAlreadyRefreshedForThisTimestamp;
+      
+      if (shouldTriggerRevalidation) {
         setIsRevalidating(true);
-        setTimeout(() => setIsRevalidating(false), 3000);
+        setLastRefreshTimestamp(isrData.timestamp);
+        // Trigger Next.js to fetch fresh data from the server
+        router.refresh();
+        // Keep the revalidation UI visible for a few seconds
+        setTimeout(() => setIsRevalidating(false), REVALIDATION_DISPLAY_DURATION);
       }
     };
 
@@ -54,7 +70,7 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating]);
+  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating, lastRefreshTimestamp, router]);
 
   // Merge ISR data with client metrics
   const combinedMetrics = {
