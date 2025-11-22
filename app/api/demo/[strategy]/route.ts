@@ -44,6 +44,7 @@ export async function GET(
   // Get query parameters for cache busting and request tracking
   const searchParams = request.nextUrl.searchParams;
   const requestId = searchParams.get('requestId') || `${strategy}-${Date.now()}`;
+  const simulate = searchParams.get('simulate') === 'true';
 
   // Check if we have cached data for this request
   const cached = metricsStore.get(requestId);
@@ -103,10 +104,18 @@ export async function GET(
     cacheStatus = isCacheHit ? 'hit' : 'miss';
   }
 
+  // For SSG, if simulate is true, generate new build data
+  const buildData = strategy === 'SSG' && simulate ? {
+    buildId: Math.random().toString(36).substring(7),
+    generatedAt: new Date().toISOString(),
+    buildTime: Date.now(),
+  } : undefined;
+
   return NextResponse.json({
     ...metricsData,
     cacheStatus,
     isCacheHit,
+    ...(buildData && { buildData }),
   });
 }
 

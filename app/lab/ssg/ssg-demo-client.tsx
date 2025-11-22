@@ -31,21 +31,58 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
     strategy: 'SSG',
   });
 
+  // Track simulated rebuild data (overrides static data when rebuild is simulated)
+  const [simulatedData, setSimulatedData] = useState<typeof staticData.data | null>(null);
+  const [simulatedBuildTime, setSimulatedBuildTime] = useState<number | null>(null);
+  const [justRebuilt, setJustRebuilt] = useState(false);
+
+  // Use simulated data if available, otherwise use static data
+  const displayData = simulatedData || staticData.data;
+  const displayBuildTime = simulatedBuildTime || staticData.buildTime;
+
   // Calculate age since build (using state to avoid impure function in render)
   const [ageMs, setAgeMs] = useState(0);
 
   useEffect(() => {
     const updateAge = () => {
-      setAgeMs(Date.now() - staticData.buildTime);
+      setAgeMs(Date.now() - displayBuildTime);
     };
     
     updateAge();
     const interval = setInterval(updateAge, 1000);
     return () => clearInterval(interval);
-  }, [staticData.buildTime]);
+  }, [displayBuildTime]);
 
   const ageMinutes = Math.floor(ageMs / 60000);
   const ageSeconds = Math.floor((ageMs % 60000) / 1000);
+
+  // Custom reRender handler for SSG that fetches simulated rebuild data
+  const handleRebuild = async () => {
+    // Fetch simulated rebuild data from API
+    try {
+      const response = await fetch(`/api/demo/ssg?simulate=true&cacheBust=${Date.now()}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.buildData) {
+          setSimulatedData({
+            buildId: data.buildData.buildId,
+            generatedAt: data.buildData.generatedAt,
+            version: staticData.data.version,
+          });
+          setSimulatedBuildTime(data.buildData.buildTime);
+          
+          // Show rebuild animation
+          setJustRebuilt(true);
+          setTimeout(() => setJustRebuilt(false), 2000);
+        }
+      }
+    } catch (error) {
+      console.error('Error simulating rebuild:', error);
+    }
+    
+    // Also call the default reRender to update metrics
+    reRender();
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -64,7 +101,7 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
         metrics={metrics}
         cacheInfo={cacheInfo}
         sourceCode={sourceCode}
-        onReRender={reRender}
+        onReRender={handleRebuild}
         onRefresh={refresh}
         isLoading={isLoading}
       >
@@ -79,60 +116,83 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
 
           {/* Build Info Display */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              justRebuilt ? 'ring-2 ring-green-500 bg-green-50/50 dark:bg-green-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <Package className="h-5 w-5" />
-                <span className="font-semibold">Build Information</span>
+                <span className="font-semibold">
+                  Build Information
+                  {justRebuilt && <span className="ml-2 text-green-600 dark:text-green-400">✨ Updated</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Build ID:</span>{' '}
-                  <Badge variant="secondary" className="font-mono">
-                    {staticData.data.buildId}
+                  <Badge variant="secondary" className={`font-mono transition-all duration-500 ${
+                    justRebuilt ? 'ring-2 ring-green-500 scale-110' : ''
+                  }`}>
+                    {displayData.buildId}
                   </Badge>
                 </p>
                 <p>
                   <span className="text-muted-foreground">Version:</span>{' '}
-                  <Badge variant="outline">{staticData.data.version}</Badge>
+                  <Badge variant="outline">{displayData.version}</Badge>
                 </p>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              justRebuilt ? 'ring-2 ring-green-500 bg-green-50/50 dark:bg-green-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <Zap className="h-5 w-5" />
-                <span className="font-semibold">Performance</span>
+                <span className="font-semibold">
+                  Performance
+                  {justRebuilt && <span className="ml-2 text-green-600 dark:text-green-400">✨ Reset</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Page Age:</span>{' '}
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className={`transition-all duration-500 ${
+                    justRebuilt ? 'ring-2 ring-green-500' : ''
+                  }`}>
                     {ageMinutes}m {ageSeconds}s
                   </Badge>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Built: {new Date(staticData.buildTime).toLocaleString()}
+                  Built: {new Date(displayBuildTime).toLocaleString()}
                 </p>
               </div>
             </div>
           </div>
 
           {/* Static Content Proof */}
-          <div className="border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center">
+          <div className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 ${
+            justRebuilt ? 'ring-4 ring-green-500 bg-green-50 dark:bg-green-950/30 scale-105' : ''
+          }`}>
             <Globe className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <h3 className="font-semibold mb-2">Same for All Visitors</h3>
+            <h3 className="font-semibold mb-2">
+              {justRebuilt ? '🎉 New Build Generated!' : 'Same for All Visitors'}
+            </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              This value was generated at build time and is identical for everyone
+              {justRebuilt 
+                ? 'The page was rebuilt with fresh content!'
+                : 'This value was generated at build time and is identical for everyone'
+              }
             </p>
             <Badge variant="default" className="text-lg px-4 py-2 font-mono">
-              {staticData.data.buildId}
+              {displayData.buildId}
             </Badge>
             <p className="text-xs text-muted-foreground mt-4">
-              Generated at: {staticData.data.generatedAt}
+              Generated at: {displayData.generatedAt}
             </p>
-            <p className="text-xs text-muted-foreground">
-              &quot;Simulate Rebuild&quot; will create a new version
-            </p>
+            {!justRebuilt && (
+              <p className="text-xs text-muted-foreground">
+                &quot;Simulate Rebuild&quot; will create a new version
+              </p>
+            )}
           </div>
 
           {/* Performance Benefits */}
