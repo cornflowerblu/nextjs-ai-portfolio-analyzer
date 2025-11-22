@@ -1,4 +1,6 @@
+import Link from 'next/link';
 import { SiteHeader } from '@/components/site-header';
+import { StrategyCards } from '@/components/strategy-cards';
 
 export default function Home() {
   return (
@@ -16,109 +18,18 @@ export default function Home() {
             AI-powered insights, and Lighthouse analysis.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
-            <a href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <Link href="/dashboard" className="rounded-lg bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
               View Dashboard
-            </a>
-            <a href="/lab" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
+            </Link>
+            <Link href="/lab" className="rounded-lg border border-input bg-background px-8 py-3 text-sm font-medium hover:bg-accent">
               Try Lab Demos
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Strategy Cards Grid */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="mb-8 text-center text-3xl font-bold">Rendering Strategies</h2>
-        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* SSR Card */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-2xl">🔄</span>
-              <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-500">SSR</span>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">Server-Side Rendering</h3>
-            <p className="text-sm text-muted-foreground">
-              Render on every request with always-fresh data
-            </p>
-            <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">FCP</span>
-                <span className="font-mono">--</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">LCP</span>
-                <span className="font-mono">--</span>
-              </div>
-            </div>
-          </div>
-
-          {/* SSG Card */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-2xl">⚡</span>
-              <span className="rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-500">SSG</span>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">Static Site Generation</h3>
-            <p className="text-sm text-muted-foreground">
-              Pre-render at build time for maximum performance
-            </p>
-            <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">FCP</span>
-                <span className="font-mono">--</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">LCP</span>
-                <span className="font-mono">--</span>
-              </div>
-            </div>
-          </div>
-
-          {/* ISR Card */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-2xl">🔄⚡</span>
-              <span className="rounded-full bg-yellow-500/10 px-3 py-1 text-xs font-medium text-yellow-600">ISR</span>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">Incremental Static Regeneration</h3>
-            <p className="text-sm text-muted-foreground">
-              Static generation with periodic revalidation
-            </p>
-            <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">FCP</span>
-                <span className="font-mono">--</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">LCP</span>
-                <span className="font-mono">--</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Cache Components Card */}
-          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-2xl">💾</span>
-              <span className="rounded-full bg-purple-500/10 px-3 py-1 text-xs font-medium text-purple-500">CACHE</span>
-            </div>
-            <h3 className="mb-2 text-lg font-semibold">Cache Components</h3>
-            <p className="text-sm text-muted-foreground">
-              Component-level caching with Next.js 16
-            </p>
-            <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">FCP</span>
-                <span className="font-mono">--</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">LCP</span>
-                <span className="font-mono">--</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <StrategyCards />
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">

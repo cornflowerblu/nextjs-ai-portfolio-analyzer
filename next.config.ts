@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
 
+  experimental: {
+    turbopackUseSystemTlsCerts: true,
+  },
+
   // Optimize bundle
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',

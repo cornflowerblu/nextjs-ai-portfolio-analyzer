@@ -36,6 +36,8 @@ module.exports = {
         'legacy-javascript': ['warn', { maxLength: 5 }], // Allow some legacy JS for compatibility
         'max-potential-fid': ['warn', { minScore: 0.8 }], // 0.87 is still excellent
         'render-blocking-insight': ['warn', { maxLength: 3 }], // Some blocking is acceptable
+        'render-blocking-resources': ['warn', { maxLength: 1 }], // Allow one render-blocking resource (font preload)
+        'label-content-name-mismatch': ['error', { minScore: 0.9 }], // Ensure accessible names match visible text
         // Disable problematic audits that produce NaN or are not applicable
         'color-contrast': 'off',
         'lcp-lazy-loaded': 'off',
