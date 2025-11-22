@@ -106,7 +106,7 @@ export function StreamingResponse({
               // Re-throw intentional errors, skip JSON parsing errors
               if (parseError instanceof SyntaxError) {
                 // Skip JSON parsing errors like "Unexpected token" or "Unexpected end of JSON input"
-                return;
+                continue;
               }
               // Re-throw all other errors (including intentional errors from server)
               throw parseError;
