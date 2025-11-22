@@ -8,12 +8,15 @@ import { CacheDemoClient } from './cache-demo-client';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { createAnalysis } from '@/lib/lab/analyses';
+import { kvGet, kvSet, kvDel } from '@/lib/storage/kv';
 import type { CreateAnalysisActionResult } from '@/types/analysis';
 
 export const metadata = {
   title: 'Cache Components Demo - Next.js 16',
   description: 'Live demonstration of Next.js 16 Cache Components with granular cache control',
 };
+
+const CACHE_KEY = 'cache-demo:cached-content';
 
 const createAnalysisSchema = z.object({
   url: z.string().url('Enter a valid URL (https://example.com)'),
@@ -48,25 +51,60 @@ async function createAnalysisAction(formData: FormData): Promise<CreateAnalysisA
   }
 }
 
-// Cached component - simulates component-level caching
-// In production, this would use 'use cache' directive (Next.js 16+)
+// Server action to clear the cached component
+export async function clearCachedContent() {
+  'use server';
+  await kvDel(CACHE_KEY);
+  revalidatePath('/lab/cache');
+}
+
+// Cached component - truly cached in Redis/KV
+// Simulates 'use cache' directive behavior (Next.js 16+)
 async function CachedContent() {
+  // Try to get cached value
+  const cached = await kvGet<{ timestamp: number; value: string }>(CACHE_KEY);
+  
+  if (cached) {
+    // Cache hit - measure just the retrieval time
+    const startTime = performance.now();
+    await new Promise(resolve => setTimeout(resolve, 2)); // Minimal delay for realism
+    const renderTime = performance.now() - startTime;
+    
+    return {
+      type: 'cached',
+      timestamp: cached.timestamp,
+      renderTime: Math.max(2, renderTime), // Show at least 2ms for cache hit
+      value: cached.value,
+      cacheHit: true,
+    };
+  }
+  
+  // Cache miss - expensive computation
   const startTime = performance.now();
-  await new Promise(resolve => setTimeout(resolve, 25));
+  await new Promise(resolve => setTimeout(resolve, 100)); // Simulate expensive operation
   const renderTime = performance.now() - startTime;
+  
+  const newData = {
+    timestamp: Date.now(),
+    value: Math.random().toString(36).substring(7),
+  };
+  
+  // Store with no expiration (manual invalidation only)
+  await kvSet(CACHE_KEY, newData);
   
   return {
     type: 'cached',
-    timestamp: Date.now(),
+    ...newData,
     renderTime,
-    value: Math.random().toString(36).substring(7),
+    cacheHit: false,
   };
 }
 
-// Dynamic component - always fresh
+// Dynamic component - always fresh, simulates expensive computation
 async function DynamicContent() {
   const startTime = performance.now();
-  await new Promise(resolve => setTimeout(resolve, 10));
+  // Simulate expensive operation (database query, API call, etc.)
+  await new Promise(resolve => setTimeout(resolve, 25));
   const renderTime = performance.now() - startTime;
   
   return {
@@ -119,6 +157,7 @@ export default async function Page() {
         dynamicData={dynamicData}
         sourceCode={sourceCode}
         createAnalysisAction={createAnalysisAction}
+        clearCacheAction={clearCachedContent}
       />
     </Suspense>
   );

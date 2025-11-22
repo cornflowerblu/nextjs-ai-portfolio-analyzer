@@ -64,6 +64,7 @@ interface CacheDemoClientProps {
     timestamp: number;
     renderTime: number;
     value: string;
+    cacheHit?: boolean;
   };
   dynamicData: {
     type: string;
@@ -73,6 +74,7 @@ interface CacheDemoClientProps {
   };
   sourceCode: string;
   createAnalysisAction: CreateAnalysisAction;
+  clearCacheAction: () => Promise<void>;
 }
 
 const STRATEGY_OPTIONS: { label: string; value: AnalysisStrategy; helper: string }[] = [
@@ -171,10 +173,23 @@ export function CacheDemoClient({
   dynamicData,
   sourceCode,
   createAnalysisAction,
+  clearCacheAction,
 }: CacheDemoClientProps) {
-  const { metrics, cacheInfo, isLoading, reRender, refresh } = useDemo({
+  const { metrics, isLoading, reRender, refresh } = useDemo({
     strategy: 'CACHE',
   });
+  
+  // Override cacheInfo with actual cache hit/miss status
+  const cacheInfo = {
+    status: (cachedData.cacheHit ? 'hit' : 'miss') as 'hit' | 'miss',
+    age: cachedData.cacheHit ? Math.floor((Date.now() - cachedData.timestamp) / 1000) : undefined,
+  };
+  
+  // Wrap clearCacheAction to call it and then reRender
+  const handleClearCache = useCallback(async () => {
+    await clearCacheAction();
+    reRender();
+  }, [clearCacheAction, reRender]);
 
   // State for the cached vs live API demo
   const [cachedResponse, setCachedResponse] = useState<CachedRouteResponse | null>(null);
@@ -550,7 +565,7 @@ export function CacheDemoClient({
           metrics={metrics}
           cacheInfo={cacheInfo}
           sourceCode={sourceCode}
-          onReRender={reRender}
+          onReRender={handleClearCache}
           onRefresh={refresh}
           isLoading={isLoading}
         >
