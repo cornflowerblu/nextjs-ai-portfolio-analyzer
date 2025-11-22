@@ -49,14 +49,12 @@ export function StreamingResponse({
     abortControllerRef.current = abortController;
 
     try {
-      console.log('[Client] Starting AI analysis request...');
       const response = await fetch('/api/insights', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ performanceContext: performanceContextRef.current }),
         signal: abortController.signal,
       });
-      console.log('[Client] Response received:', response.status, response.statusText);
 
       if (!response.ok) {
         // Try to parse error message from JSON response
@@ -73,43 +71,27 @@ export function StreamingResponse({
         throw new Error('Response body is not readable');
       }
 
-      console.log('[Client] Starting to read stream...');
       const decoder = new TextDecoder();
       let fullText = '';
       let chunkCount = 0;
 
-      // Set up a timeout warning
-      const timeoutWarning = setTimeout(() => {
-        console.warn('[Client] No chunks received after 10 seconds - stream might be stalled');
-      }, 10000);
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          clearTimeout(timeoutWarning);
-          console.log('[Client] Stream ended. Total chunks received:', chunkCount);
           if (chunkCount === 0) {
-            console.warn('[Client] Stream ended but no chunks were received!');
             throw new Error('AI service returned an empty response. Please try again.');
           }
           break;
         }
 
         chunkCount++;
-        if (chunkCount === 1) {
-          clearTimeout(timeoutWarning);
-          console.log('[Client] First chunk received successfully');
-        }
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
-            if (data === '[DONE]') {
-              console.log('[Client] Received [DONE] signal');
-              continue;
-            }
+            if (data === '[DONE]') continue;
 
             try {
               const parsed = JSON.parse(data);
