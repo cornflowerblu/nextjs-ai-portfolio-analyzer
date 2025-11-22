@@ -28,7 +28,6 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let auth: Auth | null = null;
 let initializationAttempted = false;
-let initializationError: Error | null = null;
 
 export function getFirebaseApp(): FirebaseApp | null {
   if (initializationAttempted && !app) {
@@ -43,7 +42,6 @@ export function getFirebaseApp(): FirebaseApp | null {
       initializationAttempted = true;
     } catch (error) {
       initializationAttempted = true;
-      initializationError = error as Error;
       if (!hasFirebaseConfig()) {
         // Silently fail if no config - expected in CI/test environments
         console.warn('Firebase not configured. Authentication features will be disabled.');
