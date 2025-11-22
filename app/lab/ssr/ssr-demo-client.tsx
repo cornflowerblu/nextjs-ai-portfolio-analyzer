@@ -5,6 +5,7 @@
 
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { DemoContainer } from '@/components/lab/demo-container';
 import { useDemo } from '@/lib/lab/use-demo';
 import { Badge } from '@/components/ui/badge';
@@ -31,12 +32,29 @@ export function SSRDemoClient({ serverData, sourceCode }: SSRDemoClientProps) {
     strategy: 'SSR',
   });
 
+  const [justRendered, setJustRendered] = useState(true);
+  const previousValueRef = useRef(serverData.data.randomValue);
+
   // Merge server data with client metrics
   const combinedMetrics = {
     ...metrics,
     renderTime: serverData.renderTime,
     timestamp: serverData.timestamp,
   };
+
+  // Detect when new data arrives and trigger flash animation
+  useEffect(() => {
+    if (serverData.data.randomValue !== previousValueRef.current) {
+      previousValueRef.current = serverData.data.randomValue;
+      // Use setTimeout to avoid setState in effect warning
+      const renderTimer = setTimeout(() => setJustRendered(true), 0);
+      const hideTimer = setTimeout(() => setJustRendered(false), 2000);
+      return () => {
+        clearTimeout(renderTimer);
+        clearTimeout(hideTimer);
+      };
+    }
+  }, [serverData.data.randomValue]);
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -70,32 +88,48 @@ export function SSRDemoClient({ serverData, sourceCode }: SSRDemoClientProps) {
 
           {/* Server Data Display */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              justRendered ? 'ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <Server className="h-5 w-5" />
-                <span className="font-semibold">Server Processing</span>
+                <span className="font-semibold">
+                  Server Processing
+                  {justRendered && <span className="ml-2 text-blue-600 dark:text-blue-400">✨ Fresh</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Render Time:</span>{' '}
-                  <Badge variant="secondary">{serverData.renderTime.toFixed(2)}ms</Badge>
+                  <Badge variant="secondary" className={`transition-all duration-500 ${
+                    justRendered ? 'ring-2 ring-blue-500' : ''
+                  }`}>{serverData.renderTime.toFixed(2)}ms</Badge>
                 </p>
                 <p>
                   <span className="text-muted-foreground">Request #:</span>{' '}
-                  <Badge variant="outline">{serverData.data.requestCount}</Badge>
+                  <Badge variant="outline" className={`transition-all duration-500 ${
+                    justRendered ? 'ring-2 ring-blue-500' : ''
+                  }`}>{serverData.data.requestCount}</Badge>
                 </p>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              justRendered ? 'ring-2 ring-blue-500 bg-blue-50/50 dark:bg-blue-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <Clock className="h-5 w-5" />
-                <span className="font-semibold">Timestamp</span>
+                <span className="font-semibold">
+                  Timestamp
+                  {justRendered && <span className="ml-2 text-blue-600 dark:text-blue-400">✨ New</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Generated:</span>{' '}
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className={`transition-all duration-500 ${
+                    justRendered ? 'ring-2 ring-blue-500' : ''
+                  }`}>
                     {new Date(serverData.timestamp).toLocaleTimeString()}
                   </Badge>
                 </p>
@@ -107,17 +141,31 @@ export function SSRDemoClient({ serverData, sourceCode }: SSRDemoClientProps) {
           </div>
 
           {/* Dynamic Content Proof */}
-          <div className="border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center">
-            <Database className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <h3 className="font-semibold mb-2">Fresh Data on Every Request</h3>
+          <div className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 ${
+            justRendered ? 'ring-4 ring-blue-500 bg-blue-50 dark:bg-blue-950/30 scale-105' : ''
+          }`}>
+            <Database className={`h-8 w-8 mx-auto mb-2 text-primary transition-all duration-500 ${
+              justRendered ? 'scale-125 text-blue-600' : ''
+            }`} />
+            <h3 className="font-semibold mb-2">
+              {justRendered ? '🎉 Just Rendered!' : 'Fresh Data on Every Request'}
+            </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              This unique value proves the page was server-rendered just now
+              {justRendered 
+                ? 'This value was generated on the server just for you!'
+                : 'This unique value proves the page was server-rendered just now'
+              }
             </p>
-            <Badge variant="default" className="text-lg px-4 py-2 font-mono">
+            <Badge variant="default" className={`text-lg px-4 py-2 font-mono transition-all duration-500 ${
+              justRendered ? 'ring-2 ring-blue-500 scale-110' : ''
+            }`}>
               {serverData.data.randomValue}
             </Badge>
-            <p className="text-xs text-muted-foreground mt-2">
-              Click &quot;Trigger New Request&quot; to generate a new value
+            <p className="text-xs text-muted-foreground mt-4">
+              {justRendered 
+                ? 'Click "Trigger New Request" to see a different value'
+                : 'Click "Trigger New Request" to generate a new value'
+              }
             </p>
           </div>
 
