@@ -5,11 +5,48 @@
 
 import { Suspense } from 'react';
 import { CacheDemoClient } from './cache-demo-client';
+import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { createAnalysis } from '@/lib/lab/analyses';
+import type { CreateAnalysisActionResult } from '@/types/analysis';
 
 export const metadata = {
   title: 'Cache Components Demo - Next.js 16',
   description: 'Live demonstration of Next.js 16 Cache Components with granular cache control',
 };
+
+const createAnalysisSchema = z.object({
+  url: z.string().url('Enter a valid URL (https://example.com)'),
+  strategy: z.enum(['SSR', 'SSG', 'ISR', 'CACHE', 'DYNAMIC']),
+  score: z.coerce.number().int().min(0).max(100),
+});
+
+async function createAnalysisAction(formData: FormData): Promise<CreateAnalysisActionResult> {
+  'use server';
+
+  const parsed = createAnalysisSchema.safeParse({
+    url: formData.get('url'),
+    strategy: formData.get('strategy'),
+    score: formData.get('score'),
+  });
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? 'Invalid form submission',
+    };
+  }
+
+  try {
+    await createAnalysis(parsed.data);
+    revalidatePath('/api/analyses');
+    revalidatePath('/lab/cache');
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to save analysis';
+    return { success: false, error: message };
+  }
+}
 
 // Cached component - simulates component-level caching
 // In production, this would use 'use cache' directive (Next.js 16+)
@@ -81,6 +118,7 @@ export default async function Page() {
         cachedData={cachedData}
         dynamicData={dynamicData}
         sourceCode={sourceCode}
+        createAnalysisAction={createAnalysisAction}
       />
     </Suspense>
   );
