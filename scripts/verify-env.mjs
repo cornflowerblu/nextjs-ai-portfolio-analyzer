@@ -21,7 +21,7 @@ function check(name, range) {
   let parsed;
   try {
     parsed = JSON.parse(result || '{}');
-  } catch (parseError) {
+  } catch {
     console.error(`❌ Failed to parse package info for ${name}`);
     process.exit(1);
   }
