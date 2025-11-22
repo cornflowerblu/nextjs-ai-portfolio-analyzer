@@ -126,7 +126,11 @@ export async function listWebVitalsMetrics(
   const { userId, url, strategy, limit = 50, offset = 0 } = options;
 
   // Build where clause with optional filters
-  const where: any = { userId };
+  const where: {
+    userId: string;
+    url?: string;
+    strategy?: RenderingStrategy;
+  } = { userId };
   if (url) {
     where.url = url;
   }

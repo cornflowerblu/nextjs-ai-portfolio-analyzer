@@ -10,6 +10,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createWebVitalsMetric, listWebVitalsMetrics } from '@/lib/db/web-vitals';
 import { prisma } from '@/lib/db/prisma';
+import type { WebVitalsMetric } from '@/lib/generated/prisma';
 
 // Mock Prisma client
 vi.mock('@/lib/db/prisma', () => ({
@@ -146,7 +147,7 @@ describe('Web Vitals Database Functions', () => {
         },
       ];
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(1);
 
       const result = await listWebVitalsMetrics({ userId });
@@ -179,7 +180,7 @@ describe('Web Vitals Database Functions', () => {
         },
       ];
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(1);
 
       const result = await listWebVitalsMetrics({ userId, url });
@@ -211,7 +212,7 @@ describe('Web Vitals Database Functions', () => {
         },
       ];
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(1);
 
       const result = await listWebVitalsMetrics({ userId, strategy });
@@ -244,7 +245,7 @@ describe('Web Vitals Database Functions', () => {
         },
       ];
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(1);
 
       const result = await listWebVitalsMetrics({ userId, url, strategy });
@@ -275,7 +276,7 @@ describe('Web Vitals Database Functions', () => {
         collectedAt: new Date(),
       }));
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(100);
 
       const result = await listWebVitalsMetrics({ userId, limit });
@@ -306,7 +307,7 @@ describe('Web Vitals Database Functions', () => {
         collectedAt: new Date(),
       }));
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(100);
 
       const result = await listWebVitalsMetrics({ userId, limit, offset });
@@ -337,7 +338,7 @@ describe('Web Vitals Database Functions', () => {
         collectedAt: new Date(),
       }));
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(100);
 
       const result = await listWebVitalsMetrics({ userId, limit, offset });
@@ -390,7 +391,7 @@ describe('Web Vitals Database Functions', () => {
         },
       ];
 
-      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as any);
+      vi.mocked(prisma.webVitalsMetric.findMany).mockResolvedValue(mockMetrics as unknown as WebVitalsMetric[]);
       vi.mocked(prisma.webVitalsMetric.count).mockResolvedValue(3);
 
       const result = await listWebVitalsMetrics({ userId });

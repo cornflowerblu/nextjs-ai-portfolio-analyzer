@@ -9,6 +9,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
+import type { DecodedIdToken } from 'firebase-admin/auth';
+import type { WebVitalsMetric } from '@/lib/generated/prisma';
 
 // Mock dependencies BEFORE imports - this is crucial for hoisting
 vi.mock('@/lib/auth/firebase-admin');
@@ -47,11 +49,11 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     // Mock database operation
-    vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as any);
+    vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as unknown as WebVitalsMetric);
 
     const request = new NextRequest('http://localhost:3000/api/web-vitals', {
       method: 'POST',
@@ -138,7 +140,7 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     const request = new NextRequest('http://localhost:3000/api/web-vitals', {
@@ -166,7 +168,7 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     const request = new NextRequest('http://localhost:3000/api/web-vitals', {
@@ -197,7 +199,7 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     for (const strategy of strategies) {
@@ -214,7 +216,7 @@ describe('POST /api/web-vitals (T035)', () => {
         collectedAt: new Date(),
       };
 
-      vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as any);
+      vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as unknown as WebVitalsMetric);
 
       const request = new NextRequest('http://localhost:3000/api/web-vitals', {
         method: 'POST',
@@ -241,7 +243,7 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.createWebVitalsMetric).mockRejectedValue(new Error('Database error'));
@@ -290,10 +292,10 @@ describe('POST /api/web-vitals (T035)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
-    vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as any);
+    vi.mocked(webVitalsDb.createWebVitalsMetric).mockResolvedValue(mockCreatedMetric as unknown as WebVitalsMetric);
 
     const request = new NextRequest('http://localhost:3000/api/web-vitals', {
       method: 'POST',
@@ -341,11 +343,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: mockMetrics as any,
+      metrics: mockMetrics as unknown as WebVitalsMetric[],
       total: 1,
       hasMore: false,
     });
@@ -387,11 +389,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: mockMetrics as any,
+      metrics: mockMetrics as unknown as WebVitalsMetric[],
       total: 1,
       hasMore: false,
     });
@@ -403,7 +405,6 @@ describe('GET /api/web-vitals (T036)', () => {
     });
 
     const response = await GET(request);
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(webVitalsDb.listWebVitalsMetrics).toHaveBeenCalledWith(
@@ -435,11 +436,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: mockMetrics as any,
+      metrics: mockMetrics as unknown as WebVitalsMetric[],
       total: 1,
       hasMore: false,
     });
@@ -451,7 +452,6 @@ describe('GET /api/web-vitals (T036)', () => {
     });
 
     const response = await GET(request);
-    const data = await response.json();
 
     expect(response.status).toBe(200);
     expect(webVitalsDb.listWebVitalsMetrics).toHaveBeenCalledWith(
@@ -470,11 +470,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: [] as any,
+      metrics: [] as WebVitalsMetric[],
       total: 0,
       hasMore: false,
     });
@@ -507,11 +507,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: [] as any,
+      metrics: [] as WebVitalsMetric[],
       total: 100,
       hasMore: true,
     });
@@ -541,11 +541,11 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
-      metrics: [] as any,
+      metrics: [] as WebVitalsMetric[],
       total: 100,
       hasMore: true,
     });
@@ -601,7 +601,7 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockRejectedValue(new Error('Database error'));
@@ -625,7 +625,7 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     vi.mocked(webVitalsDb.listWebVitalsMetrics).mockResolvedValue({
@@ -655,7 +655,7 @@ describe('GET /api/web-vitals (T036)', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as DecodedIdToken,
     });
 
     const request = new NextRequest('http://localhost:3000/api/web-vitals?strategy=INVALID', {
