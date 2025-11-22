@@ -1,0 +1,238 @@
+openapi: 3.1.0
+info:
+  title: Rendering Strategy Analyzer Persistence API
+  version: 0.1.0
+  description: User-scoped endpoints for analyses, web vitals, lighthouse tests, and reports.
+servers:
+  - url: https://localhost:3000
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RenderingStrategy:
+      type: string
+      enum: [SSR, SSG, ISR, CACHE]
+    AnalysisSession:
+      type: object
+      required: [id, userId, url, summary, recommendations, createdAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        url: { type: string, format: uri }
+        summary: { type: string }
+        recommendations: { type: string }
+        createdAt: { type: string, format: date-time }
+    WebVitalsMetric:
+      type: object
+      required: [id, userId, url, strategy, collectedAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        url: { type: string, format: uri }
+        strategy: { $ref: "#/components/schemas/RenderingStrategy" }
+        lcpMs: { type: number, minimum: 0, nullable: true }
+        cls: { type: number, minimum: 0, maximum: 1, nullable: true }
+        inpMs: { type: number, minimum: 0, nullable: true }
+        fidMs: { type: number, minimum: 0, nullable: true }
+        ttfbMs: { type: number, minimum: 0, nullable: true }
+        collectedAt: { type: string, format: date-time }
+    LighthouseTest:
+      type: object
+      required:
+        [
+          id,
+          userId,
+          url,
+          performance,
+          accessibility,
+          bestPractices,
+          seo,
+          createdAt,
+        ]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        url: { type: string, format: uri }
+        performance: { type: integer, minimum: 0, maximum: 100 }
+        accessibility: { type: integer, minimum: 0, maximum: 100 }
+        bestPractices: { type: integer, minimum: 0, maximum: 100 }
+        seo: { type: integer, minimum: 0, maximum: 100 }
+        createdAt: { type: string, format: date-time }
+    Report:
+      type: object
+      required: [id, userId, format, status, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        format: { type: string, enum: [PDF, MARKDOWN, JSON] }
+        status: { type: string, enum: [pending, processing, ready, failed] }
+        storageKey: { type: string, nullable: true }
+        url: { type: string, format: uri, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+  parameters:
+    PageLimit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    PageCursor:
+      name: cursor
+      in: query
+      schema: { type: string, nullable: true }
+    UrlParam:
+      name: url
+      in: query
+      schema: { type: string, format: uri }
+    StrategyParam:
+      name: strategy
+      in: query
+      schema: { $ref: "#/components/schemas/RenderingStrategy" }
+paths:
+  /api/analyses:
+    get:
+      summary: List analysis sessions (current user)
+      parameters:
+        [
+          { $ref: "#/components/parameters/PageLimit" },
+          { $ref: "#/components/parameters/PageCursor" },
+        ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/AnalysisSession" }
+                  nextCursor: { type: string, nullable: true }
+    post:
+      summary: Create analysis session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, summary, recommendations]
+              properties:
+                url: { type: string, format: uri }
+                summary: { type: string }
+                recommendations: { type: string }
+      responses:
+        "201": { description: Created }
+  /api/web-vitals:
+    get:
+      summary: List Web Vitals (current user)
+      parameters:
+        - { $ref: "#/components/parameters/UrlParam" }
+        - { $ref: "#/components/parameters/StrategyParam" }
+        - { $ref: "#/components/parameters/PageLimit" }
+        - { $ref: "#/components/parameters/PageCursor" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/WebVitalsMetric" }
+                  nextCursor: { type: string, nullable: true }
+    post:
+      summary: Create Web Vitals entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, strategy]
+              properties:
+                url: { type: string, format: uri }
+                strategy: { $ref: "#/components/schemas/RenderingStrategy" }
+                lcpMs: { type: number, minimum: 0, nullable: true }
+                cls: { type: number, minimum: 0, maximum: 1, nullable: true }
+                inpMs: { type: number, minimum: 0, nullable: true }
+                fidMs: { type: number, minimum: 0, nullable: true }
+                ttfbMs: { type: number, minimum: 0, nullable: true }
+      responses:
+        "201": { description: Created }
+  /api/lighthouse:
+    get:
+      summary: List Lighthouse tests (current user)
+      parameters:
+        - { $ref: "#/components/parameters/UrlParam" }
+        - { $ref: "#/components/parameters/PageLimit" }
+        - { $ref: "#/components/parameters/PageCursor" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/LighthouseTest" }
+                  nextCursor: { type: string, nullable: true }
+    post:
+      summary: Create Lighthouse test record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url, performance, accessibility, bestPractices, seo]
+              properties:
+                url: { type: string, format: uri }
+                performance: { type: integer, minimum: 0, maximum: 100 }
+                accessibility: { type: integer, minimum: 0, maximum: 100 }
+                bestPractices: { type: integer, minimum: 0, maximum: 100 }
+                seo: { type: integer, minimum: 0, maximum: 100 }
+      responses:
+        "201": { description: Created }
+  /api/reports:
+    get:
+      summary: List reports (current user)
+      parameters:
+        [
+          { $ref: "#/components/parameters/PageLimit" },
+          { $ref: "#/components/parameters/PageCursor" },
+        ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items: { $ref: "#/components/schemas/Report" }
+                  nextCursor: { type: string, nullable: true }
+    post:
+      summary: Request report generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format]
+              properties:
+                format: { type: string, enum: [PDF, MARKDOWN, JSON] }
+      responses:
+        "202": { description: Accepted }
