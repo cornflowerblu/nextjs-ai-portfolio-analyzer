@@ -4,6 +4,7 @@
  */
 
 import { SignInButton } from '@/components/auth/sign-in-button';
+import { SiteHeader } from '@/components/site-header';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
+    <>
+      <SiteHeader />
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           {/* Logo/Title */}
@@ -56,5 +59,6 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }
