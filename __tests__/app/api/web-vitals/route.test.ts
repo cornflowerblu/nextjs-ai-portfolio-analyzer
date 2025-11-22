@@ -15,6 +15,15 @@ import type { WebVitalsMetric } from '@/lib/generated/prisma';
 // Mock dependencies BEFORE imports - this is crucial for hoisting
 vi.mock('@/lib/auth/firebase-admin');
 vi.mock('@/lib/db/web-vitals');
+vi.mock('@/lib/db/prisma', () => ({
+  prisma: {
+    webVitalsMetric: {
+      create: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn(),
+    },
+  },
+}));
 
 // Now import the mocked modules and the route
 import * as firebaseAdmin from '@/lib/auth/firebase-admin';

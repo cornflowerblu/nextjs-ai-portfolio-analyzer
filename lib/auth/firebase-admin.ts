@@ -72,8 +72,8 @@ export async function verifyFirebaseToken(idToken: string | null | undefined) {
   }
 
   try {
-    const admin = getFirebaseAdminInstance();
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const app = getFirebaseAdmin();
+    const decodedToken = await app.auth().verifyIdToken(idToken);
     return decodedToken;
   } catch (error) {
     throw new Error(`Invalid or expired token: ${error instanceof Error ? error.message : 'Unknown error'}`);
