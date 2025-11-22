@@ -78,7 +78,7 @@ export function StreamingResponse({
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          if (chunkCount === 0) {
+          if (fullText.trim() === '') {
             throw new Error('AI service returned an empty response. Please try again.');
           }
           break;
