@@ -29,6 +29,72 @@ function isValidStrategy(strategy: string): strategy is RenderingStrategy {
 }
 
 /**
+ * Validation ranges for Web Vitals metrics
+ * Based on web.dev/vitals and practical production limits
+ */
+const METRIC_RANGES = {
+  lcpMs: { min: 0, max: 60000 },    // 1 minute max - beyond this indicates timeout
+  cls: { min: 0, max: 100 },         // Generous upper bound for layout shift score
+  inpMs: { min: 0, max: 10000 },    // 10 seconds max - users won't wait longer
+  fidMs: { min: 0, max: 10000 },    // 10 seconds max - same as INP
+  ttfbMs: { min: 0, max: 60000 },   // 1 minute max - same as LCP
+} as const;
+
+type MetricName = keyof typeof METRIC_RANGES;
+
+/**
+ * Validate and convert a metric value
+ * Protects against NaN, negative values, extreme values, and type coercion attacks
+ *
+ * @param value - The value to validate
+ * @param metricName - Name of the metric for error messages
+ * @returns The validated number or null if undefined
+ * @throws Error with descriptive message if invalid
+ */
+function validateMetricValue(
+  value: unknown,
+  metricName: MetricName
+): number | null {
+  if (value === undefined) return null;
+
+  // Reject null explicitly - forces clients to use undefined for optional fields
+  if (value === null) {
+    throw new Error(`${metricName} cannot be null`);
+  }
+
+  // Reject non-numeric types before conversion to prevent type coercion
+  // This catches: booleans, arrays, objects, empty strings
+  const valueType = typeof value;
+  if (valueType !== 'number') {
+    // Allow numeric strings only if they're not empty
+    if (valueType === 'string' && value !== '') {
+      // Continue to number conversion for numeric strings
+    } else {
+      throw new Error(`${metricName} must be a valid number, received: ${JSON.stringify(value)}`);
+    }
+  }
+
+  const num = Number(value);
+
+  // Catches: NaN from Number("abc"), Number([1,2]), Number({}), etc.
+  if (isNaN(num)) {
+    throw new Error(`${metricName} must be a valid number, received: ${JSON.stringify(value)}`);
+  }
+
+  // Catches: Infinity, -Infinity (though JSON serialization converts these to null)
+  if (!isFinite(num)) {
+    throw new Error(`${metricName} must be finite`);
+  }
+
+  const { min, max } = METRIC_RANGES[metricName];
+  if (num < min || num > max) {
+    throw new Error(`${metricName} must be between ${min} and ${max}, received: ${num}`);
+  }
+
+  return num;
+}
+
+/**
  * T039: POST /api/web-vitals
  * 
  * Create a new Web Vitals metric record.
@@ -98,7 +164,7 @@ export async function POST(request: NextRequest) {
     // Validate strategy value
     if (!isValidStrategy(strategy)) {
       return NextResponse.json(
-        { 
+        {
           error: `Invalid strategy. Must be one of: ${VALID_STRATEGIES.join(', ')}`,
           received: strategy,
         },
@@ -106,16 +172,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create metric
+    // Validate and convert metric values
+    let validatedMetrics;
+    try {
+      validatedMetrics = {
+        lcpMs: validateMetricValue(lcpMs, 'lcpMs'),
+        cls: validateMetricValue(cls, 'cls'),
+        inpMs: validateMetricValue(inpMs, 'inpMs'),
+        fidMs: validateMetricValue(fidMs, 'fidMs'),
+        ttfbMs: validateMetricValue(ttfbMs, 'ttfbMs'),
+      };
+    } catch (error) {
+      // Handle validation errors with 400 Bad Request
+      if (error instanceof Error) {
+        return NextResponse.json(
+          { error: error.message },
+          { status: 400 }
+        );
+      }
+      throw error;
+    }
+
+    // Create metric with validated values
     const metric = await createWebVitalsMetric({
       userId,
       url,
       strategy,
-      lcpMs: lcpMs !== undefined ? Number(lcpMs) : null,
-      cls: cls !== undefined ? Number(cls) : null,
-      inpMs: inpMs !== undefined ? Number(inpMs) : null,
-      fidMs: fidMs !== undefined ? Number(fidMs) : null,
-      ttfbMs: ttfbMs !== undefined ? Number(ttfbMs) : null,
+      ...validatedMetrics,
     });
 
     return NextResponse.json({ metric }, { status: 201 });
