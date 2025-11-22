@@ -43,6 +43,21 @@ export async function GET(
   }
 }
 
+// Type for measurement results
+type MeasurementResult = {
+  type: 'edge' | 'serverless';
+  executionTime: number;
+  totalTime: number;
+  error?: boolean;
+  httpStatus?: number;
+  httpStatusText?: string;
+  errorMessage?: string;
+  coldStart?: boolean;
+  timestamp?: string;
+  result?: number;
+  region?: string;
+};
+
 /**
  * Handle Edge vs Serverless comparison
  */
@@ -52,17 +67,46 @@ async function handleEdgeVsServerless(request: NextRequest) {
   // Fetch from both endpoints
   const baseUrl = request.nextUrl.origin;
   
+  // Log diagnostic information
+  console.log('[Edge vs Serverless] Starting comparison', {
+    baseUrl,
+    iterations,
+    host: request.nextUrl.host,
+    protocol: request.nextUrl.protocol,
+  });
+  
   const edgeResults = await Promise.all(
     Array.from({ length: iterations }, async () => {
       try {
         const start = performance.now();
-        const response = await fetch(`${baseUrl}/edge/measure`);
+        const url = `${baseUrl}/edge/measure`;
+        console.log('[Edge] Fetching:', url);
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error('[Edge] HTTP error:', response.status, response.statusText);
+          return { 
+            executionTime: 0, 
+            totalTime: 0, 
+            type: 'edge', 
+            error: true,
+            httpStatus: response.status,
+            httpStatusText: response.statusText
+          };
+        }
+        
         const data = await response.json();
         const totalTime = performance.now() - start;
         return { ...data, totalTime };
       } catch (error) {
-        console.error('Edge function error:', error);
-        return { executionTime: 0, totalTime: 0, type: 'edge', error: true };
+        console.error('[Edge] Fetch error:', error);
+        return { 
+          executionTime: 0, 
+          totalTime: 0, 
+          type: 'edge', 
+          error: true,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        };
       }
     })
   );
@@ -71,13 +115,34 @@ async function handleEdgeVsServerless(request: NextRequest) {
     Array.from({ length: iterations }, async () => {
       try {
         const start = performance.now();
-        const response = await fetch(`${baseUrl}/api/platform/serverless`);
+        const url = `${baseUrl}/api/platform/serverless`;
+        console.log('[Serverless] Fetching:', url);
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error('[Serverless] HTTP error:', response.status, response.statusText);
+          return { 
+            executionTime: 0, 
+            totalTime: 0, 
+            type: 'serverless', 
+            error: true,
+            httpStatus: response.status,
+            httpStatusText: response.statusText
+          };
+        }
+        
         const data = await response.json();
         const totalTime = performance.now() - start;
         return { ...data, totalTime };
       } catch (error) {
-        console.error('Serverless function error:', error);
-        return { executionTime: 0, totalTime: 0, type: 'serverless', error: true };
+        console.error('[Serverless] Fetch error:', error);
+        return { 
+          executionTime: 0, 
+          totalTime: 0, 
+          type: 'serverless', 
+          error: true,
+          errorMessage: error instanceof Error ? error.message : 'Unknown error'
+        };
       }
     })
   );
@@ -93,9 +158,33 @@ async function handleEdgeVsServerless(request: NextRequest) {
   const edgeTimes = filterValidTimes(edgeResults);
   const serverlessTimes = filterValidTimes(serverlessResults);
   
+  // Log diagnostic information about results
+  console.log('[Results] Edge times:', edgeTimes.length, 'valid out of', edgeResults.length);
+  console.log('[Results] Serverless times:', serverlessTimes.length, 'valid out of', serverlessResults.length);
+  
   // Ensure we have at least some valid results
   if (edgeTimes.length === 0 || serverlessTimes.length === 0) {
-    throw new Error('Failed to get valid measurements from endpoints');
+    const edgeFailedResults = edgeResults.filter((r: MeasurementResult) => r.error);
+    const serverlessFailedResults = serverlessResults.filter((r: MeasurementResult) => r.error);
+    
+    const errorDetails = {
+      message: 'Failed to get valid measurements from endpoints',
+      baseUrl,
+      edgeFailures: edgeFailedResults.length,
+      serverlessFailures: serverlessFailedResults.length,
+      edgeErrors: edgeFailedResults.map((r: MeasurementResult) => ({
+        httpStatus: r.httpStatus,
+        httpStatusText: r.httpStatusText,
+        errorMessage: r.errorMessage,
+      })),
+      serverlessErrors: serverlessFailedResults.map((r: MeasurementResult) => ({
+        httpStatus: r.httpStatus,
+        httpStatusText: r.httpStatusText,
+        errorMessage: r.errorMessage,
+      })),
+    };
+    console.error('[Error] Detailed failure information:', errorDetails);
+    throw new Error(JSON.stringify(errorDetails));
   }
   
   const edgeAvg = edgeTimes.reduce((a, b) => a + b, 0) / edgeTimes.length;
