@@ -7,6 +7,8 @@ import {
   isRedisReady,
 } from '@/lib/lab/analyses';
 
+// Explicitly use Node.js runtime since analyses.ts imports Redis client
+export const runtime = 'nodejs';
 export const revalidate = 60;
 export const fetchCache = 'force-cache';
 
