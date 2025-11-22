@@ -62,7 +62,7 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating]);
+  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating, router]);
 
   // Merge ISR data with client metrics
   const combinedMetrics = {
