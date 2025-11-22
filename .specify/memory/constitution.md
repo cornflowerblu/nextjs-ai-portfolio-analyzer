@@ -2,20 +2,16 @@
 ═══════════════════════════════════════════════════════════════════════════════
 SYNC IMPACT REPORT - Constitution Amendment
 ═══════════════════════════════════════════════════════════════════════════════
-Version Change: 1.0.0 → 1.1.0 (MINOR)
-Rationale: Added new principle (Principle VIII) for data persistence and 
-           historical tracking capabilities. Material expansion of technical
-           architecture to include database layer with Prisma, Neon, and 
-           Firebase Auth integration.
+Version Change: 1.1.0 → 1.2.0 (MINOR)
+Rationale: Added Specifications Governance section and registered spec003
+           (Prisma + Neon Postgres + Firebase Auth integration) to formalize
+           spec process alignment with constitutional principles.
 
 Modified Principles:
   - NONE (existing principles unchanged)
 
 Added Sections:
-  - Principle VIII: Data Persistence & Historical Tracking
-  - Database architecture requirements in Technical Constraints
-  - Database performance standards
-  - Authentication and data protection in Security Requirements
+  - Specifications Governance (under Governance)
 
 Removed Sections:
   - NONE
@@ -76,7 +72,7 @@ All performance metrics, AI analyses, and user interactions must be persisted fo
 
 - **Framework**: Next.js 16 with Cache Components enabled
 - **Runtime**: Edge runtime for performance-critical paths, Node.js for complex operations
-- **Database**: 
+- **Database**:
   - Vercel Postgres (Neon) for persistent data storage
   - Prisma ORM for type-safe database operations and migrations
   - Vercel KV (Redis) for caching and real-time metrics
@@ -143,40 +139,64 @@ All performance metrics, AI analyses, and user interactions must be persisted fo
 
 Constitution supersedes all implementation decisions. Performance regressions require immediate rollback or remediation. All architectural decisions must reference constitutional articles. Complexity must be justified by measurable performance gains > 20%. Breaking changes require migration guide and 2-week deprecation notice.
 
-**Version**: 1.1.0 | **Ratified**: 2024-11-18 | **Last Amended**: 2025-11-22
+### Specifications Governance
+
+- Specification IDs follow `specNNN` numbering and live under `/specs`.
+- Each spec must map user stories, functional requirements, entities, and
+  measurable success criteria to relevant constitutional principles.
+- Any spec introducing a new non-functional budget (e.g., DB latency) MUST
+  add it to Performance Standards via a MINOR constitution amendment.
+- Security-impacting changes (auth, data protection) require review against
+  Security Requirements and explicit sign-off.
+
+Registered Specifications:
+
+- spec003 — Prisma schema + Neon Postgres pooling + Firebase Auth integration
+  for data persistence, historical tracking, and per-user dashboards.
+  Scope: User, AnalysisSession, WebVitalsMetric, LighthouseTest, Report; all
+  associated to Firebase UID; indices for `userId+timestamp` and
+  `userId+url+strategy`.
+
+**Version**: 1.2.0 | **Ratified**: 2024-11-18 | **Last Amended**: 2025-11-22
 
 ## Implementation Estimate
 
 **Assumption**: Parallel execution with specialized agent "army" (multiple agents working concurrently on independent tasks)
 
 ### Database Integration Scope
+
 Adding Prisma + Neon + Firebase Auth integration to existing Next.js 16 application requires:
 
 **Phase 1: Database Foundation** (2-3 hours with parallel agents)
+
 - Prisma setup, schema design, and initial migration
 - Firebase Auth configuration and middleware
 - Database connection pooling and environment setup
 - **Parallelizable**: Schema design, auth setup, connection config (3 agents)
 
 **Phase 2: Core Entities** (3-4 hours with parallel agents)
+
 - User model with Firebase UID integration
 - LighthouseTest, AnalysisSession, WebVitalsMetric models
 - Relationships and indexes
 - **Parallelizable**: Each entity by separate agent (4 agents)
 
 **Phase 3: API Integration** (4-5 hours with parallel agents)
+
 - Protected API routes with auth middleware
 - CRUD operations for each entity
 - Historical data endpoints with pagination
 - **Parallelizable**: Each API route by separate agent (5-7 agents)
 
 **Phase 4: UI Integration** (3-4 hours with parallel agents)
+
 - Firebase Auth UI components (login/logout)
 - User dashboard with personalized history
 - Historical trends visualization updates
 - **Parallelizable**: Auth UI, dashboard, trends (3 agents)
 
 **Phase 5: Testing & Validation** (2-3 hours with parallel agents)
+
 - Database query tests
 - Auth flow tests
 - Integration tests for persistence
@@ -186,11 +206,13 @@ Adding Prisma + Neon + Firebase Auth integration to existing Next.js 16 applicat
 **With Agent Army (10+ agents)**: **3-4 hours wall-clock time** (assuming optimal parallelization and no blocking dependencies)
 
 **Constraints**:
+
 - Foundational phase (Phase 1) must complete before other phases
 - Some API routes depend on completed models
 - Testing requires implementation completion
 
 **Risk Factors**:
+
 - Firebase Auth token verification complexity: +1-2 hours
 - Prisma migration issues with existing data: +1-2 hours
 - Performance optimization for large historical datasets: +2-3 hours
