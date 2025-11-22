@@ -34,6 +34,7 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
   });
 
   const [timeUntilRevalidation, setTimeUntilRevalidation] = useState(60);
+  const [isRevalidating, setIsRevalidating] = useState(false);
 
   // Countdown to next revalidation
   useEffect(() => {
@@ -41,13 +42,19 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       const ageSeconds = Math.floor((Date.now() - isrData.timestamp) / 1000);
       const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
       setTimeUntilRevalidation(remaining);
+      
+      // Show revalidation state when timer hits zero
+      if (remaining === 0 && !isRevalidating) {
+        setIsRevalidating(true);
+        setTimeout(() => setIsRevalidating(false), 3000);
+      }
     };
 
     updateTimer();
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [isrData.timestamp, isrData.data.revalidateInterval]);
+  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating]);
 
   // Merge ISR data with client metrics
   const combinedMetrics = {
@@ -87,34 +94,75 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
           </div>
 
           {/* Revalidation Status */}
-          <div className="border-2 border-primary/50 rounded-lg p-4 bg-primary/5">
+          <div className={`border-2 rounded-lg p-4 transition-all duration-500 ${
+            isRevalidating 
+              ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/30 ring-4 ring-purple-500/50'
+              : timeUntilRevalidation <= 10
+              ? 'border-orange-500/70 bg-orange-50/50 dark:bg-orange-950/20'
+              : 'border-primary/50 bg-primary/5'
+          }`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <RefreshCw className={`h-5 w-5 text-primary ${timeUntilRevalidation === 0 ? 'animate-spin' : ''}`} />
-                <span className="font-semibold">Revalidation Timer</span>
+                <RefreshCw className={`h-5 w-5 transition-all duration-500 ${
+                  isRevalidating ? 'animate-spin text-purple-600' : 'text-primary'
+                }`} />
+                <span className="font-semibold">
+                  {isRevalidating ? '🔄 Revalidating Now!' : 'Revalidation Timer'}
+                </span>
               </div>
-              <Badge variant={timeUntilRevalidation === 0 ? 'default' : 'secondary'} className="text-lg px-3 py-1">
+              <Badge 
+                variant={isRevalidating || timeUntilRevalidation === 0 ? 'default' : 'secondary'} 
+                className={`text-lg px-3 py-1 transition-all duration-300 ${
+                  isRevalidating ? 'animate-pulse ring-2 ring-purple-500' :
+                  timeUntilRevalidation <= 10 ? 'ring-2 ring-orange-500' : ''
+                }`}
+              >
                 {timeUntilRevalidation}s
               </Badge>
             </div>
+            <div className="mt-2">
+              {/* Progress bar */}
+              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-1000 ${
+                    isRevalidating ? 'bg-purple-500 animate-pulse' :
+                    timeUntilRevalidation <= 10 ? 'bg-orange-500' : 'bg-primary'
+                  }`}
+                  style={{ 
+                    width: `${(timeUntilRevalidation / isrData.data.revalidateInterval) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
             <p className="text-sm text-muted-foreground mt-2">
-              {timeUntilRevalidation === 0
+              {isRevalidating
+                ? '✨ Content is being regenerated in the background while you see the cached version!'
+                : timeUntilRevalidation === 0
                 ? 'Content is being revalidated in the background...'
+                : timeUntilRevalidation <= 10
+                ? `⚠️ Revalidation starting soon: ${timeUntilRevalidation} seconds remaining`
                 : `Content will be revalidated in ${timeUntilRevalidation} seconds`}
             </p>
           </div>
 
           {/* ISR Data Display */}
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              isRevalidating ? 'ring-2 ring-purple-500 bg-purple-50/50 dark:bg-purple-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <Clock className="h-5 w-5" />
-                <span className="font-semibold">Cache Status</span>
+                <span className="font-semibold">
+                  Cache Status
+                  {isRevalidating && <span className="ml-2 text-purple-600 dark:text-purple-400">🔄 Updating</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Last Revalidated:</span>{' '}
-                  <Badge variant="secondary" className="font-mono text-xs">
+                  <Badge variant="secondary" className={`font-mono text-xs transition-all duration-500 ${
+                    isRevalidating ? 'ring-2 ring-purple-500' : ''
+                  }`}>
                     {new Date(isrData.timestamp).toLocaleTimeString()}
                   </Badge>
                 </p>
@@ -122,18 +170,33 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
                   <span className="text-muted-foreground">Interval:</span>{' '}
                   <Badge variant="outline">{isrData.data.revalidateInterval}s</Badge>
                 </p>
+                <p className="text-xs text-muted-foreground pt-1">
+                  {isRevalidating 
+                    ? '⏳ Background regeneration in progress...'
+                    : timeUntilRevalidation <= 10
+                    ? '⚡ Revalidation imminent'
+                    : '✓ Serving from cache'
+                  }
+                </p>
               </div>
             </div>
 
-            <div className="border rounded-lg p-4 space-y-2">
+            <div className={`border rounded-lg p-4 space-y-2 transition-all duration-500 ${
+              isRevalidating ? 'ring-2 ring-purple-500 bg-purple-50/50 dark:bg-purple-950/20' : ''
+            }`}>
               <div className="flex items-center gap-2 text-primary">
                 <TrendingUp className="h-5 w-5" />
-                <span className="font-semibold">Content Stats</span>
+                <span className="font-semibold">
+                  Content Stats
+                  {isRevalidating && <span className="ml-2 text-purple-600 dark:text-purple-400">✨ Fresh Soon</span>}
+                </span>
               </div>
               <div className="space-y-1 text-sm">
                 <p>
                   <span className="text-muted-foreground">Content ID:</span>{' '}
-                  <Badge variant="secondary" className="font-mono">
+                  <Badge variant="secondary" className={`font-mono transition-all duration-500 ${
+                    isRevalidating ? 'ring-2 ring-purple-500' : ''
+                  }`}>
                     {isrData.data.contentId}
                   </Badge>
                 </p>
