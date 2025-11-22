@@ -6,6 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { DemoContainer } from '@/components/lab/demo-container';
 import { useDemo } from '@/lib/lab/use-demo';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +30,7 @@ interface ISRDemoClientProps {
 }
 
 export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
+  const router = useRouter();
   const { metrics, cacheInfo, isLoading, reRender, refresh } = useDemo({
     strategy: 'ISR',
   });
@@ -43,9 +45,11 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
       setTimeUntilRevalidation(remaining);
       
-      // Show revalidation state when timer hits zero
+      // Trigger revalidation when timer hits zero
       if (remaining === 0 && !isRevalidating) {
         setIsRevalidating(true);
+        // Trigger Next.js to fetch fresh data from the server
+        router.refresh();
         setTimeout(() => setIsRevalidating(false), 3000);
       }
     };
@@ -54,7 +58,7 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
     const interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
-  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating]);
+  }, [isrData.timestamp, isrData.data.revalidateInterval, isRevalidating, router]);
 
   // Merge ISR data with client metrics
   const combinedMetrics = {
