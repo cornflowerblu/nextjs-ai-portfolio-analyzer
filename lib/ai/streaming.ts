@@ -41,8 +41,15 @@ export async function createTextStream(
   systemPrompt: string,
   userPrompt: string
 ) {
-  const model = getAIModel();
   const config = getAIConfig();
+  console.log('AI Config:', {
+    provider: config.provider,
+    model: config.model,
+    temperature: config.temperature,
+    maxTokens: config.maxTokens,
+  });
+
+  const model = getAIModel();
 
   return streamText({
     model,

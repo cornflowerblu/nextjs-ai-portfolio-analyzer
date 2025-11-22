@@ -57,6 +57,12 @@ export function StreamingResponse({
       });
 
       if (!response.ok) {
+        // Try to parse error message from JSON response
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to get insights: ${response.statusText}`);
+        }
         throw new Error(`Failed to get insights: ${response.statusText}`);
       }
 
@@ -70,7 +76,12 @@ export function StreamingResponse({
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          if (fullText.trim() === '') {
+            throw new Error('AI service returned an empty response. Please try again.');
+          }
+          break;
+        }
 
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
@@ -87,9 +98,18 @@ export function StreamingResponse({
                 setContent(fullText);
               } else if (parsed.type === 'suggestions') {
                 setSuggestions(parsed.suggestions);
+              } else if (parsed.type === 'error') {
+                // Intentional error from server
+                throw new Error(parsed.content || 'AI service error');
               }
-            } catch {
-              // Skip invalid JSON
+            } catch (parseError) {
+              // Re-throw intentional errors, skip JSON parsing errors
+              if (parseError instanceof SyntaxError) {
+                // Skip JSON parsing errors like "Unexpected token" or "Unexpected end of JSON input"
+                continue;
+              }
+              // Re-throw all other errors (including intentional errors from server)
+              throw parseError;
             }
           }
         }
