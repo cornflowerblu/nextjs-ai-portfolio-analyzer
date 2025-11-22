@@ -139,7 +139,7 @@ describe('Analysis Session Database Operations', () => {
     it('respects custom limit parameter', async () => {
       vi.mocked(prisma.analysisSession.findMany).mockResolvedValue([mockSessions[0]]);
 
-      const result = await listAnalysisSessions(mockUserId, { limit: 10 });
+      await listAnalysisSessions(mockUserId, { limit: 10 });
 
       expect(prisma.analysisSession.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
@@ -151,8 +151,9 @@ describe('Analysis Session Database Operations', () => {
     it('caps limit at 100 items', async () => {
       vi.mocked(prisma.analysisSession.findMany).mockResolvedValue(mockSessions);
 
-      await listAnalysisSessions(mockUserId, { limit: 200 });
+      const result = await listAnalysisSessions(mockUserId, { limit: 200 });
 
+      expect(result).toBeDefined();
       expect(prisma.analysisSession.findMany).toHaveBeenCalledWith({
         where: { userId: mockUserId },
         orderBy: { createdAt: 'desc' },
@@ -163,7 +164,7 @@ describe('Analysis Session Database Operations', () => {
     it('supports cursor-based pagination', async () => {
       vi.mocked(prisma.analysisSession.findMany).mockResolvedValue([mockSessions[1]]);
 
-      const result = await listAnalysisSessions(mockUserId, {
+      await listAnalysisSessions(mockUserId, {
         limit: 10,
         cursor: 'session-1',
       });

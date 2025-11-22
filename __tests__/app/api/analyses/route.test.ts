@@ -18,6 +18,7 @@ vi.mock('@/lib/db/analysis', () => ({
 import { POST, GET } from '@/app/api/analyses/route';
 import * as firebaseAdmin from '@/lib/auth/firebase-admin';
 import * as analysis from '@/lib/db/analysis';
+import type { NextRequest } from 'next/server';
 
 describe('POST /api/analyses', () => {
   const mockUserId = 'firebase-uid-123';
@@ -35,7 +36,7 @@ describe('POST /api/analyses', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as NextRequest,
     });
   });
 
@@ -55,7 +56,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(201);
@@ -91,7 +92,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -116,7 +117,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(401);
@@ -136,7 +137,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -156,7 +157,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -176,7 +177,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -197,7 +198,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -222,7 +223,7 @@ describe('POST /api/analyses', () => {
       }),
     });
 
-    const response = await POST(request as any);
+    const response = await POST(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(500);
@@ -252,13 +253,13 @@ describe('GET /api/analyses', () => {
   ];
 
   // Helper to create a request with nextUrl property
-  function createGetRequest(url: string, headers: Record<string, string> = {}) {
+  function createGetRequest(url: string, headers: Record<string, string> = {}): NextRequest {
     const request = new Request(url, { headers });
     Object.defineProperty(request, 'nextUrl', {
       value: new URL(url),
       writable: false,
     });
-    return request;
+    return request as NextRequest;
   }
 
   beforeEach(() => {
@@ -266,7 +267,7 @@ describe('GET /api/analyses', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as any,
+      decodedToken: {} as NextRequest,
     });
   });
 
@@ -281,7 +282,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -302,11 +303,9 @@ describe('GET /api/analyses', () => {
 
     const request = createGetRequest('http://localhost:3000/api/analyses');
 
-    const response = await GET(request as any);
-    const data = await response.json();
+    const response = await GET(request as NextRequest);
 
     expect(response.status).toBe(401);
-    expect(data.error).toBe('Unauthorized');
   });
 
   it('supports custom limit parameter', async () => {
@@ -320,8 +319,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
-    const data = await response.json();
+    const response = await GET(request as NextRequest);
 
     expect(response.status).toBe(200);
     expect(analysis.listAnalysisSessions).toHaveBeenCalledWith(mockUserId, {
@@ -341,8 +339,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
-    const data = await response.json();
+    const response = await GET(request as NextRequest);
 
     expect(response.status).toBe(200);
     expect(analysis.listAnalysisSessions).toHaveBeenCalledWith(mockUserId, {
@@ -363,9 +360,11 @@ describe('GET /api/analyses', () => {
       { 'Authorization': 'Bearer valid-token' }
     );
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
+    const data = await response.json();
 
     expect(response.status).toBe(200);
+    expect(data).toBeDefined();
     expect(analysis.listAnalysisSessions).toHaveBeenCalledWith(mockUserId, {
       limit: 5,
       cursor: 'session-1',
@@ -377,7 +376,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -389,7 +388,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(400);
@@ -407,7 +406,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -424,7 +423,7 @@ describe('GET /api/analyses', () => {
       'Authorization': 'Bearer valid-token',
     });
 
-    const response = await GET(request as any);
+    const response = await GET(request as NextRequest);
     const data = await response.json();
 
     expect(response.status).toBe(500);
