@@ -69,7 +69,7 @@ export function StrategyCards() {
                     {strategy.displayName}
                   </span>
                 </div>
-                <h3 className="mb-2 text-lg font-semibold">{strategy.name}</h3>
+                <h3 className="mb-2 text-lg font-semibold min-h-14">{strategy.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   {strategy.description}
                 </p>
