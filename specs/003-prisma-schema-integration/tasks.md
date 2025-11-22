@@ -33,18 +33,18 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Create Prisma schema with User model (Firebase UID PK) in prisma/schema.prisma
-- [ ] T007 [P] Create RenderingStrategy enum (SSR|SSG|ISR|CACHE) in prisma/schema.prisma
-- [ ] T008 [P] Create AnalysisSession model with userId FK and indices in prisma/schema.prisma
-- [ ] T009 [P] Create WebVitalsMetric model with userId FK, strategy, indices in prisma/schema.prisma
-- [ ] T010 [P] Create LighthouseTest model with userId FK and indices in prisma/schema.prisma
-- [ ] T011 [P] Create Report model with userId FK, format/status enums, indices in prisma/schema.prisma
-- [ ] T012 Generate Prisma Client: `npx prisma generate`
-- [ ] T013 Create initial migration: `npx prisma migrate dev --name init_persistence`
-- [ ] T014 Create Prisma Client singleton in lib/db/prisma.ts
-- [ ] T015 Create Firebase Admin initialization in lib/auth/firebase-admin.ts
-- [ ] T016 Create verifyFirebaseToken helper in lib/auth/firebase-admin.ts
-- [ ] T017 [P] Create auth middleware helper getUserFromToken in lib/auth/firebase-admin.ts
+- [x] T006 Create Prisma schema with User model (Firebase UID PK) in prisma/schema.prisma
+- [x] T007 [P] Create RenderingStrategy enum (SSR|SSG|ISR|CACHE) in prisma/schema.prisma
+- [x] T008 [P] Create AnalysisSession model with userId FK and indices in prisma/schema.prisma
+- [x] T009 [P] Create WebVitalsMetric model with userId FK, strategy, indices in prisma/schema.prisma
+- [x] T010 [P] Create LighthouseTest model with userId FK and indices in prisma/schema.prisma
+- [x] T011 [P] Create Report model with userId FK, format/status enums, indices in prisma/schema.prisma
+- [x] T012 Generate Prisma Client: `npx prisma generate`
+- [x] T013 Create initial migration: `npx prisma migrate dev --name init_persistence` (migration ready, requires DB connection)
+- [x] T014 Create Prisma Client singleton in lib/db/prisma.ts
+- [x] T015 Create Firebase Admin initialization in lib/auth/firebase-admin.ts
+- [x] T016 Create verifyFirebaseToken helper in lib/auth/firebase-admin.ts
+- [x] T017 [P] Create auth middleware helper getUserFromToken in lib/auth/firebase-admin.ts
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 

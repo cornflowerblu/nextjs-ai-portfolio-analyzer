@@ -5,10 +5,122 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+// Rendering strategy enum
+enum RenderingStrategy {
+  SSR
+  SSG
+  ISR
+  CACHE
+}
+
+// Report format enum
+enum ReportFormat {
+  PDF
+  MARKDOWN
+  JSON
+}
+
+// Report status enum
+enum ReportStatus {
+  pending
+  processing
+  ready
+  failed
+}
+
+// User model with Firebase UID as primary key
+model User {
+  id        String   @id // Firebase UID
+  email     String?
+  name      String?
+  photoURL  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  analysisSessions AnalysisSession[]
+  webVitalsMetrics WebVitalsMetric[]
+  lighthouseTests  LighthouseTest[]
+  reports          Report[]
+
+  @@map("users")
+}
+
+// Analysis session storing AI-generated insights
+model AnalysisSession {
+  id              String   @id @default(cuid())
+  userId          String
+  url             String
+  summary         String   @db.Text
+  recommendations String   @db.Text
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, url, createdAt(sort: Desc)])
+  @@map("analysis_sessions")
+}
+
+// Core Web Vitals metrics by rendering strategy
+model WebVitalsMetric {
+  id          String            @id @default(cuid())
+  userId      String
+  url         String
+  strategy    RenderingStrategy
+  lcpMs       Float?
+  cls         Float?
+  inpMs       Float?
+  fidMs       Float?
+  ttfbMs      Float?
+  collectedAt DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, collectedAt(sort: Desc)])
+  @@index([userId, url, strategy, collectedAt(sort: Desc)])
+  @@map("web_vitals_metrics")
+}
+
+// Lighthouse test results
+model LighthouseTest {
+  id            String   @id @default(cuid())
+  userId        String
+  url           String
+  performance   Int
+  accessibility Int
+  bestPractices Int
+  seo           Int
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, url, createdAt(sort: Desc)])
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("lighthouse_tests")
+}
+
+// Report metadata for exportable artifacts
+model Report {
+  id         String       @id @default(cuid())
+  userId     String
+  format     ReportFormat
+  status     ReportStatus
+  storageKey String?
+  url        String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@map("reports")
 }

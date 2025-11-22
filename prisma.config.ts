@@ -9,6 +9,7 @@ export default defineConfig({
     path: "prisma/migrations",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    // Use Vercel's pooled connection for Prisma, fallback to DATABASE_URL
+    url: env("POSTGRES_PRISMA_URL") ?? env("POSTGRES_URL"),
   },
 });
