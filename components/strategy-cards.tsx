@@ -49,7 +49,6 @@ export function StrategyCards() {
               onMouseEnter={() => setHoveredCard(strategyId)}
               onMouseLeave={() => setHoveredCard(null)}
               className="block"
-              aria-label={`Explore ${strategy.name} - ${strategy.description}`}
             >
               <div 
                 className={`rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 h-full ${

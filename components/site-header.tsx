@@ -56,10 +56,19 @@ export function SiteHeader() {
             variant="ghost"
             size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? (
+              <>
+                <X className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Close menu</span>
+              </>
+            ) : (
+              <>
+                <Menu className="h-5 w-5" aria-hidden="true" />
+                <span className="sr-only">Open menu</span>
+              </>
+            )}
           </Button>
         </div>
       </div>
