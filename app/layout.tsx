@@ -4,6 +4,7 @@ import "./globals.css";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import { GoogleAnalytics } from "@/components/google-analytics";
+import { SiteFooter } from "@/components/site-footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,12 +58,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}
       >
         <GoogleAnalytics />
         <WebVitalsReporter />
         <ErrorBoundary>
-          {children}
+          <div className="flex-1">
+            {children}
+          </div>
+          <SiteFooter />
         </ErrorBoundary>
       </body>
     </html>

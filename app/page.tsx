@@ -124,13 +124,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-background">
-        <div className="container px-4 py-8 text-center text-sm text-muted-foreground">
-          <p>Next.js Rendering Strategy Analyzer • Built with Next.js 16 & React 19</p>
-        </div>
-      </footer>
     </div>
   );
 }
