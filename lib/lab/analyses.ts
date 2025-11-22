@@ -31,27 +31,22 @@ const CACHE_PROVIDER: CacheProvider = KV_CONFIGURED
     ? 'redis'
     : 'none';
 
-let redisClient: RedisClientType | null = null;
+// Removed module-scoped redisClient to avoid race conditions in serverless environments.
 
 const getRedisClient = async (): Promise<RedisClientType | null> => {
   if (!REDIS_CONFIGURED) return null;
 
-  if (redisClient) {
-    return redisClient;
-  }
-
   try {
-    redisClient = createClient({
+    const client = createClient({
       url: process.env.REDIS_URL,
     });
-    redisClient.on('error', (error) => {
+    client.on('error', (error) => {
       console.error('Redis client error', error);
     });
-    await redisClient.connect();
-    return redisClient;
+    await client.connect();
+    return client;
   } catch (error) {
     console.error('Failed to connect to Redis', error);
-    redisClient = null;
     return null;
   }
 };
@@ -169,7 +164,7 @@ export const getRecentAnalyses = async (): Promise<RecentAnalysesResult> => {
   if (!isPostgresReady()) {
     return {
       items: DEMO_ANALYSES,
-      cacheHit: true,
+      cacheHit: false,
       refreshedAt: new Date().toISOString(),
       kvStats: DEFAULT_STATS,
       mode: 'demo',
