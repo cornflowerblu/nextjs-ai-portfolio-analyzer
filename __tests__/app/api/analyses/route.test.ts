@@ -19,6 +19,7 @@ import { POST, GET } from '@/app/api/analyses/route';
 import * as firebaseAdmin from '@/lib/auth/firebase-admin';
 import * as analysis from '@/lib/db/analysis';
 import type { NextRequest } from 'next/server';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 describe('POST /api/analyses', () => {
   const mockUserId = 'firebase-uid-123';
@@ -36,7 +37,7 @@ describe('POST /api/analyses', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as NextRequest,
+      decodedToken: {} as DecodedIdToken,
     });
   });
 
@@ -267,7 +268,7 @@ describe('GET /api/analyses', () => {
     vi.mocked(firebaseAdmin.getUserFromToken).mockResolvedValue({
       userId: mockUserId,
       email: 'test@example.com',
-      decodedToken: {} as NextRequest,
+      decodedToken: {} as DecodedIdToken,
     });
   });
 
