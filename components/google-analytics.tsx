@@ -16,7 +16,7 @@ export function GoogleAnalytics() {
   }
 
   // Validate measurement ID format (should be G-XXXXXXXXXX)
-  const isValidFormat = /^G-[A-Z0-9]+$/.test(measurementId);
+  const isValidFormat = /^G-[A-Z0-9]+$/i.test(measurementId);
   if (!isValidFormat) {
     console.error('Invalid Google Analytics measurement ID format. Expected format: G-XXXXXXXXXX');
     return null;
