@@ -5,140 +5,168 @@
 
 import { kv } from '@vercel/kv';
 import { sql } from '@vercel/postgres';
-import type {
-  AnalysisStrategy,
-  CreateAnalysisInput,
-  KvStats,
-  RecentAnalysis,
-  RecentAnalysesResult,
-} from '@/types/analysis';
+import { createClient, RedisClientType } from 'redis';
+import type { AnalysisStrategy, CreateAnalysisInput, KvStats, RecentAnalysis, RecentAnalysesResult } from '@/types/analysis';
+import {
+  AnalysisRow,
+  DEMO_ANALYSES,
+  fetchRecentAnalysesFromDatabase,
+  isPostgresReady,
+  mapRowToAnalysis,
+} from './analyses-data';
 
 const RECENT_ANALYSES_CACHE_KEY = 'analysis:list';
 const ANALYSIS_STATS_KEY = 'analysis:stats';
 const CACHE_TTL_SECONDS = 30;
 
-const POSTGRES_CONFIGURED = Boolean(process.env.POSTGRES_URL);
 const KV_CONFIGURED =
   Boolean(process.env.KV_REST_API_URL) &&
   Boolean(process.env.KV_REST_API_TOKEN);
+const REDIS_CONFIGURED = Boolean(process.env.REDIS_URL);
+
+type CacheProvider = 'kv' | 'redis' | 'none';
+const CACHE_PROVIDER: CacheProvider = KV_CONFIGURED
+  ? 'kv'
+  : REDIS_CONFIGURED
+    ? 'redis'
+    : 'none';
+
+let redisClient: RedisClientType | null = null;
+
+const getRedisClient = async (): Promise<RedisClientType | null> => {
+  if (!REDIS_CONFIGURED) return null;
+
+  if (redisClient) {
+    return redisClient;
+  }
+
+  try {
+    redisClient = createClient({
+      url: process.env.REDIS_URL,
+    });
+    redisClient.on('error', (error) => {
+      console.error('Redis client error', error);
+    });
+    await redisClient.connect();
+    return redisClient;
+  } catch (error) {
+    console.error('Failed to connect to Redis', error);
+    redisClient = null;
+    return null;
+  }
+};
 
 type CachedAnalysesPayload = {
   items: RecentAnalysis[];
   refreshedAt: string;
 };
 
-type AnalysisRow = {
-  id: string;
-  url: string;
-  strategy: AnalysisStrategy;
-  score: number;
-  created_at: Date;
-};
-
-const DEMO_ANALYSES: RecentAnalysis[] = [
-  {
-    id: 'demo-1',
-    url: 'https://vercel.com',
-    strategy: 'ISR',
-    score: 96,
-    createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-  },
-  {
-    id: 'demo-2',
-    url: 'https://nextjs.org',
-    strategy: 'SSR',
-    score: 91,
-    createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-  },
-  {
-    id: 'demo-3',
-    url: 'https://github.com/vercel',
-    strategy: 'CACHE',
-    score: 99,
-    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-  },
-];
-
 const DEFAULT_STATS: KvStats = { hits: 0, misses: 0 };
 
-const mapRowToAnalysis = (row: AnalysisRow): RecentAnalysis => ({
-  id: row.id,
-  url: row.url,
-  strategy: row.strategy,
-  score: row.score,
-  createdAt: row.created_at?.toISOString?.() ?? new Date().toISOString(),
-});
-
 const recordStat = async (field: keyof KvStats) => {
-  if (!KV_CONFIGURED) return;
+  if (KV_CONFIGURED) {
+    try {
+      await kv.hincrby(ANALYSIS_STATS_KEY, field, 1);
+    } catch (error) {
+      console.error('Failed to increment KV stat', error);
+    }
+    return;
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) return;
+
   try {
-    await kv.hincrby(ANALYSIS_STATS_KEY, field, 1);
+    await redis.hIncrBy(ANALYSIS_STATS_KEY, field, 1);
   } catch (error) {
-    console.error('Failed to increment KV stat', error);
+    console.error('Failed to increment Redis stat', error);
   }
 };
 
 const readStats = async (): Promise<KvStats> => {
-  if (!KV_CONFIGURED) return DEFAULT_STATS;
+  if (KV_CONFIGURED) {
+    try {
+      const value = await kv.hgetall<Record<keyof KvStats, number | string>>(ANALYSIS_STATS_KEY);
+      return {
+        hits: Number(value?.hits ?? 0),
+        misses: Number(value?.misses ?? 0),
+      };
+    } catch (error) {
+      console.error('Failed to read KV stats', error);
+      return DEFAULT_STATS;
+    }
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) return DEFAULT_STATS;
+
   try {
-    const value = await kv.hgetall<Record<keyof KvStats, number | string>>(ANALYSIS_STATS_KEY);
+    const value = await redis.hGetAll(ANALYSIS_STATS_KEY);
     return {
       hits: Number(value?.hits ?? 0),
       misses: Number(value?.misses ?? 0),
     };
   } catch (error) {
-    console.error('Failed to read KV stats', error);
+    console.error('Failed to read Redis stats', error);
     return DEFAULT_STATS;
   }
 };
 
 const readCache = async (): Promise<CachedAnalysesPayload | null> => {
-  if (!KV_CONFIGURED) return null;
+  if (KV_CONFIGURED) {
+    try {
+      return await kv.get<CachedAnalysesPayload>(RECENT_ANALYSES_CACHE_KEY);
+    } catch (error) {
+      console.error('Failed to read analyses cache from KV', error);
+      return null;
+    }
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) return null;
+
   try {
-    return await kv.get<CachedAnalysesPayload>(RECENT_ANALYSES_CACHE_KEY);
+    const value = await redis.get(RECENT_ANALYSES_CACHE_KEY);
+    return value ? (JSON.parse(value) as CachedAnalysesPayload) : null;
   } catch (error) {
-    console.error('Failed to read analyses cache', error);
+    console.error('Failed to read analyses cache from Redis', error);
     return null;
   }
 };
 
 const writeCache = async (payload: CachedAnalysesPayload) => {
-  if (!KV_CONFIGURED) return;
+  if (KV_CONFIGURED) {
+    try {
+      await kv.set(RECENT_ANALYSES_CACHE_KEY, payload, {
+        ex: CACHE_TTL_SECONDS,
+      });
+    } catch (error) {
+      console.error('Failed to write analyses cache to KV', error);
+    }
+    return;
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) return;
+
   try {
-    await kv.set(RECENT_ANALYSES_CACHE_KEY, payload, {
-      ex: CACHE_TTL_SECONDS,
-    });
+    await redis.setEx(
+      RECENT_ANALYSES_CACHE_KEY,
+      CACHE_TTL_SECONDS,
+      JSON.stringify(payload),
+    );
   } catch (error) {
-    console.error('Failed to write analyses cache', error);
+    console.error('Failed to write analyses cache to Redis', error);
   }
 };
 
-export const isPostgresReady = () => POSTGRES_CONFIGURED;
+export { fetchRecentAnalysesFromDatabase, isPostgresReady };
 export const isKvReady = () => KV_CONFIGURED;
-
-export const fetchRecentAnalysesFromDatabase = async (
-  limit = 5,
-): Promise<RecentAnalysis[]> => {
-  if (!POSTGRES_CONFIGURED) {
-    return DEMO_ANALYSES;
-  }
-
-  try {
-    const { rows } = await sql<AnalysisRow>`
-      SELECT id, url, strategy, score, created_at
-      FROM analyses
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-    `;
-    return rows.map(mapRowToAnalysis);
-  } catch (error) {
-    console.error('Failed to query analyses table', error);
-    return DEMO_ANALYSES;
-  }
-};
+export const isRedisReady = () => REDIS_CONFIGURED;
+export const getCacheProvider = () => CACHE_PROVIDER;
 
 export const getRecentAnalyses = async (): Promise<RecentAnalysesResult> => {
-  if (!POSTGRES_CONFIGURED) {
+  if (!isPostgresReady()) {
     return {
       items: DEMO_ANALYSES,
       cacheHit: true,
@@ -148,7 +176,7 @@ export const getRecentAnalyses = async (): Promise<RecentAnalysesResult> => {
     };
   }
 
-  if (!KV_CONFIGURED) {
+  if (CACHE_PROVIDER === 'none') {
     return {
       items: await fetchRecentAnalysesFromDatabase(),
       cacheHit: false,
@@ -189,18 +217,29 @@ export const getRecentAnalyses = async (): Promise<RecentAnalysesResult> => {
 };
 
 export const invalidateAnalysesCache = async () => {
-  if (!KV_CONFIGURED) return;
+  if (KV_CONFIGURED) {
+    try {
+      await kv.del(RECENT_ANALYSES_CACHE_KEY);
+    } catch (error) {
+      console.error('Failed to invalidate analyses cache (KV)', error);
+    }
+    return;
+  }
+
+  const redis = await getRedisClient();
+  if (!redis) return;
+
   try {
-    await kv.del(RECENT_ANALYSES_CACHE_KEY);
+    await redis.del(RECENT_ANALYSES_CACHE_KEY);
   } catch (error) {
-    console.error('Failed to invalidate analyses cache', error);
+    console.error('Failed to invalidate analyses cache (Redis)', error);
   }
 };
 
 export const createAnalysis = async (
   input: CreateAnalysisInput,
 ): Promise<RecentAnalysis> => {
-  if (!POSTGRES_CONFIGURED) {
+  if (!isPostgresReady()) {
     throw new Error('POSTGRES_URL is not configured. Unable to insert data.');
   }
 

@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import {
   getRecentAnalyses,
+  getCacheProvider,
   isKvReady,
   isPostgresReady,
+  isRedisReady,
 } from '@/lib/lab/analyses';
 
 export const revalidate = 60;
@@ -16,6 +18,8 @@ export async function GET() {
       ...result,
       cacheTTL: revalidate,
       kvEnabled: isKvReady(),
+      redisEnabled: isRedisReady(),
+      cacheProvider: getCacheProvider(),
       postgresEnabled: isPostgresReady(),
       servedAt: new Date().toISOString(),
     });

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   fetchRecentAnalysesFromDatabase,
   isPostgresReady,
-} from '@/lib/lab/analyses';
+} from '@/lib/lab/analyses-data';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'edge';

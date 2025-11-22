@@ -39,9 +39,13 @@ import type {
 
 type CreateAnalysisAction = (formData: FormData) => Promise<CreateAnalysisActionResult>;
 
+type CacheProvider = 'kv' | 'redis' | 'none';
+
 type CachedRouteResponse = RecentAnalysesResult & {
   cacheTTL: number;
   kvEnabled: boolean;
+  redisEnabled: boolean;
+  cacheProvider: CacheProvider;
   postgresEnabled: boolean;
   servedAt: string;
 };
@@ -72,14 +76,14 @@ interface CacheDemoClientProps {
 }
 
 const STRATEGY_OPTIONS: { label: string; value: AnalysisStrategy; helper: string }[] = [
-  { label: 'ISR (ISR + KV cache)', value: 'ISR', helper: 'Stale-while-revalidate @ 60s' },
+  { label: 'ISR (ISR + cache)', value: 'ISR', helper: 'Stale-while-revalidate @ 60s' },
   { label: 'SSR (force-dynamic)', value: 'SSR', helper: 'Always-render, no cache' },
   { label: 'SSG (build-time)', value: 'SSG', helper: 'Static snapshot' },
   { label: 'Cache Component', value: 'CACHE', helper: 'use cache directive' },
   { label: 'Dynamic Route', value: 'DYNAMIC', helper: 'force-dynamic fetch' },
 ];
 
-const KV_TTL_SECONDS = 30;
+const CACHE_TTL_SECONDS = 30;
 
 const formatAbsoluteTime = (value?: string) => {
   if (!value) return '—';
@@ -326,9 +330,9 @@ export function CacheDemoClient({
         <section className="space-y-4 rounded-2xl border bg-card/60 p-6 shadow-sm">
           <div className="space-y-2 text-center">
             <p className="text-sm font-semibold uppercase tracking-wide text-primary">Dynamic Data Demo</p>
-            <h1 className="text-3xl font-bold">Vercel Postgres + KV with ISR vs Dynamic Fetch</h1>
+            <h1 className="text-3xl font-bold">Vercel Postgres + Cache (KV/Redis) vs Dynamic Fetch</h1>
             <p className="text-muted-foreground">
-              Insert analyses via a Server Action, compare the cached `/api/analyses` route (ISR + KV) with the
+              Insert analyses via a Server Action, compare the cached `/api/analyses` route (ISR + cache) with the
               `force-dynamic` live endpoint, and watch cache hits/misses update in real-time.
             </p>
           </div>
@@ -340,7 +344,7 @@ export function CacheDemoClient({
                   <Database className="h-5 w-5 text-primary" />
                   <div>
                     <CardTitle>Cached Snapshot</CardTitle>
-                    <CardDescription>ISR (revalidate=60) + KV TTL {KV_TTL_SECONDS}s</CardDescription>
+                    <CardDescription>ISR (revalidate=60) + cache TTL {CACHE_TTL_SECONDS}s</CardDescription>
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -353,11 +357,11 @@ export function CacheDemoClient({
                         ? 'Demo Mode (no Postgres)'
                         : cachedResponse.mode === 'database-only'
                         ? 'Postgres only'
-                        : 'Live KV + Postgres'}
+                        : 'Live cache + Postgres'}
                     </Badge>
                   )}
                   <Badge variant="outline">
-                    TTL: {cachedResponse?.cacheTTL ?? 60}s · KV {KV_TTL_SECONDS}s
+                    Revalidate: {cachedResponse?.cacheTTL ?? 60}s · Cache TTL: {CACHE_TTL_SECONDS}s
                   </Badge>
                 </div>
               </CardHeader>
@@ -369,11 +373,15 @@ export function CacheDemoClient({
                     <p className="text-xs text-muted-foreground">{formatRelativeTime(cachedResponse?.refreshedAt)}</p>
                   </div>
                   <div className="rounded-lg border bg-muted/40 p-3">
-                    <p className="text-xs text-muted-foreground">KV Hit/Miss</p>
+                    <p className="text-xs text-muted-foreground">Cache Hit/Miss</p>
                     <p className="text-sm font-semibold">
                       {cachedResponse?.kvStats?.hits ?? 0} hits · {cachedResponse?.kvStats?.misses ?? 0} misses
                     </p>
-                    <p className="text-xs text-muted-foreground">KV {cachedResponse?.kvEnabled ? 'connected' : 'disabled'}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Provider: {describeCacheProvider(cachedResponse?.cacheProvider)} · KV{' '}
+                      {cachedResponse?.kvEnabled ? 'on' : 'off'} · Redis{' '}
+                      {cachedResponse?.redisEnabled ? 'on' : 'off'}
+                    </p>
                   </div>
                 </div>
 
@@ -448,7 +456,7 @@ export function CacheDemoClient({
                 <div>
                   <CardTitle>Insert a new analysis (Server Action)</CardTitle>
                   <CardDescription>
-                    Uses @vercel/postgres for writes, invalidates the KV cache, and revalidates the ISR route.
+                    Uses @vercel/postgres for writes, invalidates the cache store (KV or Redis), and revalidates the ISR route.
                   </CardDescription>
                 </div>
               </div>
@@ -507,11 +515,13 @@ export function CacheDemoClient({
                     </p>
                   </div>
                   <div className="rounded-lg border bg-muted/40 p-3 text-sm">
-                    <p className="font-semibold">KV Cache</p>
+                    <p className="font-semibold">Cache Store</p>
                     <p className="text-xs text-muted-foreground">
-                      {cachedResponse?.kvEnabled
-                        ? 'Upstash KV stores the cached list'
-                        : 'Set KV_REST_API_* env vars to enable cache'}
+                      {cachedResponse?.cacheProvider === 'kv'
+                        ? 'Vercel KV stores the cached list'
+                        : cachedResponse?.cacheProvider === 'redis'
+                        ? 'Redis (REDIS_URL) powers the cache'
+                        : 'Set KV_REST_API_* or REDIS_URL to enable caching'}
                     </p>
                   </div>
                 </div>
@@ -741,3 +751,15 @@ export function CacheDemoClient({
     </div>
   );
 }
+const describeCacheProvider = (provider?: CacheProvider) => {
+  switch (provider) {
+    case 'kv':
+      return 'Vercel KV';
+    case 'redis':
+      return 'Redis';
+    case 'none':
+      return 'Disabled';
+    default:
+      return '—';
+  }
+};
