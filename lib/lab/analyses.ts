@@ -39,6 +39,7 @@ const getRedisClient = async (): Promise<RedisClientType | null> => {
   try {
     const client = createClient({
       url: process.env.REDIS_URL,
+      RESP: 2,
     });
     client.on('error', (error) => {
       console.error('Redis client error', error);
