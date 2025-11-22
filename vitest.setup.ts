@@ -2,6 +2,11 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 
+// Set test environment variables to prevent Prisma initialization errors
+// These are fallback values for tests that don't need a real database
+process.env.DATABASE_URL = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/test';
+process.env.POSTGRES_PRISMA_URL = process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL;
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

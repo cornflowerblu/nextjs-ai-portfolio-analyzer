@@ -41,8 +41,15 @@ function initializeFirebaseAdmin() {
   });
 }
 
-// Initialize on module load
-const firebaseAdmin = initializeFirebaseAdmin();
+// Lazy initialization - only initialize when needed
+let firebaseAdmin: admin.app.App | null = null;
+
+function getFirebaseAdminInstance() {
+  if (!firebaseAdmin) {
+    firebaseAdmin = initializeFirebaseAdmin();
+  }
+  return firebaseAdmin;
+}
 
 /**
  * Verify Firebase ID token from Authorization header
@@ -65,7 +72,8 @@ export async function verifyFirebaseToken(idToken: string | null | undefined) {
   }
 
   try {
-    const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+    const admin = getFirebaseAdminInstance();
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
     return decodedToken;
   } catch (error) {
     throw new Error(`Invalid or expired token: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -112,5 +120,5 @@ export async function getUserFromToken(authorizationHeader: string | null | unde
  * Useful for direct access to Admin SDK features
  */
 export function getFirebaseAdmin() {
-  return firebaseAdmin;
+  return getFirebaseAdminInstance();
 }
