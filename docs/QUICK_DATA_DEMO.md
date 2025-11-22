@@ -1,18 +1,22 @@
 # 60-Minute Dynamic Data Demo (Vercel-native)
 
-A minimal path to ship a dynamic rendering demo that reads and writes data using Vercel-managed primitives in under an hour. The goal is to visibly demonstrate Next.js 16 cache controls (ISR vs dynamic fetch) plus Vercel Postgres + KV in the lab UI.
+A minimal path to ship a dynamic rendering demo that reads and writes data using Vercel-managed primitives in under an hour. The goal is to visibly demonstrate Next.js 16 cache controls (ISR vs dynamic fetch) plus Vercel Postgres + KV (or Redis) in the lab UI.
 
 ## What you’ll build
-- A tiny "Recent Analyses" list backed by **Vercel Postgres** (via `@vercel/postgres`), cached in **Vercel KV**.
+
+- A tiny "Recent Analyses" list backed by **Vercel Postgres** (via `@vercel/postgres`), cached in **Vercel KV** (with a Redis fallback if KV credentials aren’t available).
 - A **Server Action** to insert a new analysis row and revalidate the cached read.
 - Two read endpoints to contrast **ISR** vs **force-dynamic** fetches, with a cache-hit badge.
 
 ## Prereqs (5 minutes)
-- Set environment vars locally or in Vercel: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`.
+
+- Set environment vars locally or in Vercel: `POSTGRES_URL`, `KV_REST_API_URL`, `KV_REST_API_TOKEN`. If Vercel KV isn’t available, provide `REDIS_URL` (Upstash/Redis, etc.) instead.
 - Install the Postgres client if missing: `npm install @vercel/postgres`.
 
 ## Data model (5 minutes)
+
 Create a lean table:
+
 ```sql
 CREATE TABLE IF NOT EXISTS analyses (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,32 +26,46 @@ CREATE TABLE IF NOT EXISTS analyses (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 ```
+
 Seed 1–2 rows so the UI has immediate content.
 
 ## Read path (15 minutes)
+
 1. Add `app/api/analyses/route.ts`:
    - `export const revalidate = 60;` (ISR) and `fetchCache = "force-cache"`.
-   - Read from KV key `analysis:list` first; on miss, `SELECT ... ORDER BY created_at DESC LIMIT 5` from Postgres, then `kv.set` the list with a short TTL.
+   - Read from KV (or Redis) key `analysis:list` first; on miss, `SELECT ... ORDER BY created_at DESC LIMIT 5` from Postgres, then cache the list with a short TTL.
 2. Add `app/api/analyses/live/route.ts` with `export const dynamic = "force-dynamic";` to bypass cache and show fresh latency.
 
 ## Write path (10 minutes)
+
 - In the lab page (e.g., `app/lab/cache/page.tsx`), add a **Server Action** form that inserts `{ url, strategy, score }` into Postgres and calls `revalidatePath("/api/analyses")`. Use `useOptimistic` to show the pending row instantly.
 
 ## UI wiring (15 minutes)
+
 - Display two panels side by side:
-  - **Cached (ISR+KV)**: fetch `/api/analyses`, show `cacheHit: true/false`, and the last revalidated timestamp.
+- **Cached (ISR + KV/Redis)**: fetch `/api/analyses`, show `cacheHit: true/false`, and the last revalidated timestamp.
   - **Live (dynamic)**: fetch `/api/analyses/live`, show measured latency (Edge vs Serverless if you set `export const runtime = "edge"` on the live route).
 - Add a small badge for cache hits and a toggle to force-refresh (call the live endpoint).
 
 ## Proof points for interviewers
+
 - Code visibly exports `revalidate`, `dynamic`, and `fetchCache` in routes.
-- KV logs include hit/miss counters; surface them in the UI.
+- Cache logs include hit/miss counters (KV or Redis); surface them in the UI.
 - "Last updated" timestamps prove ISR is working; latency text demonstrates Edge vs Serverless.
 
 ## Time budget recap
+
 - 5m env + install
 - 5m SQL/seed
 - 15m read endpoints
 - 10m write action
 - 15m UI hooks
 - 10m buffer for polish
+
+## Current implementation notes
+
+- `/app/api/analyses/route.ts` exposes the cached ISR endpoint (`revalidate = 60`, cache-backed). It returns hit/miss counts plus `mode` metadata when env vars are missing.
+- `/app/api/analyses/live/route.ts` is `force-dynamic` on the Edge runtime to highlight latency and runtime differences.
+- `lib/lab/analyses.ts` wraps Vercel Postgres + KV access with a Redis fallback, cache invalidation, and stats tracking (`REDIS_URL` is auto-detected).
+- `app/lab/cache/page.tsx` wires a Server Action that inserts into Postgres, clears the cached list (KV or Redis), and revalidates the cached route.
+- `app/lab/cache/cache-demo-client.tsx` renders the dual-panel UI, optimistic updates via `useOptimistic`, and the existing component-level cache demo so everything lives on a single page.

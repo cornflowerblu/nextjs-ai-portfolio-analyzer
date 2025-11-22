@@ -29,6 +29,8 @@ export function SignInButton() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
       setError(errorMessage);
+    } finally {
+      // Always clear loading state, even on success (navigation may take time)
       setIsLoading(false);
     }
   };
