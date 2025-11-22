@@ -60,15 +60,15 @@
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T018 [P] [US1] Unit test for verifyFirebaseToken in **tests**/lib/auth/firebase-admin.test.ts
-- [ ] T019 [P] [US1] Unit test for upsertUser function in **tests**/lib/db/user.test.ts
-- [ ] T020 [US1] Integration test for user upsert on auth in **tests**/app/api/auth/verify.test.ts
+- [x] T018 [P] [US1] Unit test for verifyFirebaseToken in **tests**/lib/auth/firebase-admin.test.ts
+- [x] T019 [P] [US1] Unit test for upsertUser function in **tests**/lib/db/user.test.ts
+- [x] T020 [US1] Integration test for user upsert on auth in **tests**/app/api/auth/verify.test.ts
 
 ### Implementation for User Story 1
 
-- [ ] T021 [US1] Create upsertUser function in lib/db/user.ts
-- [ ] T022 [US1] Create POST /api/auth/verify route in app/api/auth/verify/route.ts with Firebase token verification and user upsert
-- [ ] T023 [US1] Add runtime='nodejs' export to app/api/auth/verify/route.ts
+- [x] T021 [US1] Create upsertUser function in lib/db/user.ts
+- [x] T022 [US1] Create POST /api/auth/verify route in app/api/auth/verify/route.ts with Firebase token verification and user upsert
+- [x] T023 [US1] Add runtime='nodejs' export to app/api/auth/verify/route.ts
 
 **Checkpoint**: User Story 1 complete - users can sign in and have their profile persisted
 
@@ -82,18 +82,18 @@
 
 ### Tests for User Story 2
 
-- [ ] T024 [P] [US2] Unit test for createAnalysisSession in **tests**/lib/db/analysis.test.ts
-- [ ] T025 [P] [US2] Unit test for listAnalysisSessions with pagination in **tests**/lib/db/analysis.test.ts
-- [ ] T026 [US2] Integration test for POST /api/analyses in **tests**/app/api/analyses/route.test.ts
-- [ ] T027 [US2] Integration test for GET /api/analyses with pagination in **tests**/app/api/analyses/route.test.ts
+- [x] T024 [P] [US2] Unit test for createAnalysisSession in **tests**/lib/db/analysis.test.ts
+- [x] T025 [P] [US2] Unit test for listAnalysisSessions with pagination in **tests**/lib/db/analysis.test.ts
+- [x] T026 [US2] Integration test for POST /api/analyses in **tests**/app/api/analyses/route.test.ts
+- [x] T027 [US2] Integration test for GET /api/analyses with pagination in **tests**/app/api/analyses/route.test.ts
 
 ### Implementation for User Story 2
 
-- [ ] T028 [P] [US2] Create createAnalysisSession function in lib/db/analysis.ts
-- [ ] T029 [P] [US2] Create listAnalysisSessions function with cursor pagination in lib/db/analysis.ts
-- [ ] T030 [US2] Implement POST handler in app/api/analyses/route.ts with auth and validation
-- [ ] T031 [US2] Implement GET handler in app/api/analyses/route.ts with pagination (limit, cursor)
-- [ ] T032 [US2] Add runtime='nodejs' export to app/api/analyses/route.ts
+- [x] T028 [P] [US2] Create createAnalysisSession function in lib/db/analysis.ts
+- [x] T029 [P] [US2] Create listAnalysisSessions function with cursor pagination in lib/db/analysis.ts
+- [x] T030 [US2] Implement POST handler in app/api/analyses/route.ts with auth and validation
+- [x] T031 [US2] Implement GET handler in app/api/analyses/route.ts with pagination (limit, cursor)
+- [x] T032 [US2] Add runtime='nodejs' export to app/api/analyses/route.ts
 
 **Checkpoint**: User Story 2 complete - AI analyses are persisted and retrievable per user
 
@@ -107,18 +107,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T033 [P] [US3] Unit test for createWebVitalsMetric in **tests**/lib/db/web-vitals.test.ts
-- [ ] T034 [P] [US3] Unit test for listWebVitalsMetrics with url+strategy filters in **tests**/lib/db/web-vitals.test.ts
-- [ ] T035 [US3] Integration test for POST /api/web-vitals in **tests**/app/api/web-vitals/route.test.ts
-- [ ] T036 [US3] Integration test for GET /api/web-vitals with filters in **tests**/app/api/web-vitals/route.test.ts
+- [x] T033 [P] [US3] Unit test for createWebVitalsMetric in **tests**/lib/db/web-vitals.test.ts
+- [x] T034 [P] [US3] Unit test for listWebVitalsMetrics with url+strategy filters in **tests**/lib/db/web-vitals.test.ts
+- [x] T035 [US3] Integration test for POST /api/web-vitals in **tests**/app/api/web-vitals/route.test.ts
+- [x] T036 [US3] Integration test for GET /api/web-vitals with filters in **tests**/app/api/web-vitals/route.test.ts
 
 ### Implementation for User Story 3
 
-- [ ] T037 [P] [US3] Create createWebVitalsMetric function in lib/db/web-vitals.ts
-- [ ] T038 [P] [US3] Create listWebVitalsMetrics function with url, strategy, pagination in lib/db/web-vitals.ts
-- [ ] T039 [US3] Implement POST handler in app/api/web-vitals/route.ts with validation
-- [ ] T040 [US3] Implement GET handler in app/api/web-vitals/route.ts with url/strategy query params
-- [ ] T041 [US3] Add runtime='nodejs' export to app/api/web-vitals/route.ts
+- [x] T037 [P] [US3] Create createWebVitalsMetric function in lib/db/web-vitals.ts
+- [x] T038 [P] [US3] Create listWebVitalsMetrics function with url, strategy, pagination in lib/db/web-vitals.ts
+- [x] T039 [US3] Implement POST handler in app/api/web-vitals/route.ts with validation
+- [x] T040 [US3] Implement GET handler in app/api/web-vitals/route.ts with url/strategy query params
+- [x] T041 [US3] Add runtime='nodejs' export to app/api/web-vitals/route.ts
 
 **Checkpoint**: User Story 3 complete - Core Web Vitals tracking operational across strategies
 
