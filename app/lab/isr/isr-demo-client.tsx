@@ -38,9 +38,12 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
   const [timeUntilRevalidation, setTimeUntilRevalidation] = useState(60);
   const [isRevalidating, setIsRevalidating] = useState(false);
 
+  // Duration to show revalidation UI state (in milliseconds)
+  const REVALIDATION_DISPLAY_DURATION = 3000;
+
   // Countdown to next revalidation
   useEffect(() => {
-    const updateTimer = () => {
+    const updateTimer = async () => {
       const ageSeconds = Math.floor((Date.now() - isrData.timestamp) / 1000);
       const remaining = Math.max(0, isrData.data.revalidateInterval - ageSeconds);
       setTimeUntilRevalidation(remaining);
@@ -49,8 +52,14 @@ export function ISRDemoClient({ isrData, sourceCode }: ISRDemoClientProps) {
       if (remaining === 0 && !isRevalidating) {
         setIsRevalidating(true);
         // Trigger Next.js to fetch fresh data from the server
-        router.refresh();
-        setTimeout(() => setIsRevalidating(false), 3000);
+        try {
+          router.refresh();
+          // Keep the revalidation UI visible for a few seconds
+          setTimeout(() => setIsRevalidating(false), REVALIDATION_DISPLAY_DURATION);
+        } catch (error) {
+          console.error('Failed to refresh:', error);
+          setIsRevalidating(false);
+        }
       }
     };
 
