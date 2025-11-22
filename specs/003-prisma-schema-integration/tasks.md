@@ -19,11 +19,11 @@
 
 **Purpose**: Project initialization and Prisma/Firebase basic structure
 
-- [ ] T001 Install Prisma dependencies: `npm install prisma @prisma/client`
-- [ ] T002 Install Firebase Admin SDK: `npm install firebase-admin`
-- [ ] T003 [P] Add DATABASE_URL and POSTGRES_PRISMA_URL to .env.example
-- [ ] T004 [P] Add FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY to .env.example
-- [ ] T005 Initialize Prisma: `npx prisma init --datasource-provider postgresql`
+- [x] T001 Install Prisma dependencies: `npm install prisma @prisma/client`
+- [x] T002 Install Firebase Admin SDK: `npm install firebase-admin`
+- [x] T003 [P] Add DATABASE_URL and POSTGRES_PRISMA_URL to .env.example
+- [x] T004 [P] Add FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY to .env.example
+- [x] T005 Initialize Prisma: `npx prisma init --datasource-provider postgresql`
 
 ---
 
