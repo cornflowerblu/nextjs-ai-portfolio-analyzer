@@ -170,8 +170,8 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
 
           {/* Static Content Proof */}
           <div 
-            className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 will-change-transform ${
-              justRebuilt ? 'ring-4 ring-green-500 bg-green-50 dark:bg-green-950/30' : ''
+            className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 ${
+              justRebuilt ? 'ring-4 ring-green-500 bg-green-50 dark:bg-green-950/30 will-change-transform' : ''
             }`}
             style={justRebuilt ? { transform: 'scale(1.05)' } : undefined}
           >

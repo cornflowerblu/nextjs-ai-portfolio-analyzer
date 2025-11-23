@@ -51,8 +51,8 @@ export function StrategyCards() {
               className="block"
             >
               <div 
-                className={`rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 h-full will-change-transform ${
-                  isHovered ? 'shadow-lg' : ''
+                className={`rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 h-full ${
+                  isHovered ? 'shadow-lg will-change-transform' : ''
                 }`}
                 style={isHovered ? { transform: 'scale(1.05)' } : undefined}
               >
