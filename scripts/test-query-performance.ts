@@ -22,6 +22,9 @@ import { resolve } from 'path';
 // Load environment variables from .env.local
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 
+// Import Prisma types
+import type { PrismaClient as PrismaClientType } from '@/lib/generated/prisma';
+
 interface ExplainResult {
   'QUERY PLAN': string;
 }
@@ -31,20 +34,7 @@ const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const PERFORMANCE_TEST_RUNS = 3;
 
 // Import Prisma client after environment variables are loaded
-type PrismaClient = {
-  $queryRaw: (query: TemplateStringsArray, ...values: unknown[]) => Promise<unknown[]>;
-  $disconnect: () => Promise<void>;
-  webVitalsMetric: {
-    count: (args: { where: { userId: string } }) => Promise<number>;
-    groupBy: (args: {
-      by: string[];
-      where: { userId: string; collectedAt: { gte: Date } };
-      _avg: Record<string, boolean>;
-      _count: Record<string, boolean>;
-    }) => Promise<unknown[]>;
-  };
-};
-let prisma: PrismaClient;
+let prisma: PrismaClientType;
 
 async function main() {
   console.log('⚡ Testing database query performance...\n');

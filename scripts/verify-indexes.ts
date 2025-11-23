@@ -21,6 +21,9 @@ import { resolve } from 'path';
 // Load environment variables from .env.local
 dotenv.config({ path: resolve(process.cwd(), '.env.local') });
 
+// Import Prisma types
+import type { PrismaClient as PrismaClientType } from '@/lib/generated/prisma';
+
 interface IndexInfo {
   indexname: string;
   tablename: string;
@@ -28,7 +31,7 @@ interface IndexInfo {
 }
 
 // Import Prisma client after environment variables are loaded
-let prisma: { $queryRaw: (query: TemplateStringsArray, ...values: unknown[]) => Promise<unknown[]>; $disconnect: () => Promise<void> };
+let prisma: PrismaClientType;
 
 async function main() {
   console.log('🔍 Verifying database indexes on web_vitals_metrics table...\n');
