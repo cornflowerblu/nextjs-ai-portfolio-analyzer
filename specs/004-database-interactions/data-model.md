@@ -45,16 +45,21 @@ Indexes (from spec 003):
 **Schema** (already defined in `prisma/schema.prisma`):
 
 ```prisma
+// Web Vitals metrics schema
+// - Uses individual columns per metric type for efficient aggregation
+// - strategy: RenderingStrategy enum (SSR | SSG | ISR | CACHE)
+// - All metric fields are nullable (not every metric may be captured on every page load)
+
 model WebVitalsMetric {
   id          String            @id @default(cuid())
   userId      String
   url         String
-  strategy    RenderingStrategy // SSR | SSG | ISR | CACHE (enum)
-  lcpMs       Float?            // Largest Contentful Paint (milliseconds)
-  cls         Float?            // Cumulative Layout Shift (score)
-  inpMs       Float?            // Interaction to Next Paint (milliseconds)
-  fidMs       Float?            // First Input Delay (milliseconds)
-  ttfbMs      Float?            // Time to First Byte (milliseconds)
+  strategy    RenderingStrategy
+  lcpMs       Float?
+  cls         Float?
+  inpMs       Float?
+  fidMs       Float?
+  ttfbMs      Float?
   collectedAt DateTime          @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
