@@ -28,7 +28,7 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T001 Add package.json scripts: `db:seed`, `db:studio`, `db:push`, `db:reset` in package.json
+- [X] T001 Add package.json scripts: `db:seed`, `db:studio`, `db:push`, `db:reset` in package.json
 
 ## Phase 2: Foundational
 
