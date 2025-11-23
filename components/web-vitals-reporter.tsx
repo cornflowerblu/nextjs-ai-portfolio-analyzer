@@ -63,7 +63,18 @@ async function saveMetricToDatabase(
     }
 
     // Build request body with only the captured metric
-    const body: Record<string, unknown> = {
+    // Using explicit interface for type safety
+    interface MetricPayload {
+      url: string;
+      strategy: RenderingStrategy;
+      lcpMs?: number;
+      cls?: number;
+      inpMs?: number;
+      fidMs?: number;
+      ttfbMs?: number;
+    }
+
+    const body: MetricPayload = {
       url,
       strategy,
       [fieldName]: metricValue,
@@ -80,7 +91,9 @@ async function saveMetricToDatabase(
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+      const error = await response.json().catch(() => ({ 
+        error: `HTTP ${response.status} ${response.statusText}` 
+      }));
       console.warn('Web Vitals: Failed to save metric:', error);
     } else {
       console.debug(`Web Vitals: Saved ${metricName} to database`);
@@ -109,7 +122,8 @@ export function WebVitalsReporter() {
       
       if (strategy) {
         // Create unique key for this metric to prevent duplicates
-        const metricKey = `${pathname}-${metric.name}`;
+        // Using colon separator to avoid collision issues
+        const metricKey = `${pathname}:${metric.name}`;
         
         if (!savedMetrics.current.has(metricKey)) {
           savedMetrics.current.add(metricKey);
