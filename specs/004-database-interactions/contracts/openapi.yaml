@@ -108,7 +108,14 @@ paths:
                       received: 100000
                       min: 0
                       max: 60000
-
+                invalidMetricType:
+                  summary: Invalid metric type
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "cls must be a valid number, received: \"invalid\""
+                    details:
+                      field: "cls"
+                      received: "invalid"
                 invalidStrategy:
                   summary: Invalid strategy
                   value:
@@ -190,7 +197,7 @@ components:
           description: |
             **Largest Contentful Paint (LCP)** in milliseconds.
             Measures loading performance - time until the largest content element is visible.
-            
+            Optional.
             **Validation range**: 0-60000ms (outliers rejected)
           example: 1234.5
           minimum: 0
@@ -202,8 +209,12 @@ components:
           description: |
             **Cumulative Layout Shift (CLS)** score (unitless).
             Measures visual stability - sum of all unexpected layout shifts.
+            Optional.
+            **Standard range**: 0-1 (0-0.1 good, 0.1-0.25 needs improvement, >0.25 poor)
+            **API accepts**: 0-100 (generous upper bound for defensive validation)
             
-            **Validation range**: 0-100 (outliers rejected)
+            Note: While typical CLS values are 0-1, this API accepts up to 100 to handle
+            edge cases and prevent rejection of anomalous but valid measurements.
           example: 0.05
           minimum: 0
           maximum: 100
@@ -214,7 +225,7 @@ components:
           description: |
             **Interaction to Next Paint (INP)** in milliseconds.
             Measures responsiveness - latency of user interactions.
-            
+            Optional.
             **Validation range**: 0-10000ms (outliers rejected)
           example: 89.2
           minimum: 0
@@ -226,7 +237,7 @@ components:
           description: |
             **First Input Delay (FID)** in milliseconds.
             Measures interactivity - delay of first user interaction (deprecated in favor of INP).
-            
+            Optional.
             **Validation range**: 0-10000ms (outliers rejected)
           example: 50.0
           minimum: 0
@@ -238,7 +249,7 @@ components:
           description: |
             **Time to First Byte (TTFB)** in milliseconds.
             Measures server response time - time until first byte received.
-            
+            Optional.
             **Validation range**: 0-60000ms (outliers rejected)
           example: 200.0
           minimum: 0
@@ -280,16 +291,16 @@ components:
         message:
           type: string
           description: Human-readable error message
-          example: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+          example: "Invalid strategy. Must be one of: SSR, SSG, ISR, CACHE"
 
         details:
           type: object
           description: Additional context about the error (structure varies by error type)
           additionalProperties: true
           example:
-            field: "name"
+            field: "strategy"
             received: "FOO"
-            expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
+            expected: ["SSR", "SSG", "ISR", "CACHE"]
 
     # Read-only schemas (for dashboard queries, not exposed as API endpoints)
     WebVitalsMetric:
@@ -297,11 +308,15 @@ components:
       description: |
         Database record shape (not directly exposed via API).
         Used internally by dashboard Server Component queries.
+        
+        Note: The database schema uses individual columns for each metric type
+        (lcpMs, cls, inpMs, fidMs, ttfbMs) rather than name/value pairs.
+        This allows for efficient aggregation queries and type-safe access.
       properties:
         id:
           type: string
-          format: uuid
-          description: Unique metric record ID
+          format: cuid
+          description: Unique metric ID (CUID format)
         userId:
           type: string
           description: Firebase UID (from Authorization header)
@@ -311,7 +326,7 @@ components:
         strategy:
           type: string
           enum: [SSR, SSG, ISR, CACHE]
-          description: Rendering strategy
+          description: Rendering strategy (stored as RenderingStrategy enum)
         lcpMs:
           type: number
           format: float

@@ -23,8 +23,11 @@ This document describes the data model for Live Web Vitals tracking, including t
 │ userId (string, FK)    │  ← Firebase UID from session cookie
 │ url (string)           │  ← Page URL where metric captured
 │ strategy (enum)        │  ← SSR | SSG | ISR | CACHE
-│ name (enum)            │  ← LCP | CLS | INP | FID | TTFB
-│ value (float)          │  ← Metric value (ms or score)
+│ lcpMs (float?)         │  ← Largest Contentful Paint (ms)
+│ cls (float?)           │  ← Cumulative Layout Shift (score)
+│ inpMs (float?)         │  ← Interaction to Next Paint (ms)
+│ fidMs (float?)         │  ← First Input Delay (ms)
+│ ttfbMs (float?)        │  ← Time to First Byte (ms)
 │ collectedAt (datetime) │  ← Timestamp (indexed)
 └────────────────────────┘
 
@@ -42,39 +45,47 @@ Indexes (from spec 003):
 **Schema** (already defined in `prisma/schema.prisma`):
 
 ```prisma
-model web_vitals_metrics {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  url         String
-  strategy    String   // "SSR" | "SSG" | "ISR" | "CACHE"
-  name        String   // "LCP" | "CLS" | "INP" | "FID" | "TTFB"
-  value       Float
-  collectedAt DateTime @default(now()) @map("collected_at")
+// Web Vitals metrics schema
+// - Uses individual columns per metric type for efficient aggregation
+// - strategy: RenderingStrategy enum (SSR | SSG | ISR | CACHE)
+// - All metric fields are nullable (not every metric may be captured on every page load)
 
-  @@index([userId, collectedAt])
-  @@index([userId, url, strategy, collectedAt])
+model WebVitalsMetric {
+  id          String            @id @default(cuid())
+  userId      String            @map("user_id")
+  url         String
+  strategy    RenderingStrategy
+  lcpMs       Float?
+  cls         Float?
+  inpMs       Float?
+  fidMs       Float?
+  ttfbMs      Float?
+  collectedAt DateTime          @default(now()) @map("collected_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, collectedAt(sort: Desc)])
+  @@index([userId, url, strategy, collectedAt(sort: Desc)])
   @@map("web_vitals_metrics")
 }
 ```
 
 **Fields**:
 
-- `id`: Unique identifier (UUID v4)
+- `id`: Unique identifier (CUID)
 - `userId`: Firebase UID from session cookie (links to User table in Firebase, not Postgres)
 - `url`: Full URL where metric was captured (e.g., `http://localhost:3000/lab/ssr`)
-- `strategy`: Rendering strategy inferred from URL pathname
+- `strategy`: Rendering strategy inferred from URL pathname (enum: RenderingStrategy)
   - `/lab/ssr` → `"SSR"`
   - `/lab/ssg` → `"SSG"`
   - `/lab/isr` → `"ISR"`
   - `/lab/cache` → `"CACHE"`
   - `/dashboard` → (not tracked, meta page)
-- `name`: Web Vitals metric name (5 possible values)
-- `value`: Numeric value
-  - LCP: milliseconds (e.g., 1234.5)
-  - CLS: unitless score (e.g., 0.05)
-  - INP: milliseconds (e.g., 89.2)
-  - FID: milliseconds (e.g., 12.8)
-  - TTFB: milliseconds (e.g., 345.1)
+- `lcpMs`: Largest Contentful Paint in milliseconds (e.g., 1234.5), nullable
+- `cls`: Cumulative Layout Shift score (e.g., 0.05), nullable
+- `inpMs`: Interaction to Next Paint in milliseconds (e.g., 89.2), nullable
+- `fidMs`: First Input Delay in milliseconds (e.g., 12.8), nullable
+- `ttfbMs`: Time to First Byte in milliseconds (e.g., 345.1), nullable
 - `collectedAt`: Timestamp when metric was captured (browser time)
 
 **Validation Rules** (enforced in API, see `app/api/web-vitals/route.ts`):
@@ -126,7 +137,7 @@ const METRIC_RANGES = {
 ┌──────────────────────────────────────────────────────────────────┐
 │ 4. lib/db/web-vitals.ts (Database Layer)                        │
 │    - createWebVitalsMetric(data)                                 │
-│    - Prisma: prisma.web_vitals_metrics.create()                  │
+│    - Prisma: prisma.webVitalsMetric.create()                     │
 │    - Returns: created record                                     │
 └───────────────────────┬──────────────────────────────────────────┘
                         │ INSERT INTO web_vitals_metrics
@@ -158,23 +169,23 @@ const METRIC_RANGES = {
                         ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │ 3. lib/db/web-vitals.ts (Database Layer)                        │
-│    - Custom query: prisma.web_vitals_metrics.groupBy()          │
-│    - Group by: [strategy, name]                                 │
+│    - Custom query: prisma.webVitalsMetric.groupBy()             │
+│    - Group by: [strategy]                                       │
 │    - Where: userId + collectedAt >= 24h ago                     │
-│    - Aggregate: _avg { value }                                   │
+│    - Aggregate: _avg { lcpMs, cls, inpMs, fidMs, ttfbMs }       │
 └───────────────────────┬──────────────────────────────────────────┘
-                        │ SELECT strategy, name, AVG(value)
+                        │ SELECT strategy, AVG(lcp_ms), AVG(cls), ...
                         │ FROM web_vitals_metrics
                         │ WHERE user_id = ? AND collected_at >= ?
-                        │ GROUP BY strategy, name
+                        │ GROUP BY strategy
                         ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │ 4. Neon PostgreSQL                                                │
 │    - Index scan on (userId, collectedAt)                         │
 │    - GROUP BY aggregation                                        │
-│    - Returns ~20 rows (4 strategies × 5 metrics)                 │
+│    - Returns ~4 rows (1 per strategy, with all 5 avg metrics)    │
 └───────────────────────┬──────────────────────────────────────────┘
-                        │ Array<{ strategy, name, _avg: { value } }>
+                        │ Array<{ strategy, _avg: { lcpMs, cls, inpMs, fidMs, ttfbMs }, _count: { id } }>
                         ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │ 5. components/dashboard/metrics-panel.tsx (Display)             │
@@ -231,26 +242,26 @@ for (const strategy of ["SSG", "SSR", "ISR", "CACHE"]) {
     const hour = new Date(timestamp).getHours();
     const timeFactor = timeFactorMultiplier(hour);
 
-    for (const metricName of ["LCP", "CLS", "INP", "FID", "TTFB"]) {
-      const mean = STRATEGY_MEANS[strategy][metricName];
-      const stddev = STRATEGY_STDDEVS[strategy][metricName];
-      const value = gaussianRandom(mean, stddev) * timeFactor;
+    // Generate all 5 metrics for this page visit
+    const lcpMs = generateMetricValue(strategy, 'LCP', hour);
+    const cls = generateMetricValue(strategy, 'CLS', hour);
+    const inpMs = generateMetricValue(strategy, 'INP', hour);
+    const fidMs = generateMetricValue(strategy, 'FID', hour);
+    const ttfbMs = generateMetricValue(strategy, 'TTFB', hour);
 
-      await prisma.web_vitals_metrics.create({
-        data: {
-          userId: demoUserId,
-          url: `http://localhost:3000/lab/${strategy.toLowerCase()}`,
-          strategy,
-          name: metricName,
-          value: clamp(
-            value,
-            METRIC_RANGES[metricName].min,
-            METRIC_RANGES[metricName].max
-          ),
-          collectedAt: new Date(timestamp),
-        },
-      });
-    }
+    await prisma.webVitalsMetric.create({
+      data: {
+        userId: demoUserId,
+        url: `http://localhost:3000/lab/${strategy.toLowerCase()}`,
+        strategy,
+        lcpMs,
+        cls,
+        inpMs,
+        fidMs,
+        ttfbMs,
+        collectedAt: new Date(timestamp),
+      },
+    });
   }
 }
 ```
@@ -261,11 +272,11 @@ for (const strategy of ["SSG", "SSR", "ISR", "CACHE"]) {
 
 ### Dashboard Metrics (Current Implementation)
 
-**Query**: Last 24 hours, average per strategy per metric
+**Query**: Last 24 hours, average per strategy for all metrics
 
 ```typescript
-const metrics = await prisma.web_vitals_metrics.groupBy({
-  by: ["strategy", "name"],
+const metrics = await prisma.webVitalsMetric.groupBy({
+  by: ["strategy"],
   where: {
     userId: session.userId,
     collectedAt: {
@@ -273,7 +284,14 @@ const metrics = await prisma.web_vitals_metrics.groupBy({
     },
   },
   _avg: {
-    value: true,
+    lcpMs: true,
+    cls: true,
+    inpMs: true,
+    fidMs: true,
+    ttfbMs: true,
+  },
+  _count: {
+    id: true,
   },
 });
 ```
@@ -282,28 +300,58 @@ const metrics = await prisma.web_vitals_metrics.groupBy({
 
 ```typescript
 [
-  { strategy: "SSG", name: "LCP", _avg: { value: 615.3 } },
-  { strategy: "SSG", name: "CLS", _avg: { value: 0.03 } },
-  { strategy: "SSG", name: "INP", _avg: { value: 45.2 } },
-  // ... (20 rows total for 4 strategies × 5 metrics)
+  { 
+    strategy: "SSG", 
+    _avg: { 
+      lcpMs: 615.3, 
+      cls: 0.03, 
+      inpMs: 45.2, 
+      fidMs: 12.5, 
+      ttfbMs: 150.0 
+    },
+    _count: { id: 100 }
+  },
+  { 
+    strategy: "SSR", 
+    _avg: { 
+      lcpMs: 1800.0, 
+      cls: 0.12, 
+      inpMs: 120.0, 
+      fidMs: 45.0, 
+      ttfbMs: 650.0 
+    },
+    _count: { id: 75 }
+  },
+  // ... (4 rows total for 4 strategies)
 ];
 ```
 
 **Transformation for Display**:
 
 ```typescript
-const strategyMetrics = new Map<string, Map<string, number>>();
+const strategyMetrics = new Map<string, {
+  lcpMs: number | null;
+  cls: number | null;
+  inpMs: number | null;
+  fidMs: number | null;
+  ttfbMs: number | null;
+  count: number;
+}>();
 
 for (const row of metrics) {
-  if (!strategyMetrics.has(row.strategy)) {
-    strategyMetrics.set(row.strategy, new Map());
-  }
-  strategyMetrics.get(row.strategy)!.set(row.name, row._avg.value!);
+  strategyMetrics.set(row.strategy, {
+    lcpMs: row._avg.lcpMs ?? null,
+    cls: row._avg.cls ?? null,
+    inpMs: row._avg.inpMs ?? null,
+    fidMs: row._avg.fidMs ?? null,
+    ttfbMs: row._avg.ttfbMs ?? null,
+    count: row._count.id,
+  });
 }
 
 // Usage:
 const ssgMetrics = strategyMetrics.get("SSG");
-const avgLCP = ssgMetrics?.get("LCP") ?? null;
+const avgLCP = ssgMetrics?.lcpMs ?? null;
 ```
 
 ### Time-Series Chart (Optional Phase 2)
@@ -321,12 +369,12 @@ const hourlyLCP = await prisma.$queryRaw<
   SELECT
     DATE_TRUNC('hour', collected_at)::text as hour,
     strategy,
-    AVG(value) as avg_lcp
+    AVG(lcp_ms) as avg_lcp
   FROM web_vitals_metrics
   WHERE
-    name = 'LCP'
-    AND user_id = ${userId}
+    user_id = ${userId}
     AND collected_at >= NOW() - INTERVAL '24 hours'
+    AND lcp_ms IS NOT NULL
   GROUP BY DATE_TRUNC('hour', collected_at), strategy
   ORDER BY hour ASC
 `;
@@ -366,7 +414,7 @@ Currently: **No automatic deletion** (unbounded growth)
 
 - 1 query per dashboard page load
 - <100ms p95 latency (indexed timestamp filter)
-- Result size: ~20 rows (small)
+- Result size: ~4 rows (small)
 - Server Component caching reduces queries
 
 ## Summary
