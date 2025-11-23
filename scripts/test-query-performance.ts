@@ -31,7 +31,20 @@ const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const PERFORMANCE_TEST_RUNS = 3;
 
 // Import Prisma client after environment variables are loaded
-let prisma: any;
+type PrismaClient = {
+  $queryRaw: (query: TemplateStringsArray, ...values: unknown[]) => Promise<unknown[]>;
+  $disconnect: () => Promise<void>;
+  webVitalsMetric: {
+    count: (args: { where: { userId: string } }) => Promise<number>;
+    groupBy: (args: {
+      by: string[];
+      where: { userId: string; collectedAt: { gte: Date } };
+      _avg: Record<string, boolean>;
+      _count: Record<string, boolean>;
+    }) => Promise<unknown[]>;
+  };
+};
+let prisma: PrismaClient;
 
 async function main() {
   console.log('⚡ Testing database query performance...\n');

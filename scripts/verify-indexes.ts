@@ -28,7 +28,7 @@ interface IndexInfo {
 }
 
 // Import Prisma client after environment variables are loaded
-let prisma: any;
+let prisma: { $queryRaw: (query: TemplateStringsArray, ...values: unknown[]) => Promise<unknown[]>; $disconnect: () => Promise<void> };
 
 async function main() {
   console.log('🔍 Verifying database indexes on web_vitals_metrics table...\n');
