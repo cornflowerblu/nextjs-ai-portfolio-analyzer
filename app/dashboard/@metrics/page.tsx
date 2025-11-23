@@ -47,9 +47,11 @@ export default async function MetricsSlot() {
   }
 
   // T011: Query database for metrics from last 24 hours with aggregation
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-
   // Query all metrics for the user in the last 24 hours
+  // Note: Date.now() is allowed in Server Components as they only run server-side at request time
+  // eslint-disable-next-line react-hooks/purity
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  
   const recentMetrics = await prisma.webVitalsMetric.findMany({
     where: {
       userId,
@@ -182,7 +184,7 @@ export default async function MetricsSlot() {
       const avgLcp = agg.lcpCount > 0 ? agg.lcpSum / agg.lcpCount : 0;
       const avgCls = agg.clsCount > 0 ? agg.clsSum / agg.clsCount : 0;
       const avgInp = agg.inpCount > 0 ? agg.inpSum / agg.inpCount : 0;
-      const avgFid = agg.fidCount > 0 ? agg.fidSum / agg.fidCount : 0;
+      // Note: FID (First Input Delay) is tracked in DB but not displayed - replaced by INP
       const avgTtfb = agg.ttfbCount > 0 ? agg.ttfbSum / agg.ttfbCount : 0;
 
       // Create CoreWebVitals object with ratings
