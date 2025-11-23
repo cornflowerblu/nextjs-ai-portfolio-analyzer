@@ -237,10 +237,10 @@ export default async function MetricsSlot() {
         metrics,
       };
     })
-    // Filter out invalid strategies and sort by strategy order: SSG, ISR, CACHE, SSR
+    // Filter out invalid strategies and sort by strategy order: SSR, SSG, ISR, CACHE
     .filter(({ strategy }) => strategy in RENDERING_STRATEGIES)
     .sort((a, b) => {
-      const order = ['SSG', 'ISR', 'CACHE', 'SSR'];
+      const order = ['SSR', 'SSG', 'ISR', 'CACHE'];
       return order.indexOf(a.strategy) - order.indexOf(b.strategy);
     });
 

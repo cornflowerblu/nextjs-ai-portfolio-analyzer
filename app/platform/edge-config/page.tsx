@@ -182,7 +182,7 @@ export default function EdgeConfigPage() {
           <div>
             <h3 className="font-semibold mb-2">3. Add Environment Variable</h3>
             <code className="block p-2 bg-white rounded border text-xs">
-              EDGE_CONFIG=https://edge-config.vercel.com/...
+              EDGE_CONFIG=https://edge-config.vercel.com/ecfg_xg49dvpnlj8duwjmzocolbx9svyu?token=652c9b72-b0e2-4ba0-b8ee-601187553e4f
             </code>
           </div>
           <div>
