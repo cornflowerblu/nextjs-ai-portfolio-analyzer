@@ -19,8 +19,18 @@
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
 
-// Load environment variables from .env.local
-dotenv.config({ path: resolve(process.cwd(), '.env.local') });
+// Load environment variables
+// Try multiple environment files in order of precedence
+import { existsSync } from 'fs';
+
+const envFiles = ['.env.local', '.env.development', '.env'];
+for (const envFile of envFiles) {
+  const envPath = resolve(process.cwd(), envFile);
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    break;
+  }
+}
 
 // Import Prisma types
 import type { PrismaClient as PrismaClientType } from '@/lib/generated/prisma';
