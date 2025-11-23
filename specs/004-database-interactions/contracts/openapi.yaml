@@ -303,12 +303,15 @@ components:
       description: |
         Database record shape (not directly exposed via API).
         Used internally by dashboard Server Component queries.
-        Matches the Prisma WebVitalsMetric model structure.
+        
+        Note: The database schema uses individual columns for each metric type
+        (lcpMs, cls, inpMs, fidMs, ttfbMs) rather than name/value pairs.
+        This allows for efficient aggregation queries and type-safe access.
       properties:
         id:
           type: string
-          format: uuid
-          description: Unique metric ID (cuid, PK)
+          format: cuid
+          description: Unique metric ID (CUID format)
         userId:
           type: string
           description: Firebase UID (from session cookie)
@@ -318,7 +321,7 @@ components:
         strategy:
           type: string
           enum: [SSR, SSG, ISR, CACHE]
-          description: Rendering strategy
+          description: Rendering strategy (stored as RenderingStrategy enum)
         lcpMs:
           type: number
           format: float

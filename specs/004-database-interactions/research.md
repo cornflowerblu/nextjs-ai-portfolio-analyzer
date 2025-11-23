@@ -133,8 +133,8 @@ value = mean + (random_gaussian * stddev) + time_factor + weekend_factor
 **Query Structure**:
 
 ```typescript
-const metrics = await prisma.web_vitals_metrics.groupBy({
-  by: ["strategy", "name"],
+const metrics = await prisma.webVitalsMetric.groupBy({
+  by: ["strategy"],
   where: {
     userId: session.userId,
     collectedAt: {
@@ -142,7 +142,11 @@ const metrics = await prisma.web_vitals_metrics.groupBy({
     },
   },
   _avg: {
-    value: true,
+    lcpMs: true,
+    cls: true,
+    inpMs: true,
+    fidMs: true,
+    ttfbMs: true,
   },
 });
 ```
@@ -153,7 +157,7 @@ const metrics = await prisma.web_vitals_metrics.groupBy({
 - `collectedAt` indexed for fast filtering (from spec 003 schema)
 - `groupBy` leverages SQL GROUP BY (efficient database operation)
 - Aggregation happens in database (not in Node.js)
-- Returns ~20 rows max (4 strategies × 5 metrics)
+- Returns 4 rows max (one per strategy, with all metrics averaged)
 - Prisma generates optimized SQL for Neon's Postgres dialect
 
 **Alternatives Considered**:
@@ -175,8 +179,8 @@ const metrics = await prisma.web_vitals_metrics.groupBy({
 
 **Implementation Notes**:
 
-- Query returns array of `{ strategy, name, _avg: { value } }`
-- Transform to `Map<strategy, Map<metric, avgValue>>` for display components
+- Query returns array of `{ strategy, _avg: { lcpMs, cls, inpMs, fidMs, ttfbMs } }`
+- Transform to `Map<strategy, MetricAverages>` for display components
 - Empty result = show empty state (no error)
 - Uses existing Prisma client from `lib/db/prisma.ts`
 
@@ -316,7 +320,14 @@ const baseTimestamp = new Date('2025-01-15T00:00:00Z').getTime();
 for (let i = 0; i < count; i++) {
   const timestamp = new Date(baseTimestamp + i * 1000 * 60); // 1 min apart
   // Check existence or use upsert
-  await prisma.web_vitals_metrics.create({ data: { collectedAt: timestamp, ... } });
+  await prisma.webVitalsMetric.create({ 
+    data: { 
+      collectedAt: timestamp,
+      lcpMs: /* value */,
+      cls: /* value */,
+      // ... other metrics
+    } 
+  });
 }
 ```
 
@@ -324,8 +335,8 @@ for (let i = 0; i < count; i++) {
 
 ```typescript
 // Use createMany for bulk inserts (much faster)
-await prisma.web_vitals_metrics.createMany({
-  data: metricsArray, // Array of objects
+await prisma.webVitalsMetric.createMany({
+  data: metricsArray, // Array of objects with lcpMs, cls, inpMs, fidMs, ttfbMs
   skipDuplicates: true, // Idempotent (requires unique constraint)
 });
 ```
@@ -450,9 +461,9 @@ const hourlyMetrics = await prisma.$queryRaw<
   SELECT
     DATE_TRUNC('hour', collected_at) as hour,
     strategy,
-    AVG(value) as avg_lcp
+    AVG(lcp_ms) as avg_lcp
   FROM web_vitals_metrics
-  WHERE name = 'LCP' AND user_id = ${userId}
+  WHERE user_id = ${userId} AND lcp_ms IS NOT NULL
   GROUP BY DATE_TRUNC('hour', collected_at), strategy
   ORDER BY hour ASC
 `;
