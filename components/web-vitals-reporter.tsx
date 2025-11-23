@@ -12,12 +12,26 @@ import { getIdToken } from '@/lib/firebase/auth';
 type RenderingStrategy = 'SSR' | 'SSG' | 'ISR' | 'CACHE';
 
 /**
+ * Payload structure for Web Vitals API requests
+ */
+interface MetricPayload {
+  url: string;
+  strategy: RenderingStrategy;
+  lcpMs?: number;
+  cls?: number;
+  inpMs?: number;
+  fidMs?: number;
+  ttfbMs?: number;
+}
+
+/**
  * T006: Determine rendering strategy from URL pathname
  * Extracts strategy from /lab/{strategy} routes
  */
 function determineStrategy(pathname: string): RenderingStrategy | null {
   // Match /lab/ssr, /lab/ssg, /lab/isr, /lab/cache patterns
-  const match = pathname.match(/^\/lab\/(ssr|ssg|isr|cache)$/i);
+  // Case-sensitive to match Next.js routing conventions
+  const match = pathname.match(/^\/lab\/(ssr|ssg|isr|cache)$/);
   if (!match) {
     return null; // Not a lab demo route
   }
@@ -63,17 +77,6 @@ async function saveMetricToDatabase(
     }
 
     // Build request body with only the captured metric
-    // Using explicit interface for type safety
-    interface MetricPayload {
-      url: string;
-      strategy: RenderingStrategy;
-      lcpMs?: number;
-      cls?: number;
-      inpMs?: number;
-      fidMs?: number;
-      ttfbMs?: number;
-    }
-
     const body: MetricPayload = {
       url,
       strategy,
@@ -153,14 +156,14 @@ export function WebVitalsReporter() {
 
   // Track page views and reset saved metrics on navigation
   useEffect(() => {
-    // Reset saved metrics when pathname changes
+    // Reset saved metrics when component mounts
     savedMetrics.current.clear();
 
     if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
       // Track initial page view
       // You can integrate with analytics services here
     }
-  }, []);
+  }, []); // Empty dependency array ensures this only runs once on mount
 
   return null;
 }
