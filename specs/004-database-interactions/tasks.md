@@ -27,7 +27,7 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T001 Add package.json scripts: `db:seed`, `db:studio`, `db:push`, `db:reset` in package.json
+- [x] T001 Add package.json scripts: `db:seed`, `db:studio`, `db:push`, `db:reset` in package.json
 
 ## Phase 2: Foundational
 
@@ -37,10 +37,10 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T002 Create prisma/seed.ts with main() function, Prisma client import, and basic structure
-- [ ] T003 [P] Implement metric distribution constants (STRATEGY_MEANS, STRATEGY_STDDEVS, METRIC_RANGES) in prisma/seed.ts
-- [ ] T004 [P] Implement gaussianRandom() and timeFactorMultiplier() helper functions in prisma/seed.ts
-- [ ] T005 Implement seed data generation loop with progress logging in prisma/seed.ts
+- [x] T002 Create prisma/seed.ts with main() function, Prisma client import, and basic structure
+- [x] T003 [P] Implement metric distribution constants (STRATEGY_MEANS, STRATEGY_STDDEVS, METRIC_RANGES) in prisma/seed.ts
+- [x] T004 [P] Implement gaussianRandom() and timeFactorMultiplier() helper functions in prisma/seed.ts
+- [x] T005 Implement seed data generation loop with progress logging in prisma/seed.ts
 
 ## Phase 3: User Story 1 - Real-Time Metrics Capture
 
