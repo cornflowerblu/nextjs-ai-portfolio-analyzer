@@ -137,7 +137,7 @@ const METRIC_RANGES = {
 ┌──────────────────────────────────────────────────────────────────┐
 │ 4. lib/db/web-vitals.ts (Database Layer)                        │
 │    - createWebVitalsMetric(data)                                 │
-│    - Prisma: prisma.web_vitals_metrics.create()                  │
+│    - Prisma: prisma.webVitalsMetric.create()                     │
 │    - Returns: created record                                     │
 └───────────────────────┬──────────────────────────────────────────┘
                         │ INSERT INTO web_vitals_metrics
@@ -169,15 +169,15 @@ const METRIC_RANGES = {
                         ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │ 3. lib/db/web-vitals.ts (Database Layer)                        │
-│    - Custom query: prisma.web_vitals_metrics.groupBy()          │
-│    - Group by: [strategy, name]                                 │
+│    - Custom query: prisma.webVitalsMetric.groupBy()             │
+│    - Group by: [strategy]                                       │
 │    - Where: userId + collectedAt >= 24h ago                     │
-│    - Aggregate: _avg { value }                                   │
+│    - Aggregate: _avg { lcpMs, cls, inpMs, fidMs, ttfbMs }       │
 └───────────────────────┬──────────────────────────────────────────┘
-                        │ SELECT strategy, name, AVG(value)
+                        │ SELECT strategy, AVG(lcp_ms), AVG(cls), ...
                         │ FROM web_vitals_metrics
                         │ WHERE user_id = ? AND collected_at >= ?
-                        │ GROUP BY strategy, name
+                        │ GROUP BY strategy
                         ▼
 ┌──────────────────────────────────────────────────────────────────┐
 │ 4. Neon PostgreSQL                                                │
@@ -242,26 +242,26 @@ for (const strategy of ["SSG", "SSR", "ISR", "CACHE"]) {
     const hour = new Date(timestamp).getHours();
     const timeFactor = timeFactorMultiplier(hour);
 
-    for (const metricName of ["LCP", "CLS", "INP", "FID", "TTFB"]) {
-      const mean = STRATEGY_MEANS[strategy][metricName];
-      const stddev = STRATEGY_STDDEVS[strategy][metricName];
-      const value = gaussianRandom(mean, stddev) * timeFactor;
+    // Generate all 5 metrics for this page visit
+    const lcpMs = generateMetricValue(strategy, 'LCP', hour);
+    const cls = generateMetricValue(strategy, 'CLS', hour);
+    const inpMs = generateMetricValue(strategy, 'INP', hour);
+    const fidMs = generateMetricValue(strategy, 'FID', hour);
+    const ttfbMs = generateMetricValue(strategy, 'TTFB', hour);
 
-      await prisma.web_vitals_metrics.create({
-        data: {
-          userId: demoUserId,
-          url: `http://localhost:3000/lab/${strategy.toLowerCase()}`,
-          strategy,
-          name: metricName,
-          value: clamp(
-            value,
-            METRIC_RANGES[metricName].min,
-            METRIC_RANGES[metricName].max
-          ),
-          collectedAt: new Date(timestamp),
-        },
-      });
-    }
+    await prisma.webVitalsMetric.create({
+      data: {
+        userId: demoUserId,
+        url: `http://localhost:3000/lab/${strategy.toLowerCase()}`,
+        strategy,
+        lcpMs,
+        cls,
+        inpMs,
+        fidMs,
+        ttfbMs,
+        collectedAt: new Date(timestamp),
+      },
+    });
   }
 }
 ```

@@ -320,7 +320,14 @@ const baseTimestamp = new Date('2025-01-15T00:00:00Z').getTime();
 for (let i = 0; i < count; i++) {
   const timestamp = new Date(baseTimestamp + i * 1000 * 60); // 1 min apart
   // Check existence or use upsert
-  await prisma.web_vitals_metrics.create({ data: { collectedAt: timestamp, ... } });
+  await prisma.webVitalsMetric.create({ 
+    data: { 
+      collectedAt: timestamp,
+      lcpMs: /* value */,
+      cls: /* value */,
+      // ... other metrics
+    } 
+  });
 }
 ```
 
@@ -328,8 +335,8 @@ for (let i = 0; i < count; i++) {
 
 ```typescript
 // Use createMany for bulk inserts (much faster)
-await prisma.web_vitals_metrics.createMany({
-  data: metricsArray, // Array of objects
+await prisma.webVitalsMetric.createMany({
+  data: metricsArray, // Array of objects with lcpMs, cls, inpMs, fidMs, ttfbMs
   skipDuplicates: true, // Idempotent (requires unique constraint)
 });
 ```
