@@ -2,7 +2,8 @@
  * Unit tests for Firebase Admin authentication helpers
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, type MockedFunction } from 'vitest';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 // Mock firebase-admin module - must be defined inline for hoisting
 vi.mock('firebase-admin', () => {
@@ -37,11 +38,28 @@ vi.mock('@/lib/auth/firebase-admin', () => ({
 
 // Import after mocking
 import { verifyFirebaseToken, getUserFromToken } from '@/lib/auth/firebase-admin';
-import { vi, type MockedFunction } from 'vitest';
 
 // Type the mocked functions
 const mockedVerifyFirebaseToken = verifyFirebaseToken as MockedFunction<typeof verifyFirebaseToken>;
 const mockedGetUserFromToken = getUserFromToken as MockedFunction<typeof getUserFromToken>;
+
+// Helper to create mock DecodedIdToken
+function createMockDecodedToken(overrides: Partial<DecodedIdToken> = {}): DecodedIdToken {
+  return {
+    uid: 'test-uid',
+    aud: 'test-audience',
+    auth_time: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600,
+    iat: Math.floor(Date.now() / 1000),
+    iss: 'https://securetoken.google.com/test-project',
+    sub: 'test-subject',
+    firebase: {
+      identities: {},
+      sign_in_provider: 'google.com',
+    },
+    ...overrides,
+  } as DecodedIdToken;
+}
 
 describe('Firebase Admin Authentication', () => {
   beforeEach(() => {
@@ -50,18 +68,11 @@ describe('Firebase Admin Authentication', () => {
 
   describe('verifyFirebaseToken', () => {
     it('should verify a valid token and return decoded token', async () => {
-      const mockDecodedToken = {
+      const mockDecodedToken = createMockDecodedToken({
         uid: 'test-user-123',
         email: 'test@example.com',
         email_verified: true,
-        auth_time: Date.now() / 1000,
-        iat: Date.now() / 1000,
-        exp: Date.now() / 1000 + 3600,
-        firebase: {
-          identities: { 'google.com': ['123456'] },
-          sign_in_provider: 'google.com',
-        },
-      };
+      });
 
       // Mock the verifyFirebaseToken function
       mockedVerifyFirebaseToken.mockResolvedValue(mockDecodedToken);
@@ -101,18 +112,11 @@ describe('Firebase Admin Authentication', () => {
       const mockResult = {
         userId: 'test-user-456',
         email: 'user@example.com',
-        decodedToken: {
+        decodedToken: createMockDecodedToken({
           uid: 'test-user-456',
           email: 'user@example.com',
           email_verified: true,
-          auth_time: Date.now() / 1000,
-          iat: Date.now() / 1000,
-          exp: Date.now() / 1000 + 3600,
-          firebase: {
-            identities: { 'google.com': ['789012'] },
-            sign_in_provider: 'google.com',
-          },
-        },
+        }),
       };
 
       mockedGetUserFromToken.mockResolvedValue(mockResult);
