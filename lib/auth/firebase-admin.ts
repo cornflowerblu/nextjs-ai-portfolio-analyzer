@@ -68,7 +68,7 @@ function initializeFirebaseAdmin() {
 }
 
 // Lazy initialization - only initialize when needed
-const firebaseAdmin: admin.app.App | null = null;
+let firebaseAdmin: admin.app.App | null = null;
 
 /**
  * Get Firebase Admin instance, initializing if necessary
@@ -88,6 +88,9 @@ function getFirebaseAdminInstance() {
       '2. FIREBASE_PROJECT_ID + FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (individual values)'
     );
   }
+  
+  // Store the initialized app for reuse
+  firebaseAdmin = app;
   return app;
 }
 
