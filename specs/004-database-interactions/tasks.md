@@ -15,10 +15,9 @@ Break down spec 004 into executable tasks organized by user story for independen
 - **User Story 1**: 3 tasks (Web Vitals capture + persistence)
 - **User Story 2**: 4 tasks (Dashboard real data display)
 - **User Story 3**: 2 tasks (Historical data verification)
-- **User Story 4**: 3 tasks (Seed data generation - already mostly covered)
 - **Polish**: 2 tasks (empty states, error handling)
 
-**Total**: 19 tasks
+**Total**: 16 tasks
 
 ## Phase 1: Setup
 
@@ -34,7 +33,7 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 **Goal**: Create seed script infrastructure that can generate realistic demo data.
 
-**Test Criteria**: Seed script generates 337 metrics with proper distributions and can be run idempotently.
+**Test Criteria**: Run `npm run db:seed` successfully and dashboard shows varied metrics per strategy.
 
 ### Tasks
 
@@ -85,21 +84,7 @@ Break down spec 004 into executable tasks organized by user story for independen
 - [ ] T013 [P] [US3] Verify Prisma indexes exist on web_vitals_metrics table (userId+collectedAt, userId+url+strategy+collectedAt)
 - [ ] T014 [US3] Test database query performance with EXPLAIN ANALYZE in npm run db:studio or Neon console
 
-## Phase 6: User Story 4 - Instant Demo Data
-
-**User Story**: As a demo presenter, I want instant seed data to show dashboard populated with realistic metrics.
-
-**Goal**: Ensure seed script generates compelling, realistic demo data quickly.
-
-**Test Criteria**: Run `npm run db:seed` completes in <5s, dashboard shows varied metrics per strategy.
-
-### Tasks
-
-- [ ] T015 [P] [US4] Verify seed script generates correct counts per strategy (SSG: 100, ISR: 87, CACHE: 75, SSR: 75)
-- [ ] T016 [US4] Verify seed data has realistic distributions (SSG LCP ~600ms, SSR LCP ~1800ms)
-- [ ] T017 [US4] Verify seed script is idempotent (can run multiple times with skipDuplicates or unique timestamp logic)
-
-## Phase 7: Polish & Cross-Cutting Concerns
+## Phase 6: Polish & Cross-Cutting Concerns
 
 **Goal**: Handle edge cases and improve user experience.
 
@@ -107,8 +92,8 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T018 [P] Add empty state UI in app/dashboard/@metrics/page.tsx when no metrics found
-- [ ] T019 [P] Add error boundary / try-catch in saveMetricToDatabase() to fail silently in components/web-vitals-reporter.tsx
+- [ ] T015 [P] Add empty state UI in app/dashboard/@metrics/page.tsx when no metrics found
+- [ ] T016 [P] Add error boundary / try-catch in saveMetricToDatabase() to fail silently in components/web-vitals-reporter.tsx
 
 ## Dependencies
 
@@ -121,29 +106,25 @@ graph TD
     US1[Phase 3: User Story 1<br/>Real-Time Capture]
     US2[Phase 4: User Story 2<br/>Dashboard Display]
     US3[Phase 5: User Story 3<br/>Historical Verification]
-    US4[Phase 6: User Story 4<br/>Seed Data]
-    Polish[Phase 7: Polish]
+    Polish[Phase 6: Polish]
 
     Setup --> Foundation
     Foundation --> US1
     Foundation --> US2
-    Foundation --> US4
     US1 --> US3
     US2 --> US3
-    US4 --> US3
     US3 --> Polish
 ```
 
-**Critical Path**: Setup → Foundational → User Story 4 (seed) → User Story 2 (dashboard) → Polish
+**Critical Path**: Setup → Foundational → User Story 2 (dashboard) → Polish
 
 **Recommended Order**:
 
 1. **Phase 1 + 2**: Setup + Foundational (T001-T005)
-2. **Phase 6**: User Story 4 (T015-T017) - Get demo data working first
-3. **Phase 4**: User Story 2 (T009-T012) - Dashboard displays seed data
-4. **Phase 3**: User Story 1 (T006-T008) - Real-time capture
-5. **Phase 5**: User Story 3 (T013-T014) - Verification
-6. **Phase 7**: Polish (T018-T019) - Edge cases
+2. **Phase 4**: User Story 2 (T009-T012) - Dashboard displays seed data
+3. **Phase 3**: User Story 1 (T006-T008) - Real-time capture
+4. **Phase 5**: User Story 3 (T013-T014) - Verification
+5. **Phase 6**: Polish (T015-T016) - Edge cases
 
 ## Parallel Execution Opportunities
 
@@ -169,14 +150,9 @@ graph TD
 - T013 (verify indexes) + T014 (test performance) are independent verification tasks
 - Both just confirm existing infrastructure
 
-### Phase 6: User Story 4 (all 3 tasks can run in parallel)
+### Phase 6: Polish (both tasks can run in parallel)
 
-- T015 (verify counts) + T016 (verify distributions) + T017 (verify idempotency)
-- All are independent verification checks on the same seed script
-
-### Phase 7: Polish (both tasks can run in parallel)
-
-- T018 (empty state UI) + T019 (error handling) are in different files
+- T015 (empty state UI) + T016 (error handling) are in different files
 - No shared dependencies, can be implemented simultaneously
 
 **Maximum Parallelization Example**:
@@ -190,11 +166,10 @@ Developer C: T009-T012 (dashboard conversion)
 # Then verification (all parallel):
 Developer A: T013 (indexes)
 Developer B: T014 (performance)
-Developer C: T015-T017 (seed verification)
 
 # Finally polish (parallel):
-Developer A: T018 (empty state)
-Developer B: T019 (error handling)
+Developer A: T015 (empty state)
+Developer B: T016 (error handling)
 ```
 
 ## Implementation Strategy
@@ -208,7 +183,7 @@ Developer B: T019 (error handling)
 1. T001 (setup scripts)
 2. T002-T005 (seed script)
 3. T009-T012 (dashboard query)
-4. T018 (empty state)
+4. T015 (empty state)
 
 **MVP Deliverable**: Run `npm run db:seed`, see populated dashboard. **Estimate: 1.5 hours**
 
@@ -219,19 +194,18 @@ Developer B: T019 (error handling)
 - Phase 1: Setup (T001)
 - Phase 2: Foundational (T002-T005)
 - Phase 4: Dashboard Display (T009-T012)
-- Phase 7: Empty state only (T018)
+- Phase 6: Empty state only (T015)
 
 **Iteration 2** (Real-time capture - 30 minutes):
 
 - Phase 3: User Story 1 (T006-T008)
-- Phase 7: Error handling (T019)
+- Phase 6: Error handling (T016)
 
 **Iteration 3** (Verification - 30 minutes):
 
 - Phase 5: User Story 3 (T013-T014)
-- Phase 6: User Story 4 (T015-T017)
 
-**Total**: 2.5 hours across 3 iterations
+**Total**: 2 hours across 3 iterations
 
 ### Testing Strategy
 
@@ -275,26 +249,14 @@ Developer B: T019 (error handling)
 5. Verify index scan used (not seq scan)
 ```
 
-**User Story 4** (Seed data):
-
-```bash
-# Test flow:
-1. time npm run db:seed
-2. Verify completes in <5s
-3. npm run db:studio
-4. Check metric distributions (SSG faster than SSR)
-5. npm run db:seed (run again)
-6. Verify no errors, no duplicates (idempotent)
-```
-
 ## File Change Summary
 
 ### Files to Modify (2)
 
 | File                                 | Lines Changed | Tasks           | Description                            |
 | ------------------------------------ | ------------- | --------------- | -------------------------------------- |
-| `components/web-vitals-reporter.tsx` | ~40           | T006-T008, T019 | Add API POST call, error handling      |
-| `app/dashboard/@metrics/page.tsx`    | ~60           | T009-T012, T018 | Convert to Server Component, add query |
+| `components/web-vitals-reporter.tsx` | ~40           | T006-T008, T016 | Add API POST call, error handling      |
+| `app/dashboard/@metrics/page.tsx`    | ~60           | T009-T012, T015 | Convert to Server Component, add query |
 
 ### Files to Create (4)
 
@@ -317,7 +279,7 @@ Developer B: T019 (error handling)
 
 **Completion Checklist**:
 
-- [ ] All 19 tasks marked complete
+- [ ] All 16 tasks marked complete
 - [ ] `npm run db:seed` generates 337 metrics in <5s
 - [ ] Dashboard shows aggregated metrics per strategy
 - [ ] Browse `/lab/ssr` → metric appears in database
@@ -338,14 +300,14 @@ Developer B: T019 (error handling)
 - [ ] TypeScript compiles with no errors
 - [ ] ESLint passes with no warnings
 - [ ] Existing tests pass (41 tests from spec 003)
-- [ ] Manual testing checklist complete (all 4 user stories)
+- [ ] Manual testing checklist complete (all 3 user stories)
 
 ## Notes
 
 - **No test generation**: Tests are optional per spec. Focus on implementation.
 - **Existing infrastructure**: 90% of backend already exists from spec 003. This is primarily wiring.
 - **Parallel-friendly**: Most tasks are independent and can be done simultaneously.
-- **MVP-focused**: Can ship working dashboard after just 5 tasks (T001-T005, T009-T012, T018).
+- **MVP-focused**: Can ship working dashboard after just 5 tasks (T001-T005, T009-T012, T015).
 - **Incremental**: Each phase delivers standalone value and is independently testable.
 
 ## References

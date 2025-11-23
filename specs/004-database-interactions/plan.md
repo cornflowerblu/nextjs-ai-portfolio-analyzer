@@ -262,7 +262,6 @@ package.json                            # 🔧 MODIFY - Add db:seed, db:studio s
    - Realistic distributions: SSG 600ms LCP, SSR 1800ms LCP
    - Time-of-day variations (peak hours slower)
    - Progress logging with emoji
-   - Idempotent (uses unique timestamps)
 
 2. **components/dashboard/vitals-chart.tsx** (~100 lines, OPTIONAL Phase 2)
    - Recharts LineChart component
@@ -270,11 +269,10 @@ package.json                            # 🔧 MODIFY - Add db:seed, db:studio s
    - Group by hour with averages
    - All strategies on same chart
 
-3. **tests/prisma/seed.test.ts** (~50 lines)
-   - Test seed data generation logic
-   - Verify metric distributions are realistic
-   - Check timestamp ranges (7 days)
-   - Validate strategy assignment
+3. **__tests__/prisma/seed.test.ts** (~30 lines, optional)
+   - Test seed script runs without errors
+   - Verify data is generated (count > 0)
+   - Basic sanity checks on data structure
 
 4. **tests/e2e/web-vitals-capture.spec.ts** (~80 lines, BACKUP PLAN)
    - Playwright test for full flow
