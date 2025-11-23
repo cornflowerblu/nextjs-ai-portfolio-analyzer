@@ -27,11 +27,14 @@ interface IndexInfo {
   indexdef: string;
 }
 
+// Import Prisma client after environment variables are loaded
+let prisma: any;
+
 async function main() {
   console.log('🔍 Verifying database indexes on web_vitals_metrics table...\n');
 
-  // Import Prisma client after environment variables are loaded
-  const { prisma } = await import('../lib/db/prisma');
+  const prismaModule = await import('../lib/db/prisma');
+  prisma = prismaModule.prisma;
 
   try {
     // Query PostgreSQL system catalog to get indexes on web_vitals_metrics table
@@ -124,6 +127,7 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    const { prisma } = await import('../lib/db/prisma');
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   });

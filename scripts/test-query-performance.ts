@@ -26,11 +26,18 @@ interface ExplainResult {
   'QUERY PLAN': string;
 }
 
+// Constants for performance testing
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+const PERFORMANCE_TEST_RUNS = 3;
+
+// Import Prisma client after environment variables are loaded
+let prisma: any;
+
 async function main() {
   console.log('⚡ Testing database query performance...\n');
 
-  // Import Prisma client after environment variables are loaded
-  const { prisma } = await import('../lib/db/prisma');
+  const prismaModule = await import('../lib/db/prisma');
+  prisma = prismaModule.prisma;
 
   try {
     // Get or use demo user ID
@@ -50,7 +57,7 @@ async function main() {
     }
 
     // Calculate 24 hours ago timestamp
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const twentyFourHoursAgo = new Date(Date.now() - TWENTY_FOUR_HOURS_MS);
     
     console.log(`\n🔍 Testing dashboard query (last 24 hours)...\n`);
 
@@ -175,11 +182,11 @@ async function main() {
     }
 
     // Test 3: Measure actual query performance with Prisma
-    console.log('\n3️⃣  Testing actual Prisma query performance (3 runs)...\n');
+    console.log(`\n3️⃣  Testing actual Prisma query performance (${PERFORMANCE_TEST_RUNS} runs)...\n`);
     
     const times: number[] = [];
     
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < PERFORMANCE_TEST_RUNS; i++) {
       const start = Date.now();
       
       await prisma.webVitalsMetric.groupBy({
@@ -275,6 +282,7 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    const { prisma } = await import('../lib/db/prisma');
-    await prisma.$disconnect();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
   });
