@@ -55,27 +55,31 @@ paths:
             schema:
               $ref: "#/components/schemas/WebVitalsMetricRequest"
             examples:
-              lcp:
-                summary: Largest Contentful Paint (LCP)
+              singleMetric:
+                summary: Single metric (LCP)
                 value:
                   url: "http://localhost:3000/lab/ssg"
                   strategy: "SSG"
-                  name: "LCP"
-                  value: 1234.5
-              cls:
-                summary: Cumulative Layout Shift (CLS)
+                  lcpMs: 1234.5
+              multipleMetrics:
+                summary: Multiple metrics
                 value:
                   url: "http://localhost:3000/lab/ssr"
                   strategy: "SSR"
-                  name: "CLS"
-                  value: 0.05
-              inp:
-                summary: Interaction to Next Paint (INP)
+                  lcpMs: 1200.0
+                  cls: 0.05
+                  inpMs: 89.2
+                  ttfbMs: 200.0
+              allMetrics:
+                summary: All metrics
                 value:
                   url: "http://localhost:3000/lab/isr"
                   strategy: "ISR"
-                  name: "INP"
-                  value: 89.2
+                  lcpMs: 1500.0
+                  cls: 0.1
+                  inpMs: 120.0
+                  fidMs: 50.0
+                  ttfbMs: 300.0
 
       responses:
         "200":
@@ -95,26 +99,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               examples:
-                invalidMetricName:
-                  summary: Invalid metric name
+                metricOutOfRange:
+                  summary: Metric value out of range
                   value:
                     code: "INVALID_INPUT"
-                    message: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+                    message: "lcpMs must be between 0 and 60000, received: 70000"
                     details:
-                      field: "name"
-                      received: "FOO"
-                      expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
-
-                valueOutOfRange:
-                  summary: Value out of range
-                  value:
-                    code: "INVALID_INPUT"
-                    message: "Value 50000 out of range for LCP. Expected 0-30000"
-                    details:
-                      field: "value"
-                      received: 50000
+                      field: "lcpMs"
+                      received: 70000
                       min: 0
-                      max: 30000
+                      max: 60000
+
+                invalidMetricType:
+                  summary: Invalid metric type
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "cls must be a valid number, received: \"invalid\""
+                    details:
+                      field: "cls"
+                      received: "invalid"
 
                 invalidStrategy:
                   summary: Invalid strategy
@@ -171,8 +174,6 @@ components:
       required:
         - url
         - strategy
-        - name
-        - value
       properties:
         url:
           type: string
@@ -193,34 +194,55 @@ components:
             - **CACHE**: Cache Components (Server Components with caching)
           example: "SSG"
 
-        name:
-          type: string
-          enum: [LCP, CLS, INP, FID, TTFB]
-          description: |
-            Web Vitals metric name.
-            - **LCP**: Largest Contentful Paint (loading performance)
-            - **CLS**: Cumulative Layout Shift (visual stability)
-            - **INP**: Interaction to Next Paint (responsiveness)
-            - **FID**: First Input Delay (interactivity, deprecated in favor of INP)
-            - **TTFB**: Time to First Byte (server response time)
-          example: "LCP"
-
-        value:
+        lcpMs:
           type: number
           format: float
           description: |
-            Metric value. Unit depends on metric:
-            - **LCP, INP, FID, TTFB**: milliseconds
-            - **CLS**: unitless score
-
-            **Validation ranges** (extreme outliers rejected):
-            - LCP: 0-30000ms
-            - CLS: 0-5 (score)
-            - INP: 0-5000ms
-            - FID: 0-2000ms
-            - TTFB: 0-10000ms
+            Largest Contentful Paint in milliseconds (loading performance).
+            Optional. Range: 0-60000ms
           example: 1234.5
           minimum: 0
+          maximum: 60000
+
+        cls:
+          type: number
+          format: float
+          description: |
+            Cumulative Layout Shift (visual stability).
+            Optional. Unitless score. Range: 0-100
+          example: 0.05
+          minimum: 0
+          maximum: 100
+
+        inpMs:
+          type: number
+          format: float
+          description: |
+            Interaction to Next Paint in milliseconds (responsiveness).
+            Optional. Range: 0-10000ms
+          example: 89.2
+          minimum: 0
+          maximum: 10000
+
+        fidMs:
+          type: number
+          format: float
+          description: |
+            First Input Delay in milliseconds (interactivity, deprecated in favor of INP).
+            Optional. Range: 0-10000ms
+          example: 50.0
+          minimum: 0
+          maximum: 10000
+
+        ttfbMs:
+          type: number
+          format: float
+          description: |
+            Time to First Byte in milliseconds (server response time).
+            Optional. Range: 0-60000ms
+          example: 200.0
+          minimum: 0
+          maximum: 60000
 
     WebVitalsMetricResponse:
       type: object
@@ -258,16 +280,16 @@ components:
         message:
           type: string
           description: Human-readable error message
-          example: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+          example: "Invalid strategy. Must be one of: SSR, SSG, ISR, CACHE"
 
         details:
           type: object
           description: Additional context about the error (structure varies by error type)
           additionalProperties: true
           example:
-            field: "name"
+            field: "strategy"
             received: "FOO"
-            expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
+            expected: ["SSR", "SSG", "ISR", "CACHE"]
 
     # Read-only schemas (for dashboard queries, not exposed as API endpoints)
     WebVitalsMetric:
@@ -275,11 +297,12 @@ components:
       description: |
         Database record shape (not directly exposed via API).
         Used internally by dashboard Server Component queries.
+        Matches the Prisma WebVitalsMetric model structure.
       properties:
         id:
           type: string
           format: uuid
-          description: Unique metric ID
+          description: Unique metric ID (CUID)
         userId:
           type: string
           description: Firebase UID (from session cookie)
@@ -289,12 +312,32 @@ components:
         strategy:
           type: string
           enum: [SSR, SSG, ISR, CACHE]
-        name:
-          type: string
-          enum: [LCP, CLS, INP, FID, TTFB]
-        value:
+          description: Rendering strategy
+        lcpMs:
           type: number
           format: float
+          nullable: true
+          description: Largest Contentful Paint in milliseconds
+        cls:
+          type: number
+          format: float
+          nullable: true
+          description: Cumulative Layout Shift score
+        inpMs:
+          type: number
+          format: float
+          nullable: true
+          description: Interaction to Next Paint in milliseconds
+        fidMs:
+          type: number
+          format: float
+          nullable: true
+          description: First Input Delay in milliseconds
+        ttfbMs:
+          type: number
+          format: float
+          nullable: true
+          description: Time to First Byte in milliseconds
         collectedAt:
           type: string
           format: date-time
