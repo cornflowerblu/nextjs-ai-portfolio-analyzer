@@ -8,7 +8,6 @@
 import { useState, useEffect } from 'react';
 import { signOut, onAuthStateChange } from '@/lib/firebase/auth';
 import { User } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,24 +17,85 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+// Unified user data structure
+interface UserData {
+  email: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+}
+
 export function UserMenu() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((authUser) => {
-      setUser(authUser);
-      setIsLoading(false);
+    // Track if component is still mounted
+    let isMounted = true;
+    let unsubscribe: (() => void) | undefined;
+    let hasServerSession = false;
+
+    // First, check server-side session
+    const checkServerSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.user && isMounted) {
+            setUser({
+              email: data.user.email,
+              displayName: data.user.name,
+              photoURL: data.user.picture,
+            });
+            setIsLoading(false);
+            return true; // Session found
+          }
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+      return false; // No session found
+    };
+
+    // Check server session first, then subscribe to Firebase auth state changes
+    checkServerSession().then((sessionFound) => {
+      if (!isMounted) return;
+      hasServerSession = sessionFound;
+
+      // Subscribe to Firebase auth state changes
+      unsubscribe = onAuthStateChange((authUser: User | null) => {
+        if (!isMounted) return;
+
+        if (authUser) {
+          setUser({
+            email: authUser.email,
+            displayName: authUser.displayName,
+            photoURL: authUser.photoURL,
+          });
+        } else if (!hasServerSession) {
+          // Only clear user if Firebase auth is null AND we don't have a server session
+          setUser(null);
+        }
+        setIsLoading(false);
+      });
     });
 
-    return () => unsubscribe();
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const handleSignOut = async () => {
     try {
       await signOut();
-      router.push('/login');
+      // Use window.location for full page reload after sign out
+      window.location.href = '/login';
     } catch (error) {
       console.error('Sign out error:', error);
     }
