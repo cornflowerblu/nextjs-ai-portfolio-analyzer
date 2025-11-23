@@ -41,7 +41,8 @@ function createPrismaClient() {
     throw new Error('Database connection string not found. Set POSTGRES_PRISMA_URL, POSTGRES_URL, or DATABASE_URL.');
   }
 
-  // Use Neon adapter for Prisma 7 - PrismaNeon accepts connectionString directly
+  // Use Neon adapter with connection string for Prisma 7
+  // PrismaNeon expects { connectionString } object parameter
   // See: https://www.prisma.io/docs/orm/overview/databases/neon
   const adapter = new PrismaNeon({ connectionString });
 
