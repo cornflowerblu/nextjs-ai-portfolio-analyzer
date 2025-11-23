@@ -52,9 +52,9 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T006 [US1] Implement determineStrategy() function from URL pathname in components/web-vitals-reporter.tsx
-- [ ] T007 [US1] Implement saveMetricToDatabase() async function with fetch POST to /api/web-vitals in components/web-vitals-reporter.tsx
-- [ ] T008 [US1] Wire web-vitals callbacks (onLCP, onCLS, onINP, onFID, onTTFB) to call saveMetricToDatabase in components/web-vitals-reporter.tsx
+- [x] T006 [US1] Implement determineStrategy() function from URL pathname in components/web-vitals-reporter.tsx
+- [x] T007 [US1] Implement saveMetricToDatabase() async function with fetch POST to /api/web-vitals in components/web-vitals-reporter.tsx
+- [x] T008 [US1] Wire web-vitals callbacks (onLCP, onCLS, onINP, onFID, onTTFB) to call saveMetricToDatabase in components/web-vitals-reporter.tsx
 
 ## Phase 4: User Story 2 - Dashboard Real Data Display
 
@@ -66,10 +66,10 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T009 [P] [US2] Remove 'use client' directive from app/dashboard/@metrics/page.tsx, change to async function
-- [ ] T010 [US2] Import getServerSession and prisma client in app/dashboard/@metrics/page.tsx
-- [ ] T011 [US2] Implement database query with groupBy aggregation for last 24h metrics in app/dashboard/@metrics/page.tsx
-- [ ] T012 [US2] Transform query results into Map<strategy, Map<metric, avgValue>> and pass to MetricsPanel in app/dashboard/@metrics/page.tsx
+- [x] T009 [P] [US2] Remove 'use client' directive from app/dashboard/@metrics/page.tsx, change to async function
+- [x] T010 [US2] Import getServerSession and prisma client in app/dashboard/@metrics/page.tsx
+- [x] T011 [US2] Implement database query with groupBy aggregation for last 24h metrics in app/dashboard/@metrics/page.tsx
+- [x] T012 [US2] Transform query results into Map<strategy, Map<metric, avgValue>> and pass to MetricsPanel in app/dashboard/@metrics/page.tsx
 
 ## Phase 5: User Story 3 - Historical Metrics Verification
 
@@ -81,8 +81,8 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T013 [P] [US3] Verify Prisma indexes exist on web_vitals_metrics table (userId+collectedAt, userId+url+strategy+collectedAt)
-- [ ] T014 [US3] Test database query performance with EXPLAIN ANALYZE in npm run db:studio or Neon console
+- [x] T013 [P] [US3] Verify Prisma indexes exist on web_vitals_metrics table (userId+collectedAt, userId+url+strategy+collectedAt)
+- [x] T014 [US3] Test database query performance with EXPLAIN ANALYZE in npm run db:studio or Neon console
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
@@ -92,8 +92,8 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T015 [P] Add empty state UI in app/dashboard/@metrics/page.tsx when no metrics found
-- [ ] T016 [P] Add error boundary / try-catch in saveMetricToDatabase() to fail silently in components/web-vitals-reporter.tsx
+- [x] T015 [P] Add empty state UI in app/dashboard/@metrics/page.tsx when no metrics found
+- [x] T016 [P] Add error boundary / try-catch in saveMetricToDatabase() to fail silently in components/web-vitals-reporter.tsx
 
 ## Dependencies
 

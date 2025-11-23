@@ -180,8 +180,9 @@ async function main() {
   const { prisma } = await import('../lib/db/prisma');
 
   // Get or create demo user
-  // In production, you'd get this from Firebase Auth after login
+  // Uses Firebase user ID from environment variable
   const demoUserId = process.env.DEMO_USER_ID || 'demo-seed-user-id';
+  const demoEmail = process.env.DEMO_USER_EMAIL || 'demo@example.com';
   
   // Create demo user if it doesn't exist
   const demoUser = await prisma.user.upsert({
@@ -189,8 +190,8 @@ async function main() {
     update: {},
     create: {
       id: demoUserId,
-      email: 'demo@example.com',
-      name: 'Demo User',
+      email: demoEmail,
+      name: 'Roger Ulrich',
       photoURL: null,
     },
   });
