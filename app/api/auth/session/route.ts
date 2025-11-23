@@ -37,7 +37,6 @@ export async function POST(request: NextRequest) {
     // Check access control using shared utility
   
     if (!isUserAllowed(decodedToken.email)) {
-      console.log('🔥 Access denied for:', decodedToken.email);
       return NextResponse.json(
         { error: 'Access denied. Your email is not authorized.' },
         { status: 403 }
@@ -54,7 +53,6 @@ export async function POST(request: NextRequest) {
         name: decodedToken.name,
         photoURL: decodedToken.picture,
       });
-      console.log('✅ User persisted to database');
     } catch (dbError) {
       // Log error but continue with session creation
       console.error('⚠️ Database persistence unavailable (continuing without it):', dbError instanceof Error ? dbError.message : 'Unknown error');

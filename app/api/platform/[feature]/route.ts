@@ -67,20 +67,11 @@ async function handleEdgeVsServerless(request: NextRequest) {
   // Fetch from both endpoints
   const baseUrl = request.nextUrl.origin;
   
-  // Log diagnostic information
-  console.log('[Edge vs Serverless] Starting comparison', {
-    baseUrl,
-    iterations,
-    host: request.nextUrl.host,
-    protocol: request.nextUrl.protocol,
-  });
-  
   const edgeResults = await Promise.all(
     Array.from({ length: iterations }, async () => {
       try {
         const start = performance.now();
         const url = `${baseUrl}/edge/measure`;
-        console.log('[Edge] Fetching:', url);
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -116,7 +107,6 @@ async function handleEdgeVsServerless(request: NextRequest) {
       try {
         const start = performance.now();
         const url = `${baseUrl}/api/platform/serverless`;
-        console.log('[Serverless] Fetching:', url);
         const response = await fetch(url);
         
         if (!response.ok) {
@@ -157,10 +147,6 @@ async function handleEdgeVsServerless(request: NextRequest) {
   // Calculate statistics - filter out invalid results and ensure we have valid numbers
   const edgeTimes = filterValidTimes(edgeResults);
   const serverlessTimes = filterValidTimes(serverlessResults);
-  
-  // Log diagnostic information about results
-  console.log('[Results] Edge times:', edgeTimes.length, 'valid out of', edgeResults.length);
-  console.log('[Results] Serverless times:', serverlessTimes.length, 'valid out of', serverlessResults.length);
   
   // Ensure we have at least some valid results
   if (edgeTimes.length === 0 || serverlessTimes.length === 0) {

@@ -3,6 +3,8 @@
  */
 
 import { describe, it, expect, vi, beforeEach, type MockedFunction } from 'vitest';
+import type { DecodedIdToken } from 'firebase-admin/auth';
+import { NextRequest } from 'next/server';
 
 // Mock Firebase Admin
 vi.mock('@/lib/auth/firebase-admin', () => ({
@@ -28,6 +30,24 @@ import { upsertUser } from '@/lib/db/user';
 const mockedVerifyFirebaseToken = verifyFirebaseToken as MockedFunction<typeof verifyFirebaseToken>;
 const mockedUpsertUser = upsertUser as MockedFunction<typeof upsertUser>;
 
+// Helper to create mock DecodedIdToken
+function createMockDecodedToken(overrides: Partial<DecodedIdToken> = {}): DecodedIdToken {
+  return {
+    uid: 'test-uid',
+    aud: 'test-audience',
+    auth_time: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600,
+    iat: Math.floor(Date.now() / 1000),
+    iss: 'https://securetoken.google.com/test-project',
+    sub: 'test-subject',
+    firebase: {
+      identities: {},
+      sign_in_provider: 'google.com',
+    },
+    ...overrides,
+  } as DecodedIdToken;
+}
+
 describe('POST /api/auth/verify', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -35,12 +55,12 @@ describe('POST /api/auth/verify', () => {
 
   describe('Successful Authentication', () => {
     it('should verify token and upsert user on successful authentication', async () => {
-      const mockDecodedToken = {
+      const mockDecodedToken = createMockDecodedToken({
         uid: 'firebase-uid-123',
         email: 'test@example.com',
         name: 'Test User',
         picture: 'https://example.com/photo.jpg',
-      };
+      });
 
       const mockUser = {
         id: 'firebase-uid-123',
@@ -54,7 +74,7 @@ describe('POST /api/auth/verify', () => {
       mockedVerifyFirebaseToken.mockResolvedValue(mockDecodedToken);
       mockedUpsertUser.mockResolvedValue(mockUser);
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -80,10 +100,10 @@ describe('POST /api/auth/verify', () => {
     });
 
     it('should handle user without name or photoURL', async () => {
-      const mockDecodedToken = {
+      const mockDecodedToken = createMockDecodedToken({
         uid: 'firebase-uid-456',
         email: 'minimal@example.com',
-      };
+      });
 
       const mockUser = {
         id: 'firebase-uid-456',
@@ -97,7 +117,7 @@ describe('POST /api/auth/verify', () => {
       mockedVerifyFirebaseToken.mockResolvedValue(mockDecodedToken);
       mockedUpsertUser.mockResolvedValue(mockUser);
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +142,7 @@ describe('POST /api/auth/verify', () => {
 
   describe('Error Handling', () => {
     it('should return 400 when no token provided', async () => {
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +160,7 @@ describe('POST /api/auth/verify', () => {
     it('should return 401 when token is invalid', async () => {
       mockedVerifyFirebaseToken.mockRejectedValue(new Error('Invalid token'));
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +179,7 @@ describe('POST /api/auth/verify', () => {
     it('should return 401 when token is expired', async () => {
       mockedVerifyFirebaseToken.mockRejectedValue(new Error('Token expired'));
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -175,15 +195,15 @@ describe('POST /api/auth/verify', () => {
     });
 
     it('should handle database errors gracefully', async () => {
-      const mockDecodedToken = {
+      const mockDecodedToken = createMockDecodedToken({
         uid: 'firebase-uid-789',
         email: 'db-error@example.com',
-      };
+      });
 
       mockedVerifyFirebaseToken.mockResolvedValue(mockDecodedToken);
       mockedUpsertUser.mockRejectedValue(new Error('Database connection error'));
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -201,11 +221,11 @@ describe('POST /api/auth/verify', () => {
 
   describe('User Profile Fields', () => {
     it('should map Firebase picture to photoURL', async () => {
-      const mockDecodedToken = {
+      const mockDecodedToken = createMockDecodedToken({
         uid: 'firebase-uid-photo',
         email: 'photo@example.com',
         picture: 'https://example.com/user-photo.jpg',
-      };
+      });
 
       mockedVerifyFirebaseToken.mockResolvedValue(mockDecodedToken);
       mockedUpsertUser.mockResolvedValue({
@@ -217,7 +237,7 @@ describe('POST /api/auth/verify', () => {
         updatedAt: new Date(),
       });
 
-      const request = new Request('http://localhost:3000/api/auth/verify', {
+      const request = new NextRequest('http://localhost:3000/api/auth/verify', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

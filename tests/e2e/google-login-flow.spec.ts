@@ -69,7 +69,7 @@ test.describe('Google Login Flow', () => {
     // Fill in email
     const emailInput = popup.locator('input[type="email"]');
     await emailInput.waitFor({ state: 'visible', timeout: 10000 });
-    await emailInput.fill(TEST_EMAIL);
+    await emailInput.fill(TEST_EMAIL!);
     
     // Click Next
     await popup.locator('button:has-text("Next"), #identifierNext').first().click();
@@ -82,7 +82,7 @@ test.describe('Google Login Flow', () => {
     // Fill in password
     const passwordInput = popup.locator('input[type="password"]');
     await passwordInput.waitFor({ state: 'visible', timeout: 10000 });
-    await passwordInput.fill(TEST_PASSWORD);
+    await passwordInput.fill(TEST_PASSWORD!);
     
     // Click Next/Sign in
     await popup.locator('button:has-text("Next"), #passwordNext').first().click();

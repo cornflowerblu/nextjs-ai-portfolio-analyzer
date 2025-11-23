@@ -1,0 +1,366 @@
+openapi: 3.1.0
+info:
+  title: AI Portfolio Analyzer - Web Vitals API
+  version: 1.0.0
+  description: |
+    API contract for Live Web Vitals Dashboard Integration (Spec 004).
+
+    This API enables Real User Monitoring (RUM) by capturing Web Vitals metrics from the browser
+    and persisting them to Neon PostgreSQL via Prisma ORM.
+
+    **Authentication**: Bearer token (Firebase) sent via Authorization header.
+
+    **Related Files**:
+    - Implementation: `app/api/web-vitals/route.ts`
+    - Database layer: `lib/db/web-vitals.ts`
+    - Client component: `components/web-vitals-reporter.tsx`
+    - Tests: `__tests__/app/api/web-vitals/route.test.ts`
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://ai-portfolio-analyzer.vercel.app
+    description: Production server
+
+paths:
+  /api/web-vitals:
+    post:
+      summary: Save Web Vitals metrics
+      description: |
+        Captures Web Vitals metrics from the browser and persists them to the database.
+        Multiple metrics can be included in a single request.
+
+        **Called by**: `components/web-vitals-reporter.tsx` when metrics finalize.
+
+        **Authentication**: Requires valid Authorization header with Firebase ID token.
+
+        **Idempotency**: Not idempotent. Each call creates a new record. Duplicates are acceptable
+        (same metric can be reported multiple times with different timestamps).
+
+        **Rate Limiting**: None currently implemented. Future enhancement.
+
+        **Performance**: Target p95 latency < 500ms including database write.
+
+      operationId: saveWebVitalsMetric
+
+      tags:
+        - Web Vitals
+
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebVitalsMetricRequest"
+            examples:
+              allMetrics:
+                summary: All Core Web Vitals
+                value:
+                  url: "http://localhost:3000/lab/ssg"
+                  strategy: "SSG"
+                  lcpMs: 1234.5
+                  cls: 0.05
+                  inpMs: 89.2
+                  fidMs: 50.0
+                  ttfbMs: 200.0
+              partialMetrics:
+                summary: Partial metrics (LCP and CLS only)
+                value:
+                  url: "http://localhost:3000/lab/ssr"
+                  strategy: "SSR"
+                  lcpMs: 2100.0
+                  cls: 0.12
+              singleMetric:
+                summary: Single metric (TTFB only)
+                value:
+                  url: "http://localhost:3000/lab/isr"
+                  strategy: "ISR"
+                  ttfbMs: 150.5
+
+      responses:
+        "200":
+          description: Metric saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebVitalsMetricResponse"
+              example:
+                success: true
+                metricId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                valueOutOfRange:
+                  summary: Metric value out of range
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "lcpMs must be between 0 and 60000, received: 100000"
+                    details:
+                      field: "lcpMs"
+                      received: 100000
+                      min: 0
+                      max: 60000
+
+                invalidStrategy:
+                  summary: Invalid strategy
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "Invalid strategy. Must be one of: SSR, SSG, ISR, CACHE"
+                    details:
+                      field: "strategy"
+                      received: "FOO"
+                      expected: ["SSR", "SSG", "ISR", "CACHE"]
+
+        "401":
+          description: Unauthorized (missing or invalid Authorization header)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "UNAUTHORIZED"
+                message: "Missing or invalid Authorization header"
+                details:
+                  hint: "Include 'Authorization: Bearer <firebase-id-token>' header"
+
+        "500":
+          description: Server error (database or internal error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "DATABASE_ERROR"
+                message: "Failed to save metric to database"
+                details:
+                  error: "Connection timeout"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Firebase ID token sent in the Authorization header.
+
+        **Format**: `Bearer <firebase-id-token>`
+        **Expiry**: 1 hour (automatically refreshed by Firebase SDK)
+        **Contains**: Firebase UID, email, claims
+
+        Client must obtain ID token from Firebase Authentication and include it in requests.
+
+  schemas:
+    WebVitalsMetricRequest:
+      type: object
+      required:
+        - url
+        - strategy
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Full URL where metrics were captured
+          example: "http://localhost:3000/lab/ssg"
+          minLength: 1
+          maxLength: 2048
+
+        strategy:
+          type: string
+          enum: [SSR, SSG, ISR, CACHE]
+          description: |
+            Rendering strategy for the page.
+            - **SSR**: Server-Side Rendering (on-demand)
+            - **SSG**: Static Site Generation (pre-rendered)
+            - **ISR**: Incremental Static Regeneration (cached with revalidation)
+            - **CACHE**: Cache Components (Server Components with caching)
+          example: "SSG"
+
+        lcpMs:
+          type: number
+          format: float
+          description: |
+            **Largest Contentful Paint (LCP)** in milliseconds.
+            Measures loading performance - time until the largest content element is visible.
+            
+            **Validation range**: 0-60000ms (outliers rejected)
+          example: 1234.5
+          minimum: 0
+          maximum: 60000
+
+        cls:
+          type: number
+          format: float
+          description: |
+            **Cumulative Layout Shift (CLS)** score (unitless).
+            Measures visual stability - sum of all unexpected layout shifts.
+            
+            **Validation range**: 0-100 (outliers rejected)
+          example: 0.05
+          minimum: 0
+          maximum: 100
+
+        inpMs:
+          type: number
+          format: float
+          description: |
+            **Interaction to Next Paint (INP)** in milliseconds.
+            Measures responsiveness - latency of user interactions.
+            
+            **Validation range**: 0-10000ms (outliers rejected)
+          example: 89.2
+          minimum: 0
+          maximum: 10000
+
+        fidMs:
+          type: number
+          format: float
+          description: |
+            **First Input Delay (FID)** in milliseconds.
+            Measures interactivity - delay of first user interaction (deprecated in favor of INP).
+            
+            **Validation range**: 0-10000ms (outliers rejected)
+          example: 50.0
+          minimum: 0
+          maximum: 10000
+
+        ttfbMs:
+          type: number
+          format: float
+          description: |
+            **Time to First Byte (TTFB)** in milliseconds.
+            Measures server response time - time until first byte received.
+            
+            **Validation range**: 0-60000ms (outliers rejected)
+          example: 200.0
+          minimum: 0
+          maximum: 60000
+
+    WebVitalsMetricResponse:
+      type: object
+      required:
+        - success
+        - metricId
+      properties:
+        success:
+          type: boolean
+          description: Always true for successful requests
+          example: true
+
+        metricId:
+          type: string
+          format: uuid
+          description: Unique ID of the created database record
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_INPUT
+            - UNAUTHORIZED
+            - DATABASE_ERROR
+            - INTERNAL_ERROR
+          description: Machine-readable error code
+          example: "INVALID_INPUT"
+
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+
+        details:
+          type: object
+          description: Additional context about the error (structure varies by error type)
+          additionalProperties: true
+          example:
+            field: "name"
+            received: "FOO"
+            expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
+
+    # Read-only schemas (for dashboard queries, not exposed as API endpoints)
+    WebVitalsMetric:
+      type: object
+      description: |
+        Database record shape (not directly exposed via API).
+        Used internally by dashboard Server Component queries.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique metric record ID
+        userId:
+          type: string
+          description: Firebase UID (from Authorization header)
+        url:
+          type: string
+          description: Page URL where metrics were captured
+        strategy:
+          type: string
+          enum: [SSR, SSG, ISR, CACHE]
+          description: Rendering strategy
+        lcpMs:
+          type: number
+          format: float
+          nullable: true
+          description: Largest Contentful Paint in milliseconds
+        cls:
+          type: number
+          format: float
+          nullable: true
+          description: Cumulative Layout Shift score
+        inpMs:
+          type: number
+          format: float
+          nullable: true
+          description: Interaction to Next Paint in milliseconds
+        fidMs:
+          type: number
+          format: float
+          nullable: true
+          description: First Input Delay in milliseconds
+        ttfbMs:
+          type: number
+          format: float
+          nullable: true
+          description: Time to First Byte in milliseconds
+        collectedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when metrics were captured
+          example: "2025-01-22T14:30:00.000Z"
+
+tags:
+  - name: Web Vitals
+    description: |
+      Real User Monitoring (RUM) endpoints for capturing and storing Web Vitals metrics.
+
+      **Data Flow**:
+      1. Browser: `web-vitals` library captures metrics
+      2. Client Component: `WebVitalsReporter` POSTs to `/api/web-vitals` with multiple metrics
+      3. API Route: Validates and saves all metrics in a single database record
+      4. Server Component: Dashboard queries and displays aggregated metrics
+
+      **Note**: Multiple metrics can be sent in a single request and are stored together
+      with the same URL, strategy, and timestamp.
+
+      **Related Specs**:
+      - Spec 003: Prisma + Neon database setup
+      - Spec 004: Live Web Vitals integration (this spec)
+
+externalDocs:
+  description: Web Vitals specification (Google)
+  url: https://web.dev/vitals/
