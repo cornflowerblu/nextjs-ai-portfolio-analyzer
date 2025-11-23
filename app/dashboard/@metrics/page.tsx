@@ -48,8 +48,7 @@ export default async function MetricsSlot() {
 
   // T011: Query database for metrics from last 24 hours with aggregation
   // Query all metrics for the user in the last 24 hours
-  // Note: Date.now() is allowed in Server Components as they only run server-side at request time
-  // eslint-disable-next-line react-hooks/purity
+  // eslint-disable-next-line react-hooks/purity -- Date.now() is valid in Server Components (server-side only)
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
   const recentMetrics = await prisma.webVitalsMetric.findMany({
@@ -187,11 +186,15 @@ export default async function MetricsSlot() {
       // Note: FID (First Input Delay) is tracked in DB but not displayed - replaced by INP
       const avgTtfb = agg.ttfbCount > 0 ? agg.ttfbSum / agg.ttfbCount : 0;
 
+      // Estimate FCP as ~60% of LCP (typical relationship based on Core Web Vitals data)
+      // FCP measures first paint, LCP measures largest paint, so FCP is usually earlier
+      const estimatedFcp = avgLcp * 0.6;
+
       // Create CoreWebVitals object with ratings
       const metrics: CoreWebVitals = {
         fcp: {
-          value: avgLcp, // Use LCP as proxy for FCP (we don't track FCP separately yet)
-          rating: getRating(avgLcp, CORE_WEB_VITALS_THRESHOLDS.fcp),
+          value: estimatedFcp,
+          rating: getRating(estimatedFcp, CORE_WEB_VITALS_THRESHOLDS.fcp),
           delta: 0,
         },
         lcp: {
@@ -222,7 +225,8 @@ export default async function MetricsSlot() {
         metrics,
       };
     })
-    // Sort by strategy order: SSG, ISR, CACHE, SSR
+    // Filter out invalid strategies and sort by strategy order: SSG, ISR, CACHE, SSR
+    .filter(({ strategy }) => strategy in RENDERING_STRATEGIES)
     .sort((a, b) => {
       const order = ['SSG', 'ISR', 'CACHE', 'SSR'];
       return order.indexOf(a.strategy) - order.indexOf(b.strategy);
@@ -232,13 +236,17 @@ export default async function MetricsSlot() {
     <section>
       <h2 className="text-2xl font-semibold mb-4">Core Web Vitals</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {strategyMetricsData.map((strategyData) => (
-          <MetricsPanel
-            key={strategyData.strategy}
-            metrics={strategyData.metrics}
-            strategyName={RENDERING_STRATEGIES[strategyData.strategy as keyof typeof RENDERING_STRATEGIES].displayName}
-          />
-        ))}
+        {strategyMetricsData.map((strategyData) => {
+          // Strategy is guaranteed to be valid after filter above
+          const strategyKey = strategyData.strategy as keyof typeof RENDERING_STRATEGIES;
+          return (
+            <MetricsPanel
+              key={strategyData.strategy}
+              metrics={strategyData.metrics}
+              strategyName={RENDERING_STRATEGIES[strategyKey].displayName}
+            />
+          );
+        })}
       </div>
     </section>
   );

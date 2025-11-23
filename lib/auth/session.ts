@@ -41,14 +41,42 @@ export async function getServerSession(): Promise<SessionData | null> {
       return null;
     }
 
-    const sessionData = JSON.parse(sessionCookie.value) as SessionData;
-
-    // Check if session is expired
-    if (sessionData.expiresAt < Date.now()) {
+    // Parse and validate session data
+    let sessionData: unknown;
+    try {
+      sessionData = JSON.parse(sessionCookie.value);
+    } catch (parseError) {
+      console.error('Invalid session cookie JSON:', parseError);
       return null;
     }
 
-    return sessionData;
+    // Validate session data structure
+    if (!sessionData || typeof sessionData !== 'object') {
+      return null;
+    }
+
+    const data = sessionData as Record<string, unknown>;
+    if (
+      typeof data.uid !== 'string' ||
+      typeof data.expiresAt !== 'number'
+    ) {
+      return null;
+    }
+
+    const validatedSession: SessionData = {
+      uid: data.uid,
+      email: typeof data.email === 'string' ? data.email : null,
+      name: typeof data.name === 'string' ? data.name : null,
+      picture: typeof data.picture === 'string' ? data.picture : null,
+      expiresAt: data.expiresAt,
+    };
+
+    // Check if session is expired
+    if (validatedSession.expiresAt < Date.now()) {
+      return null;
+    }
+
+    return validatedSession;
   } catch (error) {
     console.error('Error retrieving session:', error);
     return null;
