@@ -19,7 +19,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:push": "prisma db push",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "db:verify-indexes": "tsx scripts/verify-indexes.ts",
+    "db:test-performance": "tsx scripts/test-query-performance.ts"
   },
   "engines": {
     "node": ">=20.0.0 <25.0.0"
