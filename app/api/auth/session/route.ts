@@ -8,8 +8,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyFirebaseToken } from '@/lib/auth/firebase-admin';
 import { cookies } from 'next/headers';
 import { isUserAllowed } from '@/lib/firebase/access-control';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/constants';
 
-const SESSION_COOKIE_NAME = 'session';
 const SESSION_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // Use Node.js runtime for database operations
