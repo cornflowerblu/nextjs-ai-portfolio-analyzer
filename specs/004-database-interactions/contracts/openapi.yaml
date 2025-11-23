@@ -275,11 +275,15 @@ components:
       description: |
         Database record shape (not directly exposed via API).
         Used internally by dashboard Server Component queries.
+        
+        Note: The database schema uses individual columns for each metric type
+        (lcpMs, cls, inpMs, fidMs, ttfbMs) rather than name/value pairs.
+        This allows for efficient aggregation queries and type-safe access.
       properties:
         id:
           type: string
-          format: uuid
-          description: Unique metric ID
+          format: cuid
+          description: Unique metric ID (CUID format)
         userId:
           type: string
           description: Firebase UID (from session cookie)
@@ -289,12 +293,32 @@ components:
         strategy:
           type: string
           enum: [SSR, SSG, ISR, CACHE]
-        name:
-          type: string
-          enum: [LCP, CLS, INP, FID, TTFB]
-        value:
+          description: Rendering strategy (stored as RenderingStrategy enum)
+        lcpMs:
           type: number
           format: float
+          nullable: true
+          description: Largest Contentful Paint in milliseconds
+        cls:
+          type: number
+          format: float
+          nullable: true
+          description: Cumulative Layout Shift score
+        inpMs:
+          type: number
+          format: float
+          nullable: true
+          description: Interaction to Next Paint in milliseconds
+        fidMs:
+          type: number
+          format: float
+          nullable: true
+          description: First Input Delay in milliseconds
+        ttfbMs:
+          type: number
+          format: float
+          nullable: true
+          description: Time to First Byte in milliseconds
         collectedAt:
           type: string
           format: date-time
