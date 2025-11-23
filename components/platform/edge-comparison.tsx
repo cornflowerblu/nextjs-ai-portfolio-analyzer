@@ -117,18 +117,18 @@ export function EdgeComparison() {
   const chartData = [
     {
       metric: 'Average',
-      Edge: safeToFixed(data.edge.avg),
-      Serverless: safeToFixed(data.serverless.avg),
+      Edge: data.edge.avg || 0,
+      Serverless: data.serverless.avg || 0,
     },
     {
       metric: 'Min',
-      Edge: safeToFixed(data.edge.min),
-      Serverless: safeToFixed(data.serverless.min),
+      Edge: data.edge.min || 0,
+      Serverless: data.serverless.min || 0,
     },
     {
       metric: 'Max',
-      Edge: safeToFixed(data.edge.max),
-      Serverless: safeToFixed(data.serverless.max),
+      Edge: data.edge.max || 0,
+      Serverless: data.serverless.max || 0,
     },
   ];
 
