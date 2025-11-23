@@ -186,8 +186,20 @@ export default async function MetricsSlot() {
       // Note: FID (First Input Delay) is tracked in DB but not displayed - replaced by INP
       const avgTtfb = agg.ttfbCount > 0 ? agg.ttfbSum / agg.ttfbCount : 0;
 
-      // Estimate FCP as ~60% of LCP (typical relationship based on Core Web Vitals data)
-      // FCP measures first paint, LCP measures largest paint, so FCP is usually earlier
+      /**
+       * Estimate FCP as ~60% of LCP (typical relationship based on Core Web Vitals data)
+       * 
+       * Rationale:
+       * - FCP (First Contentful Paint) measures the time to first paint, while LCP (Largest Contentful Paint) measures the time to the largest paint.
+       * - FCP typically occurs earlier than LCP, and analysis of Core Web Vitals data shows that FCP is often around 60% of LCP for most pages.
+       * - The 0.6 multiplier is chosen based on observed averages in public web performance datasets.
+       * 
+       * Limitations:
+       * - This is an approximation because FCP is not stored in the database.
+       * - The actual ratio may vary significantly depending on page structure, content loading patterns, and rendering strategy.
+       * - For pages with delayed LCP elements (e.g., images loaded late), FCP may be much earlier than 60% of LCP.
+       * - This estimation may lead to misleading data in edge cases; use with caution and consider revisiting if more accurate data becomes available.
+       */
       const estimatedFcp = avgLcp * 0.6;
 
       // Create CoreWebVitals object with ratings

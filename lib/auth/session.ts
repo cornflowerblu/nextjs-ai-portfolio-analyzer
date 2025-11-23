@@ -4,8 +4,7 @@
  */
 
 import { cookies } from 'next/headers';
-
-const SESSION_COOKIE_NAME = 'session';
+import { SESSION_COOKIE_NAME } from '@/lib/auth/constants';
 
 /**
  * Session data structure stored in cookie
@@ -71,8 +70,14 @@ export async function getServerSession(): Promise<SessionData | null> {
       expiresAt: data.expiresAt,
     };
 
-    // Check if session is expired
-    if (validatedSession.expiresAt < Date.now()) {
+    // Check if session is expired or has invalid expiration
+    const now = Date.now();
+    // Reject if expiresAt is negative, in the past, or more than 1 year in the future
+    if (
+      validatedSession.expiresAt < now ||
+      validatedSession.expiresAt < 0 ||
+      validatedSession.expiresAt > now + (365 * 24 * 60 * 60 * 1000) // More than 1 year in future
+    ) {
       return null;
     }
 
