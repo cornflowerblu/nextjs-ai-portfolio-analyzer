@@ -1,0 +1,321 @@
+openapi: 3.1.0
+info:
+  title: AI Portfolio Analyzer - Web Vitals API
+  version: 1.0.0
+  description: |
+    API contract for Live Web Vitals Dashboard Integration (Spec 004).
+
+    This API enables Real User Monitoring (RUM) by capturing Web Vitals metrics from the browser
+    and persisting them to Neon PostgreSQL via Prisma ORM.
+
+    **Authentication**: Session cookie (Firebase) automatically sent by browser.
+
+    **Related Files**:
+    - Implementation: `app/api/web-vitals/route.ts`
+    - Database layer: `lib/db/web-vitals.ts`
+    - Client component: `components/web-vitals-reporter.tsx`
+    - Tests: `__tests__/app/api/web-vitals/route.test.ts`
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://ai-portfolio-analyzer.vercel.app
+    description: Production server
+
+paths:
+  /api/web-vitals:
+    post:
+      summary: Save Web Vitals metric
+      description: |
+        Captures a single Web Vitals metric from the browser and persists it to the database.
+
+        **Called by**: `components/web-vitals-reporter.tsx` when metrics finalize.
+
+        **Authentication**: Requires valid session cookie (Firebase UID extracted server-side).
+
+        **Idempotency**: Not idempotent. Each call creates a new record. Duplicates are acceptable
+        (same metric can be reported multiple times with different timestamps).
+
+        **Rate Limiting**: None currently implemented. Future enhancement.
+
+        **Performance**: Target p95 latency < 500ms including database write.
+
+      operationId: saveWebVitalsMetric
+
+      tags:
+        - Web Vitals
+
+      security:
+        - sessionCookie: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebVitalsMetricRequest"
+            examples:
+              lcp:
+                summary: Largest Contentful Paint (LCP)
+                value:
+                  url: "http://localhost:3000/lab/ssg"
+                  strategy: "SSG"
+                  name: "LCP"
+                  value: 1234.5
+              cls:
+                summary: Cumulative Layout Shift (CLS)
+                value:
+                  url: "http://localhost:3000/lab/ssr"
+                  strategy: "SSR"
+                  name: "CLS"
+                  value: 0.05
+              inp:
+                summary: Interaction to Next Paint (INP)
+                value:
+                  url: "http://localhost:3000/lab/isr"
+                  strategy: "ISR"
+                  name: "INP"
+                  value: 89.2
+
+      responses:
+        "200":
+          description: Metric saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebVitalsMetricResponse"
+              example:
+                success: true
+                metricId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalidMetricName:
+                  summary: Invalid metric name
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+                    details:
+                      field: "name"
+                      received: "FOO"
+                      expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
+
+                valueOutOfRange:
+                  summary: Value out of range
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "Value 50000 out of range for LCP. Expected 0-30000"
+                    details:
+                      field: "value"
+                      received: 50000
+                      min: 0
+                      max: 30000
+
+                invalidStrategy:
+                  summary: Invalid strategy
+                  value:
+                    code: "INVALID_INPUT"
+                    message: "Invalid strategy. Must be one of: SSR, SSG, ISR, CACHE"
+                    details:
+                      field: "strategy"
+                      received: "FOO"
+                      expected: ["SSR", "SSG", "ISR", "CACHE"]
+
+        "401":
+          description: Unauthorized (no valid session cookie)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "UNAUTHORIZED"
+                message: "No valid session cookie found"
+                details:
+                  hint: "Login at /login to get session cookie"
+
+        "500":
+          description: Server error (database or internal error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                code: "DATABASE_ERROR"
+                message: "Failed to save metric to database"
+                details:
+                  error: "Connection timeout"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: session
+      description: |
+        Firebase session cookie set by `/api/auth/login` endpoint.
+
+        **Format**: JWT signed by Firebase Admin SDK
+        **Expiry**: 14 days
+        **Contains**: Firebase UID, email, expiration
+
+        Browser automatically includes this cookie in requests (same-origin).
+
+  schemas:
+    WebVitalsMetricRequest:
+      type: object
+      required:
+        - url
+        - strategy
+        - name
+        - value
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Full URL where metric was captured
+          example: "http://localhost:3000/lab/ssg"
+          minLength: 1
+          maxLength: 2048
+
+        strategy:
+          type: string
+          enum: [SSR, SSG, ISR, CACHE]
+          description: |
+            Rendering strategy for the page.
+            - **SSR**: Server-Side Rendering (on-demand)
+            - **SSG**: Static Site Generation (pre-rendered)
+            - **ISR**: Incremental Static Regeneration (cached with revalidation)
+            - **CACHE**: Cache Components (Server Components with caching)
+          example: "SSG"
+
+        name:
+          type: string
+          enum: [LCP, CLS, INP, FID, TTFB]
+          description: |
+            Web Vitals metric name.
+            - **LCP**: Largest Contentful Paint (loading performance)
+            - **CLS**: Cumulative Layout Shift (visual stability)
+            - **INP**: Interaction to Next Paint (responsiveness)
+            - **FID**: First Input Delay (interactivity, deprecated in favor of INP)
+            - **TTFB**: Time to First Byte (server response time)
+          example: "LCP"
+
+        value:
+          type: number
+          format: float
+          description: |
+            Metric value. Unit depends on metric:
+            - **LCP, INP, FID, TTFB**: milliseconds
+            - **CLS**: unitless score
+
+            **Validation ranges** (extreme outliers rejected):
+            - LCP: 0-30000ms
+            - CLS: 0-5 (score)
+            - INP: 0-5000ms
+            - FID: 0-2000ms
+            - TTFB: 0-10000ms
+          example: 1234.5
+          minimum: 0
+
+    WebVitalsMetricResponse:
+      type: object
+      required:
+        - success
+        - metricId
+      properties:
+        success:
+          type: boolean
+          description: Always true for successful requests
+          example: true
+
+        metricId:
+          type: string
+          format: uuid
+          description: Unique ID of the created database record
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_INPUT
+            - UNAUTHORIZED
+            - DATABASE_ERROR
+            - INTERNAL_ERROR
+          description: Machine-readable error code
+          example: "INVALID_INPUT"
+
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Invalid metric name. Must be one of: LCP, CLS, INP, FID, TTFB"
+
+        details:
+          type: object
+          description: Additional context about the error (structure varies by error type)
+          additionalProperties: true
+          example:
+            field: "name"
+            received: "FOO"
+            expected: ["LCP", "CLS", "INP", "FID", "TTFB"]
+
+    # Read-only schemas (for dashboard queries, not exposed as API endpoints)
+    WebVitalsMetric:
+      type: object
+      description: |
+        Database record shape (not directly exposed via API).
+        Used internally by dashboard Server Component queries.
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique metric ID
+        userId:
+          type: string
+          description: Firebase UID (from session cookie)
+        url:
+          type: string
+          description: Page URL
+        strategy:
+          type: string
+          enum: [SSR, SSG, ISR, CACHE]
+        name:
+          type: string
+          enum: [LCP, CLS, INP, FID, TTFB]
+        value:
+          type: number
+          format: float
+        collectedAt:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when metric was captured
+          example: "2025-01-22T14:30:00.000Z"
+
+tags:
+  - name: Web Vitals
+    description: |
+      Real User Monitoring (RUM) endpoints for capturing and storing Web Vitals metrics.
+
+      **Data Flow**:
+      1. Browser: `web-vitals` library captures metrics
+      2. Client Component: `WebVitalsReporter` POSTs to `/api/web-vitals`
+      3. API Route: Validates and saves to database
+      4. Server Component: Dashboard queries and displays aggregated metrics
+
+      **Related Specs**:
+      - Spec 003: Prisma + Neon database setup
+      - Spec 004: Live Web Vitals integration (this spec)
+
+externalDocs:
+  description: Web Vitals specification (Google)
+  url: https://web.dev/vitals/
