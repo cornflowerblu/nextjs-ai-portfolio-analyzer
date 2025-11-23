@@ -9,7 +9,7 @@ Transform the mock-data dashboard into a production-grade Real User Monitoring s
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x + Next.js 16.0.3 (App Router with Turbopack)  
+**Language/Version**: TypeScript 5.3.2 + Next.js 16.0.3 (App Router with Turbopack)  
 **Primary Dependencies**:
 
 - Prisma 7.0.0 with @prisma/adapter-neon
@@ -270,7 +270,7 @@ package.json                            # 🔧 MODIFY - Add db:seed, db:studio s
    - Group by hour with averages
    - All strategies on same chart
 
-3. \***\*tests**/prisma/seed.test.ts\*\* (~50 lines)
+3. **tests/prisma/seed.test.ts** (~50 lines)
    - Test seed data generation logic
    - Verify metric distributions are realistic
    - Check timestamp ranges (7 days)
