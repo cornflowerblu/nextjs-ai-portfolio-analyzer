@@ -616,9 +616,10 @@ export function CacheDemoClient({
               </div>
 
               <div
-                className={`relative overflow-hidden rounded-lg border-2 border-blue-500/50 bg-blue-50 p-4 transition-all dark:bg-blue-950/20 ${
-                  dynamicJustUpdated ? 'ring-4 ring-blue-500 scale-105' : ''
+                className={`relative overflow-hidden rounded-lg border-2 border-blue-500/50 bg-blue-50 p-4 transition-all dark:bg-blue-950/20 will-change-transform ${
+                  dynamicJustUpdated ? 'ring-4 ring-blue-500' : ''
                 }`}
+                style={dynamicJustUpdated ? { transform: 'scale(1.05)' } : undefined}
               >
                 <div
                   className={`absolute right-0 top-0 rounded-bl-lg px-3 py-1 text-xs font-semibold text-white transition-all ${

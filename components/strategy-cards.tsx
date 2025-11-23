@@ -51,9 +51,10 @@ export function StrategyCards() {
               className="block"
             >
               <div 
-                className={`rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 h-full ${
-                  isHovered ? 'shadow-lg scale-105' : ''
+                className={`rounded-xl border border-border bg-card p-6 shadow-sm transition-all duration-200 h-full will-change-transform ${
+                  isHovered ? 'shadow-lg' : ''
                 }`}
+                style={isHovered ? { transform: 'scale(1.05)' } : undefined}
               >
                 <div className="mb-4 flex items-center justify-between">
                   <span className="text-2xl" aria-hidden="true">{strategy.icon}</span>

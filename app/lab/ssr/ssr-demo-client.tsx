@@ -141,12 +141,18 @@ export function SSRDemoClient({ serverData, sourceCode }: SSRDemoClientProps) {
           </div>
 
           {/* Dynamic Content Proof */}
-          <div className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 ${
-            justRendered ? 'ring-4 ring-blue-500 bg-blue-50 dark:bg-blue-950/30 scale-105' : ''
-          }`}>
-            <Database className={`h-8 w-8 mx-auto mb-2 text-primary transition-all duration-500 ${
-              justRendered ? 'scale-125 text-blue-600' : ''
-            }`} />
+          <div 
+            className={`border-2 border-dashed rounded-lg p-6 bg-muted/50 text-center transition-all duration-500 will-change-transform ${
+              justRendered ? 'ring-4 ring-blue-500 bg-blue-50 dark:bg-blue-950/30' : ''
+            }`}
+            style={justRendered ? { transform: 'scale(1.05)' } : undefined}
+          >
+            <Database 
+              className={`h-8 w-8 mx-auto mb-2 text-primary transition-all duration-500 will-change-transform ${
+                justRendered ? 'text-blue-600' : ''
+              }`}
+              style={justRendered ? { transform: 'scale(1.25)' } : undefined}
+            />
             <h3 className="font-semibold mb-2">
               {justRendered ? '🎉 Just Rendered!' : 'Fresh Data on Every Request'}
             </h3>
