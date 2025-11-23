@@ -15,7 +15,7 @@
  * 2. userId + url + strategy + collectedAt (DESC) - for page-level analysis
  */
 
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import { resolve } from 'path';
 import { existsSync } from 'fs';
 

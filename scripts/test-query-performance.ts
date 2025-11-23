@@ -16,7 +16,7 @@
  * - Planning time: <10ms
  */
 
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import { resolve } from 'path';
 
 // Load environment variables
