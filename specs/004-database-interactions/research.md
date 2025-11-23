@@ -312,7 +312,7 @@ Array<{
 
 ```typescript
 // Use predictable timestamps to avoid duplicates
-const baseTimestamp = new Date('2025-01-15T00:00:00Z').getTime();
+const baseTimestamp = new Date('2025-11-15T00:00:00Z').getTime();
 for (let i = 0; i < count; i++) {
   const timestamp = new Date(baseTimestamp + i * 1000 * 60); // 1 min apart
   // Check existence or use upsert
