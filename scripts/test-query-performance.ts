@@ -79,16 +79,16 @@ async function main() {
     
     const explainPlan = await prisma.$queryRaw<ExplainResult[]>`
       EXPLAIN
-      SELECT strategy, 
-             AVG(lcp_ms) as avg_lcp,
+      SELECT strategy,
+             AVG("lcpMs") as avg_lcp,
              AVG(cls) as avg_cls,
-             AVG(inp_ms) as avg_inp,
-             AVG(fid_ms) as avg_fid,
-             AVG(ttfb_ms) as avg_ttfb,
+             AVG("inpMs") as avg_inp,
+             AVG("fidMs") as avg_fid,
+             AVG("ttfbMs") as avg_ttfb,
              COUNT(*) as sample_count
       FROM web_vitals_metrics
-      WHERE user_id = ${demoUserId}
-        AND collected_at >= ${twentyFourHoursAgo}
+      WHERE "userId" = ${demoUserId}
+        AND "collectedAt" >= ${twentyFourHoursAgo}
       GROUP BY strategy;
     `;
 
@@ -102,16 +102,16 @@ async function main() {
     const startTime = Date.now();
     const explainAnalyze = await prisma.$queryRaw<ExplainResult[]>`
       EXPLAIN ANALYZE
-      SELECT strategy, 
-             AVG(lcp_ms) as avg_lcp,
+      SELECT strategy,
+             AVG("lcpMs") as avg_lcp,
              AVG(cls) as avg_cls,
-             AVG(inp_ms) as avg_inp,
-             AVG(fid_ms) as avg_fid,
-             AVG(ttfb_ms) as avg_ttfb,
+             AVG("inpMs") as avg_inp,
+             AVG("fidMs") as avg_fid,
+             AVG("ttfbMs") as avg_ttfb,
              COUNT(*) as sample_count
       FROM web_vitals_metrics
-      WHERE user_id = ${demoUserId}
-        AND collected_at >= ${twentyFourHoursAgo}
+      WHERE "userId" = ${demoUserId}
+        AND "collectedAt" >= ${twentyFourHoursAgo}
       GROUP BY strategy;
     `;
     const endTime = Date.now();

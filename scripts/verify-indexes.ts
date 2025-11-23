@@ -79,12 +79,12 @@ async function main() {
     const requiredIndexes = [
       {
         name: 'userId + collectedAt',
-        pattern: /user_id.*collected_at/i,
+        pattern: /userid.*collectedat/i,
         found: false,
       },
       {
         name: 'userId + url + strategy + collectedAt',
-        pattern: /user_id.*url.*strategy.*collected_at/i,
+        pattern: /userid.*url.*strategy.*collectedat/i,
         found: false,
       },
     ];
