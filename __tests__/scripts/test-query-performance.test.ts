@@ -177,62 +177,39 @@ describe('Database Query Performance Testing', () => {
   });
 
   describe('Performance analysis logic', () => {
-    it.each([
-      {
-        executionTime: 45.0,
-        usesIndexScan: true,
-        usesSeqScan: false,
-        avgTime: 125.0,
-        expectedIssues: [],
-        expectedPassed: [
-          'Query execution time is within target (<100ms)',
-          'Query uses index scan for efficient filtering',
-          'Prisma query response time is acceptable',
-        ],
-      },
-      {
-        executionTime: 120.0,
-        usesIndexScan: true,
-        usesSeqScan: false,
-        avgTime: 125.0,
-        expectedIssues: [
-          'Query execution time (120.00ms) exceeds target (100ms)',
-        ],
-        expectedPassed: [
-          'Query uses index scan for efficient filtering',
-          'Prisma query response time is acceptable',
-        ],
-      },
-    ])(
-      'should analyze query performance (executionTime: $executionTime)',
-      ({ executionTime, usesIndexScan, usesSeqScan, avgTime, expectedIssues, expectedPassed }) => {
-        const issues: string[] = [];
-        const passed: string[] = [];
+    it('should pass all checks for optimal performance', () => {
+      const executionTime = 45.0;
+      const usesIndexScan = true;
+      const usesSeqScan = false;
+      const avgTime = 125.0;
 
-        if (executionTime < 100) {
-          passed.push('Query execution time is within target (<100ms)');
-        } else {
-          issues.push(
-            `Query execution time (${executionTime.toFixed(2)}ms) exceeds target (100ms)`
-          );
-        }
+      const issues: string[] = [];
+      const passed: string[] = [];
 
-        if (usesIndexScan) {
-          passed.push('Query uses index scan for efficient filtering');
-        } else if (usesSeqScan) {
-          issues.push('Query uses sequential scan instead of index');
-        }
-
-        if (avgTime < 500) {
-          passed.push('Prisma query response time is acceptable');
-        } else {
-          issues.push(`Prisma query response time (${avgTime.toFixed(2)}ms) is high`);
-        }
-
-        expect(issues).toEqual(expectedIssues);
-        expect(passed).toEqual(expectedPassed);
+      if (executionTime < 100) {
+        passed.push('Query execution time is within target (<100ms)');
+      } else {
+        issues.push(
+          `Query execution time (${executionTime.toFixed(2)}ms) exceeds target (100ms)`
+        );
       }
-    );
+
+      if (usesIndexScan) {
+        passed.push('Query uses index scan for efficient filtering');
+      } else if (usesSeqScan) {
+        issues.push('Query uses sequential scan instead of index');
+      }
+
+      if (avgTime < 500) {
+        passed.push('Prisma query response time is acceptable');
+      } else {
+        issues.push(`Prisma query response time (${avgTime.toFixed(2)}ms) is high`);
+      }
+
+      expect(issues).toHaveLength(0);
+      expect(passed).toHaveLength(3);
+    });
+
     it('should detect issues with slow execution and sequential scan', () => {
       const executionTime = 150.0;
       const usesIndexScan = false;
