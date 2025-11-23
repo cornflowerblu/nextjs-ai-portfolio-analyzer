@@ -334,12 +334,12 @@ export function CacheDemoClient({
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Link href="/lab" className="cursor-pointer">
-        <Button variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6">
+        <Link href="/lab">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Lab
-        </Button>
-      </Link>
+        </Link>
+      </Button>
 
       <div className="space-y-10">
         <section className="space-y-4 rounded-2xl border bg-card/60 p-6 shadow-sm">

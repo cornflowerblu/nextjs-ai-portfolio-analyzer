@@ -32,12 +32,12 @@ export default function NotFound() {
               View Dashboard
             </Link>
           </Button>
-          <Link href="/dashboard" className="w-full">
-            <Button variant="ghost" className="w-full" size="lg">
+          <Button asChild variant="ghost" className="w-full" size="lg">
+            <Link href="/dashboard">
               <ArrowLeft className="mr-2 h-4 w-4" />
               View Dashboard
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>

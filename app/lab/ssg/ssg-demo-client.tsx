@@ -87,12 +87,12 @@ export function SSGDemoClient({ staticData, sourceCode }: SSGDemoClientProps) {
   return (
     <div className="container mx-auto py-8 px-4">
       {/* Back Button */}
-      <Link href="/lab">
-        <Button variant="ghost" className="mb-6">
+      <Button asChild variant="ghost" className="mb-6">
+        <Link href="/lab">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Lab
-        </Button>
-      </Link>
+        </Link>
+      </Button>
 
       <DemoContainer
         strategy="SSG"

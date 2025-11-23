@@ -128,12 +128,12 @@ export default function LabPage() {
                 </div>
 
                 {/* Launch Demo Button */}
-                <Link href={demoPath} className="block">
-                  <Button className="w-full" size="lg">
+                <Button asChild className="w-full" size="lg">
+                  <Link href={demoPath}>
                     Launch Demo
                     <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           );
