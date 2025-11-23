@@ -70,16 +70,16 @@ test.describe('Authentication Fixes', () => {
     ]);
 
     // Navigate to dashboard
-    await page.goto('http://localhost:3000/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/dashboard', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
-    
+
     // Check user menu is visible
     let userMenu = page.locator('button[class*="rounded-full"]').first();
     await expect(userMenu).toBeVisible();
     console.log('✓ User menu visible on initial dashboard load');
-    
-    // Reload the page
-    await page.reload({ waitUntil: 'networkidle' });
+
+    // Reload the page (use 'load' instead of 'networkidle' due to 1s SWR polling)
+    await page.reload({ waitUntil: 'load' });
     await page.waitForTimeout(2000);
     
     // User menu should still be visible after reload
@@ -88,7 +88,7 @@ test.describe('Authentication Fixes', () => {
     console.log('✓ User menu still visible after page reload');
     
     // Navigate to another page
-    await page.goto('http://localhost:3000/lab', { waitUntil: 'networkidle' });
+    await page.goto('http://localhost:3000/lab', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
     
     // User menu should still be visible on different page

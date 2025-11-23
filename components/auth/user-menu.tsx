@@ -32,6 +32,7 @@ export function UserMenu() {
     // Track if component is still mounted
     let isMounted = true;
     let unsubscribe: (() => void) | undefined;
+    let hasServerSession = false;
 
     // First, check server-side session
     const checkServerSession = async () => {
@@ -59,21 +60,22 @@ export function UserMenu() {
     };
 
     // Check server session first, then subscribe to Firebase auth state changes
-    checkServerSession().then((hasSession) => {
+    checkServerSession().then((sessionFound) => {
       if (!isMounted) return;
-      
+      hasServerSession = sessionFound;
+
       // Subscribe to Firebase auth state changes
       unsubscribe = onAuthStateChange((authUser: User | null) => {
         if (!isMounted) return;
-        
+
         if (authUser) {
           setUser({
             email: authUser.email,
             displayName: authUser.displayName,
             photoURL: authUser.photoURL,
           });
-        } else {
-          // Always clear user if Firebase auth is null, regardless of server session
+        } else if (!hasServerSession) {
+          // Only clear user if Firebase auth is null AND we don't have a server session
           setUser(null);
         }
         setIsLoading(false);
