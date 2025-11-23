@@ -209,7 +209,13 @@ components:
           format: float
           description: |
             Cumulative Layout Shift (visual stability).
-            Optional. Unitless score. Range: 0-100
+            Optional. Unitless score.
+            
+            **Standard range**: 0-1 (0-0.1 good, 0.1-0.25 needs improvement, >0.25 poor)
+            **API accepts**: 0-100 (generous upper bound for defensive validation)
+            
+            Note: While typical CLS values are 0-1, this API accepts up to 100 to handle
+            edge cases and prevent rejection of anomalous but valid measurements.
           example: 0.05
           minimum: 0
           maximum: 100
@@ -302,7 +308,7 @@ components:
         id:
           type: string
           format: uuid
-          description: Unique metric ID (CUID)
+          description: Unique metric ID (cuid, PK)
         userId:
           type: string
           description: Firebase UID (from session cookie)
