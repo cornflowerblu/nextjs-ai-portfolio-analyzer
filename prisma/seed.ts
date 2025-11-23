@@ -115,9 +115,11 @@ type Strategy = keyof typeof STRATEGY_MEANS;
  * @returns Random value following Gaussian distribution
  */
 function gaussianRandom(mean: number, stddev: number): number {
-  // Box-Muller transform
-  const u1 = Math.random();
-  const u2 = Math.random();
+  // Box-Muller transform with safety check
+  let u1 = Math.random();
+  let u2 = Math.random();
+  // Ensure u1 is never 0 to avoid log(0) = -Infinity
+  while (u1 === 0) u1 = Math.random();
   const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
   return mean + z0 * stddev;
 }
@@ -258,6 +260,7 @@ async function main() {
 
   console.log(`🎉 Seed complete! Generated ${totalCreated} metrics across 7 days`);
   console.log(`   Total page visits simulated: ${totalCreated}`);
+  console.log(`   Total metrics captured: ${totalCreated * 5}`); // 5 metrics per visit
   console.log(`\n📊 Next steps:`);
   console.log(`   1. npm run dev`);
   console.log(`   2. Login at /login`);

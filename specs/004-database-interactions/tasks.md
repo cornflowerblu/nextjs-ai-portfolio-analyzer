@@ -53,7 +53,7 @@ Break down spec 004 into executable tasks organized by user story for independen
 
 ### Tasks
 
-- [ ] T006 [US1] Implement determineStrategy() function from URL pathname in components/web-vitals-reporter.tsx
+- [ ] T006 [US1] Implement determineStrategy() function in components/web-vitals-reporter.tsx that infers the rendering strategy from the URL pathname (e.g., /lab/ssg, /lab/isr, /lab/ssr, /lab/cache). Ensure this matches the approach used in the seed script and the actual Prisma schema, where metrics are stored as separate fields (lcpMs, cls, inpMs, fidMs, ttfbMs) rather than as { name, value } pairs.
 - [ ] T007 [US1] Implement saveMetricToDatabase() async function with fetch POST to /api/web-vitals in components/web-vitals-reporter.tsx
 - [ ] T008 [US1] Wire web-vitals callbacks (onLCP, onCLS, onINP, onFID, onTTFB) to call saveMetricToDatabase in components/web-vitals-reporter.tsx
 
