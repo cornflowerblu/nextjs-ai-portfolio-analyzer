@@ -27,20 +27,22 @@ test.describe('Login Bug Investigation', () => {
 
     // Go to login page
     await page.goto('/login', { waitUntil: 'networkidle' });
-    
+
     // Verify login page loaded
     await expect(page.locator('h1:has-text("Welcome Back")')).toBeVisible();
-    const signInButton = page.locator('button:has-text("Sign in with Google")');
+
+    // Use a stable locator that works regardless of button text state
+    const signInButton = page.getByRole('button', { name: /Sign in with Google|Signing in/i });
     await expect(signInButton).toBeVisible();
-    
+
     console.log('Login page loaded successfully');
 
     // Click the sign in button
     await signInButton.click();
-    
+
     // Wait a bit to see what happens
     await page.waitForTimeout(2000);
-    
+
     // Check if button is in loading state
     const isLoading = await signInButton.isDisabled();
     const buttonText = await signInButton.textContent();
@@ -104,14 +106,15 @@ test.describe('Login Bug Investigation', () => {
 
   test('inspect sign-in button component state', async ({ page }) => {
     await page.goto('/login');
-    
-    const signInButton = page.locator('button:has-text("Sign in with Google")');
+
+    // Use stable role-based locator
+    const signInButton = page.getByRole('button', { name: /Sign in with Google/i });
     await expect(signInButton).toBeVisible();
-    
+
     // Check initial state
     const initialDisabled = await signInButton.isDisabled();
     console.log('Initial button disabled state:', initialDisabled);
-    
+
     // Evaluate component internals if possible
     const buttonHtml = await signInButton.evaluate(el => el.outerHTML);
     console.log('Button HTML:', buttonHtml);
