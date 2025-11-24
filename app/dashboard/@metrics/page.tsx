@@ -51,22 +51,46 @@ export default async function MetricsSlot() {
   // eslint-disable-next-line react-hooks/purity -- Date.now() is valid in Server Components (server-side only)
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
   
-  const recentMetrics = await prisma.webVitalsMetric.findMany({
-    where: {
-      userId,
-      collectedAt: {
-        gte: oneDayAgo,
+  let recentMetrics;
+  try {
+    recentMetrics = await prisma.webVitalsMetric.findMany({
+      where: {
+        userId,
+        collectedAt: {
+          gte: oneDayAgo,
+        },
       },
-    },
-    select: {
-      strategy: true,
-      lcpMs: true,
-      cls: true,
-      inpMs: true,
-      fidMs: true,
-      ttfbMs: true,
-    },
-  });
+      select: {
+        strategy: true,
+        lcpMs: true,
+        cls: true,
+        inpMs: true,
+        fidMs: true,
+        ttfbMs: true,
+      },
+    });
+  } catch (error) {
+    // Handle database connection errors gracefully (e.g., in E2E tests or when DB is unavailable)
+    console.error('Failed to fetch metrics from database:', error);
+    return (
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Core Web Vitals</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Database Unavailable</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4">
+              Unable to connect to the database. Metrics are temporarily unavailable.
+            </p>
+            <p className="text-sm text-muted-foreground">
+              This may occur during testing or if the database connection is not configured.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
+    );
+  }
 
   // T015: Show empty state if no metrics found
   if (recentMetrics.length === 0) {
