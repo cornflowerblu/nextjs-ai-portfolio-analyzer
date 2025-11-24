@@ -207,7 +207,7 @@ export function CacheDemoClient({
   const fetchCachedData = useCallback(async () => {
     setCacheLoading(true);
     try {
-      const response = await fetch('/api/analyses', { cache: 'no-store' });
+      const response = await fetch('/api/lab/analyses', { cache: 'no-store' });
       if (!response.ok) {
         throw new Error('Cached route failed to load');
       }
@@ -226,7 +226,7 @@ export function CacheDemoClient({
   const fetchLiveData = useCallback(async () => {
     setLiveLoading(true);
     try {
-      const response = await fetch('/api/analyses/live', { cache: 'no-store' });
+      const response = await fetch('/api/lab/analyses/live', { cache: 'no-store' });
       if (!response.ok) {
         throw new Error('Live route failed to load');
       }

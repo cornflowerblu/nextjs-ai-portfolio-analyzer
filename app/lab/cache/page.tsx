@@ -42,7 +42,7 @@ async function createAnalysisAction(formData: FormData): Promise<CreateAnalysisA
 
   try {
     await createAnalysis(parsed.data);
-    revalidatePath('/api/analyses');
+    revalidatePath('/api/lab/analyses');
     revalidatePath('/lab/cache');
     return { success: true };
   } catch (error) {
