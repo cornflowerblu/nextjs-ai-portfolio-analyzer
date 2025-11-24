@@ -52,8 +52,9 @@ async function saveMetricToDatabase(
 ): Promise<void> {
   try {
     // Get Firebase ID token for authentication
-    const idToken = await getIdToken();
-    
+    // Note: Background token refresh keeps tokens fresh automatically
+    let idToken = await getIdToken();
+
     if (!idToken) {
       // User not authenticated - fail silently
       console.debug('Web Vitals: Skipping database save (not authenticated)');
@@ -84,7 +85,7 @@ async function saveMetricToDatabase(
     };
 
     // POST to API endpoint
-    const response = await fetch('/api/web-vitals', {
+    let response = await fetch('/api/web-vitals', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -93,9 +94,30 @@ async function saveMetricToDatabase(
       body: JSON.stringify(body),
     });
 
+    // If 401, try refreshing token and retry once
+    // Note: Unlike lib/fetcher.ts, we don't call refreshSession() here because
+    // this endpoint uses Bearer token authentication (Authorization header).
+    // We only need to refresh the Firebase ID token, not the server session cookie.
+    // The background token refresh in user-menu.tsx handles session cookie renewal.
+    if (response.status === 401) {
+      console.debug('Web Vitals: Token expired, refreshing...');
+      idToken = await getIdToken(true); // Force refresh
+
+      if (idToken) {
+        response = await fetch('/api/web-vitals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`,
+          },
+          body: JSON.stringify(body),
+        });
+      }
+    }
+
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ 
-        error: `HTTP ${response.status} ${response.statusText}` 
+      const error = await response.json().catch(() => ({
+        error: `HTTP ${response.status} ${response.statusText}`
       }));
       console.warn('Web Vitals: Failed to save metric:', error);
     } else {

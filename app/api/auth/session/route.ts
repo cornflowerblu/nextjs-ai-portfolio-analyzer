@@ -133,3 +133,59 @@ export async function GET() {
     return NextResponse.json({ user: null });
   }
 }
+
+/**
+ * PATCH /api/auth/session
+ * Refresh/extend an existing session using a fresh Firebase ID token
+ */
+export async function PATCH(request: NextRequest) {
+  try {
+    const { idToken } = await request.json();
+
+    if (!idToken) {
+      return NextResponse.json({ error: 'No ID token provided' }, { status: 400 });
+    }
+
+    // Verify the fresh ID token
+    const decodedToken = await verifyFirebaseToken(idToken);
+
+    // Check access control
+    if (!isUserAllowed(decodedToken.email)) {
+      return NextResponse.json(
+        { error: 'Access denied. Your email is not authorized.' },
+        { status: 403 }
+      );
+    }
+
+    // Create refreshed session data with new expiration
+    const sessionData = {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      name: decodedToken.name || decodedToken.email?.split('@')[0],
+      picture: decodedToken.picture,
+      expiresAt: Date.now() + SESSION_DURATION,
+    };
+
+    // Update the session cookie with extended expiration
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE_NAME, JSON.stringify(sessionData), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: SESSION_DURATION / 1000, // Convert to seconds
+      path: '/',
+    });
+
+    return NextResponse.json({
+      success: true,
+      user: sessionData,
+      message: 'Session refreshed successfully'
+    });
+  } catch (error) {
+    console.error('Session refresh error:', error);
+    return NextResponse.json(
+      { error: 'Failed to refresh session' },
+      { status: 401 }
+    );
+  }
+}

@@ -72,13 +72,16 @@ export async function signInWithGoogle() {
  */
 export async function signOut() {
   const auth = getFirebaseAuth();
-  
+
   if (!auth) {
     console.warn('Firebase authentication is not configured.');
     return;
   }
-  
+
   try {
+    // Stop automatic token refresh
+    stopTokenRefresh();
+
     // Clear session on server
     await fetch('/api/auth/session', {
       method: 'DELETE',
@@ -127,22 +130,101 @@ export function onAuthStateChange(callback: (user: User | null) => void) {
 
 /**
  * Get fresh ID token for API calls
+ * @param forceRefresh - Force token refresh even if not expired
  */
-export async function getIdToken(): Promise<string | null> {
+export async function getIdToken(forceRefresh = false): Promise<string | null> {
   const auth = getFirebaseAuth();
-  
+
   if (!auth) {
     return null;
   }
-  
+
   const user = auth.currentUser;
-  
+
   if (!user) return null;
-  
+
   try {
-    return await user.getIdToken();
+    return await user.getIdToken(forceRefresh);
   } catch (error) {
     console.error('Error getting ID token:', error);
     return null;
+  }
+}
+
+/**
+ * Refresh the server session using current Firebase token
+ * Should be called periodically to keep session alive
+ */
+export async function refreshSession(): Promise<boolean> {
+  try {
+    const idToken = await getIdToken(true); // Force fresh token
+
+    if (!idToken) {
+      console.warn('No ID token available for session refresh');
+      return false;
+    }
+
+    const response = await fetch('/api/auth/session', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (!response.ok) {
+      console.warn('Session refresh failed:', response.status);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error refreshing session:', error);
+    return false;
+  }
+}
+
+// Token refresh interval: 50 minutes (tokens expire after 60 minutes)
+const TOKEN_REFRESH_INTERVAL_MS = 50 * 60 * 1000;
+let refreshIntervalId: NodeJS.Timeout | null = null;
+
+/**
+ * Start automatic token and session refresh
+ * Call this after successful sign-in
+ */
+export function startTokenRefresh() {
+  // Clear any existing interval
+  stopTokenRefresh();
+
+  // Set up periodic refresh
+  refreshIntervalId = setInterval(async () => {
+    const auth = getFirebaseAuth();
+
+    if (!auth?.currentUser) {
+      console.log('No user signed in, stopping token refresh');
+      stopTokenRefresh();
+      return;
+    }
+
+    console.log('Auto-refreshing token and session...');
+    const success = await refreshSession();
+
+    if (!success) {
+      console.warn('Auto-refresh failed - user may need to sign in again');
+    }
+  }, TOKEN_REFRESH_INTERVAL_MS);
+
+  console.log('Token auto-refresh started (every 50 minutes)');
+}
+
+/**
+ * Stop automatic token refresh
+ * Call this on sign-out
+ */
+export function stopTokenRefresh() {
+  if (refreshIntervalId) {
+    clearInterval(refreshIntervalId);
+    refreshIntervalId = null;
+    console.log('Token auto-refresh stopped');
   }
 }

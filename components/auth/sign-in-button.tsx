@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithGoogle } from '@/lib/firebase/auth';
+import { signInWithGoogle, startTokenRefresh } from '@/lib/firebase/auth';
 
 // Delay to ensure session cookie is set before redirect
 // This allows the server-side session endpoint to complete before navigation
@@ -22,14 +22,17 @@ export function SignInButton() {
 
     try {
       await signInWithGoogle();
-      
+
+      // Start automatic token refresh
+      startTokenRefresh();
+
       // Wait for session to be established before redirect
       await new Promise(resolve => setTimeout(resolve, SESSION_ESTABLISHMENT_DELAY_MS));
-      
+
       // Get redirect URL from query params or default to dashboard
       const params = new URLSearchParams(window.location.search);
       const from = params.get('from') || '/dashboard';
-      
+
       // Use window.location for more reliable navigation after auth
       window.location.href = from;
     } catch (err) {

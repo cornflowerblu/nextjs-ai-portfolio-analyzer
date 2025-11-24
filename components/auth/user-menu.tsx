@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signOut, onAuthStateChange } from '@/lib/firebase/auth';
+import { signOut, onAuthStateChange, startTokenRefresh } from '@/lib/firebase/auth';
 import { User } from 'firebase/auth';
 import {
   DropdownMenu,
@@ -74,6 +74,10 @@ export function UserMenu() {
             displayName: authUser.displayName,
             photoURL: authUser.photoURL,
           });
+
+          // Start automatic token refresh when user is authenticated
+          // This handles both initial load with existing session and new sign-ins
+          startTokenRefresh();
         } else if (!hasServerSession) {
           // Only clear user if Firebase auth is null AND we don't have a server session
           setUser(null);
