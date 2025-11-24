@@ -95,6 +95,10 @@ async function saveMetricToDatabase(
     });
 
     // If 401, try refreshing token and retry once
+    // Note: Unlike lib/fetcher.ts, we don't call refreshSession() here because
+    // this endpoint uses Bearer token authentication (Authorization header).
+    // We only need to refresh the Firebase ID token, not the server session cookie.
+    // The background token refresh in user-menu.tsx handles session cookie renewal.
     if (response.status === 401) {
       console.debug('Web Vitals: Token expired, refreshing...');
       idToken = await getIdToken(true); // Force refresh
