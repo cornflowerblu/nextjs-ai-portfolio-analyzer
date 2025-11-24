@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signOut, onAuthStateChange } from '@/lib/firebase/auth';
+import { signOut, onAuthStateChange, startTokenRefresh, refreshSession } from '@/lib/firebase/auth';
 import { User } from 'firebase/auth';
 import {
   DropdownMenu,
@@ -64,6 +64,11 @@ export function UserMenu() {
       if (!isMounted) return;
       hasServerSession = sessionFound;
 
+      // If we have a session, start automatic token refresh
+      if (sessionFound) {
+        startTokenRefresh();
+      }
+
       // Subscribe to Firebase auth state changes
       unsubscribe = onAuthStateChange((authUser: User | null) => {
         if (!isMounted) return;
@@ -74,6 +79,9 @@ export function UserMenu() {
             displayName: authUser.displayName,
             photoURL: authUser.photoURL,
           });
+
+          // Start automatic token refresh when user signs in
+          startTokenRefresh();
         } else if (!hasServerSession) {
           // Only clear user if Firebase auth is null AND we don't have a server session
           setUser(null);
