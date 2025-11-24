@@ -90,6 +90,14 @@ export function StrategyCard({ strategy, isActive = false, onClick }: StrategyCa
               ))}
             </ul>
           </div>
+          <div className="mb-4">
+            <span className="font-medium">Cons:</span>
+            <ul className="mt-1 ml-4 list-disc text-muted-foreground">
+              {strategy.tradeoffs.cons.slice(0, 2).map((con, index) => (
+                <li key={index}>{con}</li>
+              ))}
+            </ul>
+          </div>
         </div>
         {/* Lab Demo Link aligned to bottom */}
         <div
