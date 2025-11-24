@@ -6,7 +6,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signOut, onAuthStateChange, startTokenRefresh, refreshSession } from '@/lib/firebase/auth';
+import { signOut, onAuthStateChange, startTokenRefresh } from '@/lib/firebase/auth';
 import { User } from 'firebase/auth';
 import {
   DropdownMenu,
