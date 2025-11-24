@@ -64,11 +64,6 @@ export function UserMenu() {
       if (!isMounted) return;
       hasServerSession = sessionFound;
 
-      // If we have a session, start automatic token refresh
-      if (sessionFound) {
-        startTokenRefresh();
-      }
-
       // Subscribe to Firebase auth state changes
       unsubscribe = onAuthStateChange((authUser: User | null) => {
         if (!isMounted) return;
@@ -80,7 +75,8 @@ export function UserMenu() {
             photoURL: authUser.photoURL,
           });
 
-          // Start automatic token refresh when user signs in
+          // Start automatic token refresh when user is authenticated
+          // This handles both initial load with existing session and new sign-ins
           startTokenRefresh();
         } else if (!hasServerSession) {
           // Only clear user if Firebase auth is null AND we don't have a server session
